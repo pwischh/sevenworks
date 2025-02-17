@@ -12,13 +12,13 @@ export default function Navbar() {
                     <a href = "#">About</a>
                 </nav>
             </div>
-            <div className = "flex flex-row justify-end gap-4 w-full h-fit text-nowrap">
-                <button className = "border-2 border-offWhite px-2 py-1 rounded-xl hover:bg-lightRed hover:border-transparent">
+            <div className = "flex flex-row justify-end items-center gap-4 w-full h-fit text-nowrap">
+                <a href = "../register" className = "border-2 border-offWhite px-2 py-1 rounded-xl hover:bg-lightRed hover:border-transparent">
                     Log In
-                </button>
-                <button className = "bg-lightRed px-2 py-1 rounded-xl hover:bg-darkRed">
+                </a>
+                <a href = "../register" className = "bg-lightRed border-2 border-lightRed px-2 py-1 rounded-xl hover:bg-darkRed hover:border-darkRed">
                     Sign Up
-                </button>
+                </a>
             </div>
         </div>
     );
