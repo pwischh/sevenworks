@@ -1,5 +1,3 @@
-@import 'tailwind-merge';
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
