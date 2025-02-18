@@ -3,7 +3,7 @@ import Logo from "../icons/tmpLogo";
 export default function Navbar() {
     return (
         <div className = "flex flex-row justify-center items-center p-4 gap-3 bg-navy text-white w-full h-fit text-offWhite text-l fixed top-0 right-0 left-0 z-3">
-            <div className = "flex flex-row justify-start items-center gap-5 w-full h-full">
+            <div className = "flex flex-row justify-start items-center gap-5">
                 <Logo />
                 <nav className = "flex flex-row gap-7 px-1 w-fit h-full text-nowrap font-semibold">
                     <a href = "../templates">Resumes</a>
