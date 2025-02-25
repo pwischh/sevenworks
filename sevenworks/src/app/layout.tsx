@@ -3,8 +3,14 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import classNames from 'classnames';
 
+// const markazi = Markazi_Text({
+//     subsets: ["latin"],
+//     variable: "--font-markazi",
+// })
+
 const inter = Inter({
-  subsets: ["latin"]
+  subsets: ["latin"],
+  variable: "--font-inter"
 });
 
 export const metadata: Metadata = {
