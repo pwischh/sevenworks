@@ -10,8 +10,8 @@ export default function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [pending, setPending] = useState(false);
-    const [error, setError] = useState("");
-    const [resetMessage, setResetMessage] = useState("");
+    const [error, setError] = useState<string | null>(null); // This should work correctly
+    const [resetMessage, setResetMessage] = useState<string | null>(null);
     const router = useRouter();
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -48,7 +48,7 @@ export default function Login() {
 
     const handleGithubSignIn = async () => {
         setPending(true);
-        setError(null);
+        setError(null); // This should work correctly
 
         try {
             const result = await signInWithPopup(auth, githubProvider);

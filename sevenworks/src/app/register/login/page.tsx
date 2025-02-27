@@ -1,4 +1,5 @@
 "use client";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { auth, githubProvider } from "../../lib/firebase";
@@ -10,8 +11,8 @@ export default function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [pending, setPending] = useState(false);
-    const [error, setError] = useState("");
-    const [resetMessage, setResetMessage] = useState("");
+    const [error, setError] = useState<string | null>(null); // This should work correctly
+    const [resetMessage, setResetMessage] = useState<string | null>(null);
     const router = useRouter();
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -48,12 +49,12 @@ export default function Login() {
 
     const handleGithubSignIn = async () => {
         setPending(true);
-        setError(null);
-
+        setError(null); // This should work correctly
+    
         try {
             const result = await signInWithPopup(auth, githubProvider);
             console.log("GitHub user signed in:", result.user);
-
+    
             setPending(false);
             router.push("/dashboard");
         } catch (error: unknown) {
@@ -61,6 +62,7 @@ export default function Login() {
             setPending(false);
         }
     };
+    
 
     return (
         <div className="flex justify-center items-center min-h-screen bg-gradient-to-b from-navy to-darkRed">
