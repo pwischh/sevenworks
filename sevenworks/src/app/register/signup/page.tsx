@@ -68,7 +68,7 @@ export default function Login() {
                 <IoIosArrowBack className="text-offWhite text-[45px] hover:text-neutral-400"/>
             </a>
             <form onSubmit={handleSubmit} className="flex flex-col w-[450px] bg-offWhite p-6 rounded-xl shadow-2xl border-b-4 border-lightGray">
-                <h2 className="text-[32px] font-extrabold text-navy text-center">Welcome Back</h2>
+                <h2 className="text-[32px] font-extrabold text-navy text-center">Welcome!</h2>
                 
                 <div className="flex justify-center">
                     <div className="w-[90%] h-[2px] bg-navy my-2"></div>
@@ -114,7 +114,7 @@ export default function Login() {
                         disabled={pending}
                         className="w-[80%] text-white text-[18px] bg-lightRed py-3 rounded-lg hover:bg-darkRed transition duration-200"
                     >
-                        Log In
+                        Sign Up
                     </button>
                 </div>
                 <div className="flex justify-center mt-4">
@@ -125,7 +125,7 @@ export default function Login() {
                         className="w-[80%] text-offWhite text-[18px] bg-gray-800 py-3 rounded-lg hover:bg-gray-900 transition duration-200 flex items-center justify-center"
                     >
                         <FaGithub className="mr-2" />
-                        {pending ? "Signing In with GitHub..." : "Sign In with GitHub"}
+                        {pending ? "Signing Up with GitHub..." : "Sign Up with GitHub"}
                     </button>
                 </div>
                 <p className="text-[14px] text-gray-500 text-center mt-2">
