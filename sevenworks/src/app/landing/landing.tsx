@@ -1,4 +1,6 @@
 import { FaRegCircleCheck } from "react-icons/fa6";
+import "./landing.css";
+import ImageGrid from "./imagegrid.js";
 
 export default function Landing() {
     return (
@@ -32,6 +34,11 @@ export default function Landing() {
                     <a href="/register/signup" className="font-medium text-[20px] text-offWhite hover:underline">
                         Get Started
                     </a>
+                </div>
+            </div>
+            <div className="flex flex-col w-[1000px] h-full justify-center items-center p-[50px] pr-[100px] mt-[-80px]"> {/* Adjusted margin-top to raise the images */}
+                <div className="min-h-screen flex items-center justify-center">
+                    <ImageGrid />
                 </div>
             </div>
         </div>
