@@ -27,7 +27,7 @@ export default function AutoScrollImagesDown() {
           }}
         >
           {[...images, ...images].map((src, index) => (
-            <div key={index} className="relative w-full h-[400px] md:h-[500px] shadow-lg rounded-lg overflow-hidden flex-shrink-0">
+            <div key={index} className="relative w-full h-[400px] md:h-[500px] rounded-lg overflow-hidden flex-shrink-0">
               <Image
                 src={src}
                 alt={`Resume ${index + 1}`}

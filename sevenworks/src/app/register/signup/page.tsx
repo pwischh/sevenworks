@@ -1,28 +1,38 @@
+// filepath: /Users/alexlautin/Documents/GitHub/sevenworks/sevenworks/src/app/register/signup/page.tsx
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { auth, githubProvider } from "../../lib/firebase";
-import { signInWithEmailAndPassword, sendPasswordResetEmail, signInWithPopup } from "firebase/auth";
-import { IoIosArrowBack } from "react-icons/io";
-import { FaGithub } from "react-icons/fa";
+import { auth } from "../../lib/firebase";
+import { createUserWithEmailAndPassword } from "firebase/auth";
 
-export default function Login() {
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
+import { IoIosArrowBack } from "react-icons/io";
+
+export default function Signup() {
+    const [form, setForm] = useState({
+        username: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+    });
     const [pending, setPending] = useState(false);
-    const [error, setError] = useState<string | null>(null); // This should work correctly
-    const [resetMessage, setResetMessage] = useState<string | null>(null);
+    const [error, setError] = useState<string | null>(null);
     const router = useRouter();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setPending(true);
 
-        try {
-            const userCredential = await signInWithEmailAndPassword(auth, email, password);
-            console.log("User logged in:", userCredential.user);
+        if (form.password !== form.confirmPassword) {
+            setError("Passwords do not match");
             setPending(false);
-            router.push("/dashboard"); // Redirect to the landing page
+            return;
+        }
+
+        try {
+            const userCredential = await createUserWithEmailAndPassword(auth, form.email, form.password);
+            console.log("User signed up:", userCredential.user); // Now the variable is "used"
+            setPending(false);
+            router.push("/register/login");
         } catch (error: unknown) {
             if (error instanceof Error) {
                 setError(error.message);
@@ -31,106 +41,71 @@ export default function Login() {
             }
             setPending(false);
         }
-    };
-
-    const handlePasswordReset = async () => {
-        try {
-            await sendPasswordResetEmail(auth, email);
-            setResetMessage("Password reset email sent!");
-        } catch (error: unknown) {
-            if (error instanceof Error) {
-                setError(error.message);
-            } else {
-                setError("An unknown error occurred");
-            }
-        }
-    };
-
-    const handleGithubSignIn = async () => {
-        setPending(true);
-        setError(null as string | null); // Explicitly cast `null` to string | null
-
-        try {
-            const result = await signInWithPopup(auth, githubProvider);
-            console.log("GitHub user signed in:", result.user);
-
-            setPending(false);
-            router.push("/dashboard");
-        } catch (error: unknown) {
-            setError(error instanceof Error ? error.message : "An unknown error occurred");
-            setPending(false);
-        }
+        
     };
 
     return (
-        <div className="flex justify-center items-center min-h-screen bg-gradient-to-b from-navy to-darkRed">
+        <div className="flex items-center justify-center min-h-screen bg-gradient-to-b from-navy to-darkRed">
             <a href="../../" className="absolute left-2 top-3">
                 <IoIosArrowBack className="text-offWhite text-[45px] hover:text-neutral-400"/>
             </a>
             <form onSubmit={handleSubmit} className="flex flex-col w-[450px] bg-offWhite p-6 rounded-xl shadow-2xl border-b-4 border-lightGray">
-                <h2 className="text-[32px] font-extrabold text-navy text-center">Welcome!</h2>
-                
+                <h2 className="text-[32px] font-extrabold text-navy text-center">Create an Account</h2>
+
                 <div className="flex justify-center">
-                    <div className="w-[90%] h-[2px] bg-navy my-2"></div>
+                    <div className="w-[90%] h-[2px] bg-navy mt-2 mb-5"></div>
                 </div>
 
-                {error && <p className="text-red-500 text-center mt-2">{error}</p>}
-                {resetMessage && <p className="text-green-500 text-center mt-2">{resetMessage}</p>}
-                
-                <div className="flex flex-col gap-1 mt-4">
-                    <p className="text-lightGray text-[16px] font-medium">Email</p>
-                    <input 
-                        type="email" 
-                        placeholder="example@email.com" 
+                {error && <p className="text-red-500 text-center">{error}</p>}
+
+                <div className="flex flex-col h-fit gap-1">
+                    <p className="text-lightGray text-[16px] font-medium pl-1">Email</p>
+                    <input
+                        type="email"
+                        placeholder="example@email.com"
+                        name="email"
                         disabled={pending}
-                        value={email} 
-                        onChange={(e) => setEmail(e.target.value)}
+                        value={form.email}
+                        onChange={(e) => setForm({ ...form, email: e.target.value })}
                         className="w-full h-[50px] rounded-xl pl-4 shadow-md text-navy border border-gray-200"
                     />
                 </div>
-
-                <div className="flex flex-col gap-1 mt-4">
-                    <p className="text-lightGray text-[16px] font-medium">Password</p>
-                    <input 
-                        type="password" 
-                        placeholder="password" 
+                <div className="flex flex-col h-fit gap-1 mt-5">
+                    <p className="text-lightGray text-[16px] font-medium pl-1">Password</p>
+                    <input
+                        type="password"
+                        placeholder="password"
+                        name="password"
                         disabled={pending}
-                        value={password} 
-                        onChange={(e) => setPassword(e.target.value)}
+                        value={form.password}
+                        onChange={(e) => setForm({ ...form, password: e.target.value })}
                         className="w-full h-[50px] rounded-xl pl-4 shadow-md text-navy border border-gray-200"
                     />
-                    <button 
-                        type="button" 
-                        onClick={handlePasswordReset} 
-                        className="text-sky-600 text-[14px] text-right hover:underline"
-                    >
-                        Forgot Password?
-                    </button>
                 </div>
-
-                <div className="flex justify-center mt-8">
-                    <button 
-                        type="submit" 
+                <div className="flex flex-col h-fit gap-1 mt-5">
+                    <p className="text-lightGray text-[16px] font-medium pl-1">Confirm Password</p>
+                    <input
+                        type="password"
+                        placeholder="confirm password"
+                        name="confirmPassword"
                         disabled={pending}
-                        className="w-[80%] text-white text-[18px] bg-lightRed py-3 rounded-lg hover:bg-darkRed transition duration-200"
+                        value={form.confirmPassword}
+                        onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })}
+                        className="w-full h-[50px] rounded-xl pl-4 shadow-md text-navy border border-gray-200"
+                    />
+                </div>
+                <div className="flex justify-center mt-12">
+                    <button
+                        type="submit"
+                        disabled={pending}
+                        className="w-[80%] text-offWhite text-[18px] bg-lightRed py-3 rounded-lg hover:bg-darkRed transition duration:200"
                     >
                         Sign Up
                     </button>
                 </div>
-                <div className="flex justify-center mt-4">
-                    <button
-                        type="button"
-                        onClick={handleGithubSignIn}
-                        disabled={pending}
-                        className="w-[80%] text-offWhite text-[18px] bg-gray-800 py-3 rounded-lg hover:bg-gray-900 transition duration-200 flex items-center justify-center"
-                    >
-                        <FaGithub className="mr-2" />
-                        {pending ? "Signing Up with GitHub..." : "Sign Up with GitHub"}
-                    </button>
-                </div>
                 <p className="text-[14px] text-gray-500 text-center mt-2">
-                    Don&apos;t have an account?&nbsp;
-                    <a href="./signup" className="text-sky-600 hover:underline">Create one</a>
+                    Already have an account?&nbsp;
+                    <a href="./login" className="text-sky-600 hover:underline">Log in</a>
                 </p>
             </form>
         </div>
