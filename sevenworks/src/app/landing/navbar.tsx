@@ -20,7 +20,7 @@ export default function Navbar() {
                     <a href="../templates" className="hover:scale-[105%] transition-all duration-200">Cover Letters</a>
                     <a href="#" className="hover:scale-[105%] transition-all duration-200">Examples</a>
                     <a href="#" className="hover:scale-[105%] transition-all duration-200">About</a>
-                    <a href="../editor" className="hover:scale-[105%] transition-all duration-200">TEMP Editor</a>
+                    <a href="../prototype" className="hover:scale-[105%] transition-all duration-200">demo</a>
                 </nav>
             </div>
             <div className="flex flex-row justify-end items-center gap-5 text-offWhite">
