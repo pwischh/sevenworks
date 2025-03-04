@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useRef } from "react";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
-import BusinessTemplate from "../../../public/TEST-TEMPLATES/business-template";
+import BusinessTemplate from "../TEST-TEMPLATES/business-template";
 
 export default function Demo() {
     const [form, setForm] = useState({
@@ -75,7 +75,7 @@ export default function Demo() {
                     Export as PDF
                 </button>
             </form>
-            <div className="flex justify-center items-center w-full">
+            <div className="flex justify-center items-center w-full h-screen">
                 <BusinessTemplate values={form} ref={componentRef}/>
             </div>
         </div>

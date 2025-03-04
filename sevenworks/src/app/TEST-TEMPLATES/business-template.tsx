@@ -4,10 +4,9 @@ import { formValues } from "@/app/types";
 const BusinessTemplate = forwardRef<HTMLDivElement, { values: formValues }>(
   ({ values }, ref) => {
     return (
-      <div ref={ref} className="w-fit h-fit">  {/* Make sure ref is applied to the outermost div */}
-        <div className="bg-white text-black w-[95vw] max-w-[500px] border-2"
+      <div ref={ref}>
+        <div className="bg-white text-black w-full max-w-[500px]"
                 style={{aspectRatio: "1 / 1.294"}}>
-            {/* Resume content goes here */}
             <header className="border-b pb-4 px-4 pt-4">
               <h1 className="text-xl font-bold">{values.firstName}&nbsp;{values.lastName}</h1>
               <p className="text-sm text-gray-600">
@@ -16,7 +15,6 @@ const BusinessTemplate = forwardRef<HTMLDivElement, { values: formValues }>(
             </header>
             <main className="px-4 py-2">
               <div className="grid grid-cols-2 gap-4">
-                {/* Left Column */}
                 <section>
                   <h2 className="text-lg font-semibold mb-2">Profile</h2>
                   <p className="text-sm text-gray-700">
@@ -29,7 +27,6 @@ const BusinessTemplate = forwardRef<HTMLDivElement, { values: formValues }>(
                     <li>Skill Three</li>
                   </ul>
                 </section>
-                {/* Right Column */}
                 <section>
                   <h2 className="text-lg font-semibold mb-2">Experience</h2>
                   <div className="mb-4">
