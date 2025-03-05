@@ -15,33 +15,48 @@ export default function Demo() {
     const componentRef = useRef<HTMLDivElement>(null);
 
     async function exportToPDF(){
-      if (!componentRef.current) {
-        console.error("Component reference is null");
-        return;
-      }
-      
-      console.log("Component html: ", componentRef.current)
-      console.log("Component width: ", componentRef.current.offsetWidth)
 
-      try {
-        componentRef.current.style.background = "white";
-        console.log("Creating canvas")
-        const canvas = await html2canvas(componentRef.current, {
-            scale: 2,
-            useCORS: true,
-            allowTaint: true,
-            logging: true,
-        });
-        console.log("Canvas created")
-        const img = canvas.toDataURL("image/png")
+        //Check if ref properly retrieved html
+        if (!componentRef.current) {
+            console.error("Component reference is null");
+            return;
+        }
 
-        const pdf = new jsPDF("portrait", "in", [8.5, 11]);
-        pdf.addImage(img, "PNG", 0, 0, 8.5, 11);
+        //temporarily update styles to render entire resume -- even overflow
+        componentRef.current.style.height = "auto";
+        const div = componentRef.current.querySelector(".scroll-div") as HTMLDivElement | null;
+        if (div) div.style.overflow = "visible"
+        else{
+            console.error("No div retrieved");
+            return;
+        }
 
-        pdf.save("test-pdf.pdf")
-      } catch(error) {
-        console.error("Error generating PDF: ", error)
-      }
+        //Begin pdf export process
+        try {
+            const canvas = await html2canvas(componentRef.current, {
+                scale: 2,
+                useCORS: true,
+                allowTaint: true,
+                logging: true,
+            });
+            //Get image of entire html element
+            const img = canvas.toDataURL("image/png")
+
+            //Get current width and height for pdf dimensions
+            const width = componentRef.current.offsetWidth;
+            const height = componentRef.current.offsetHeight;
+
+            //Create jsPDF instance and add our image to it
+            const pdf = new jsPDF("portrait", "px", [width, height]);
+            pdf.addImage(img, "PNG", 0, 0, width, height);
+
+            //Save pdf and revert styles to normal
+            pdf.save("test.pdf")
+            componentRef.current.style.height = "";
+            div.style.overflow = "scroll";
+        } catch(error) {
+            console.error("Error generating PDF: ", error)
+        }
     }
 
     return(
@@ -70,12 +85,11 @@ export default function Demo() {
                 />
                 <button
                     onClick={exportToPDF}
-                    className="px-4 py-2 border-2 border-gray-400 text-gray-700 rounded-md"
-                >
+                    className="px-4 py-2 border-2 border-gray-400 text-gray-700 rounded-md">
                     Export as PDF
                 </button>
             </form>
-            <div className="flex justify-center items-center w-full h-screen">
+            <div className="flex justify-center items-center w-full h-screen bg-offWhite">
                 <BusinessTemplate values={form} ref={componentRef}/>
             </div>
         </div>

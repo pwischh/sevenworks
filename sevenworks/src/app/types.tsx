@@ -3,7 +3,3 @@ export interface formValues{
     lastName: string;
     content: string;
 }
-
-export interface formProps{
-    values: formValues;
-}
