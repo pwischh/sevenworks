@@ -13,7 +13,7 @@ export default function Navbar() {
                 </nav>
             </div>
             <div className = "flex flex-row justify-end items-center gap-4 text-nowrap">
-                <a href = "../registe/login" className = "border-2 border-offWhite px-2 py-1 rounded-xl hover:bg-lightRed hover:border-transparent">
+                <a href = "../register/login" className = "border-2 border-offWhite px-2 py-1 rounded-xl hover:bg-lightRed hover:border-transparent">
                     Log In
                 </a>
                 <a href = "../register/signup" className = "bg-lightRed border-2 border-lightRed px-2 py-1 rounded-xl hover:bg-darkRed hover:border-darkRed">

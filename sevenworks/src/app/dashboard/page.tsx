@@ -25,7 +25,7 @@ const Sidebar = () => (
     <nav>
       <ul>
         <li className="mb-4">
-          <a href="#" className="hover:underline">Home</a>
+          <a href="/dashboard" className="hover:underline">Home</a>
         </li>
         <li className="mb-4">
           <a href="/templates" className="hover:underline">Resumes</a>
@@ -37,7 +37,7 @@ const Sidebar = () => (
           <a href="/profile" className="hover:underline">Profile</a>
         </li>
         <li className="mb-4">
-          <a href="#" className="hover:underline">Sign Out</a>
+          <a href="../" className="hover:underline">Sign Out</a>
         </li>
       </ul>
     </nav>
@@ -122,7 +122,7 @@ const Dashboard = () => {
             id: doc.id,
             title: data.name,
             description: data.category,
-            image: "/sample-business-resume.png", // Static image remains unchanged
+            image: "/sample-business-resume.png",
           };
         });
         setEditingResumes(editingData);
@@ -148,16 +148,18 @@ const Dashboard = () => {
   return (
     <div className="flex">
       <Sidebar />
-      <main className="flex-1 p-8 bg-gray-100 min-h-screen text-gray-800 ml-64">
-        {/* Resume Templates Section */}
+      <main className="flex-1 h-screen p-8 bg-gray-100 text-gray-800 ml-64 overflow-y-auto">
+        {/* Resume Templates Section (Horizontal Scrolling) */}
         <h1 className="text-3xl font-bold mb-8">Resume Templates</h1>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="flex space-x-4 overflow-x-auto pb-4">
           {templateResumes.map((resume) => (
-            <ResumeCard key={resume.id} resume={resume} />
+            <div key={resume.id} className="flex-none w-full max-w-xs">
+              <ResumeCard resume={resume} />
+            </div>
           ))}
         </div>
 
-        {/* Edited Resumes */}
+        {/* Editing Resumes Section */}
         <h1 className="text-3xl font-bold my-8">Editing Resumes</h1>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {editingResumes.map((resume) => (
