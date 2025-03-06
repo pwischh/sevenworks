@@ -2,11 +2,7 @@ import Check from "../icons/check";
 
 export default function Landing() {
     return(
-<<<<<<< HEAD
-        <div className = "flex flex-row h-[700px] place-content-center gap-3 px-[100px] pb-[75px] bg-gradient-to-b from-navy to-darkRed">
-=======
         <div className = "flex flex-row w-full h-screen place-content-center gap-3 px-[100px] pb-[75px] bg-cover bg-gradient-to-b from-navy to-darkRed overflow-hidden">
->>>>>>> e2c20b5313bb54d706cc44fd1c6d127d7fa18755
             <div className = "flex flex-col w-full h-full justify-center items-start gap-[22px]">
                 <h1 className = "max-w-[600px] text-[50px] text-offWhite font-extrabold">
                     Focus on your future, not formatting
