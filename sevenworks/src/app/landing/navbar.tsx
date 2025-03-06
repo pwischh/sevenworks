@@ -2,7 +2,7 @@ import Logo from "../icons/tmpLogo";
 
 export default function Navbar() {
     return (
-        <div className = "flex flex-row p-4 gap-3 bg-navy text-white w-full text-offWhite text-l fixed top-0 right-0 left-0 z-3">
+        <div className = "navbar flex flex-row p-4 gap-3 bg-navy text-white w-full text-offWhite text-l fixed top-0 right-0 left-0 z-3">
             <div className = "flex flex-row items-center gap-5 w-full">
                 <Logo />
                 <nav className = "flex flex-row gap-7 px-1 w-fit text-nowrap font-semibold">
