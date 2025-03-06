@@ -3,6 +3,8 @@
 import React, { useEffect, useState } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import Image from "next/image";
 import { Markazi_Text } from "next/font/google";
 import { collection, getDocs } from "firebase/firestore";
 import { auth, db } from "../lib/firebase";
@@ -17,27 +19,35 @@ const Sidebar = () => (
   <aside className="w-64 h-screen bg-gray-800 text-white p-6 fixed">
     <div className="flex flex-row w-full items-center mb-2">
       <div className={markazi.className}>
-        <a href="/" className="text-3xl font-bold text-offWhite hover:underline">
+        <Link href="/" className="text-3xl font-bold text-offWhite hover:underline">
           SevenWorks
-        </a>
+        </Link>
       </div>
     </div>
     <nav>
       <ul>
         <li className="mb-4">
-          <a href="/dashboard" className="hover:underline">Home</a>
+          <Link href="/dashboard" className="hover:underline">
+            Home
+          </Link>
         </li>
         <li className="mb-4">
-          <a href="/templates" className="hover:underline">Resumes</a>
+          <Link href="/templates" className="hover:underline">
+            Resumes
+          </Link>
         </li>
         <li className="mb-4">
           <a href="#" className="hover:underline">Settings</a>
         </li>
         <li className="mb-4">
-          <a href="/profile" className="hover:underline">Profile</a>
+          <Link href="/profile" className="hover:underline">
+            Profile
+          </Link>
         </li>
         <li className="mb-4">
-          <a href="../" className="hover:underline">Sign Out</a>
+          <Link href="../" className="hover:underline">
+            Sign Out
+          </Link>
         </li>
       </ul>
     </nav>
@@ -51,16 +61,17 @@ interface Resume {
   image?: string;
 }
 
-// ResumeCard Component (sizes unchanged)
+// ResumeCard Component using Next.js <Image>
 const ResumeCard = ({ resume }: { resume: Resume }) => (
   <div className="flex flex-col items-center w-full max-w-xs">
     {/* Document Thumbnail */}
     <div className="relative w-full aspect-[8.5/11] bg-white rounded-md shadow hover:shadow-lg overflow-hidden">
       {resume.image && (
-        <img
+        <Image
           src={resume.image}
           alt={resume.title}
-          className="absolute inset-0 w-full h-full object-cover"
+          fill
+          className="object-cover"
         />
       )}
     </div>
