@@ -5,8 +5,8 @@ const BusinessTemplate = forwardRef<HTMLDivElement, { values: formValues }>(
   ({ values }, ref) => {
     return (
       <div ref={ref}>
-        <div className="scroll-div bg-white text-black w-[550px]"
-              style={{aspectRatio: "1 / 1.294", overflow: "scroll"}}>
+        <div className="scroll-div bg-white text-black w-[550px] p-0 m-0"
+              style={{aspectRatio: "1 / 1.294", overflow: "scoll"}}>
             <header className="border-b pb-4 px-4 pt-4">
               <h1 className="text-xl font-bold">{values.firstName}&nbsp;{values.lastName}</h1>
               <p className="text-sm text-gray-600">

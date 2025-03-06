@@ -33,29 +33,87 @@ export default function Demo() {
 
         //Begin pdf export process
         try {
+            //Create canvas capturing entire template
             const canvas = await html2canvas(componentRef.current, {
                 scale: 2,
                 useCORS: true,
                 allowTaint: true,
                 logging: true,
             });
-            //Get image of entire html element
-            const img = canvas.toDataURL("image/png")
+            
+            //page dimensions in inches
+            const pageWidth = 8.5;
+            const pageHeight = 11;
 
-            //Get current width and height for pdf dimensions
-            const width = componentRef.current.offsetWidth;
-            const height = componentRef.current.offsetHeight;
+            //Get scale factor -- needed because canvas dimensions are in pixels
+            const scale = pageWidth/canvas.width;
+            //Get scaled height of ONE page
+            const pageCanvasHeight = pageHeight/scale;
 
-            //Create jsPDF instance and add our image to it
-            const pdf = new jsPDF("portrait", "px", [width, height]);
-            pdf.addImage(img, "PNG", 0, 0, width, height);
+            //Calc total number of pages needed
+            const totalPages = Math.ceil(canvas.height/pageCanvasHeight);
+            
+            //Create jsPDF instance
+            const pdf = new jsPDF("portrait", "in", [pageWidth, pageHeight]);
 
-            //Save pdf and revert styles to normal
+            for (let page = 0; page < totalPages; page++) {
+                // Create a temp canvas with a fixed height equal to one page in canvas pixels.
+                const pageCanvas = document.createElement("canvas");
+                pageCanvas.width = canvas.width;
+                pageCanvas.height = pageCanvasHeight; // fixed height for uniformity
+          
+                const ctx = pageCanvas.getContext("2d");
+                if (!ctx) {
+                  console.error("2D context not available");
+                  return;
+                }
+          
+                // Calculate the source Y offset for this page slice.
+                const srcY = page * pageCanvasHeight;
+                // For the last page, if the remaining content is less than a full page, get that remainder.
+                let srcHeight = pageCanvasHeight;
+                if (page === totalPages - 1 && canvas.height - srcY < pageCanvasHeight) {
+                  srcHeight = canvas.height - srcY;
+                }
+
+                if (srcHeight < 10) break;
+          
+                // Draw the corresponding slice from the full canvas onto the temporary canvas.
+                // If this is the last page and srcHeight is smaller, only that part will be drawn.
+                ctx.drawImage(
+                  canvas,
+                  0, srcY,              // source x, y
+                  canvas.width, srcHeight,  // source width, height
+                  0, 0,                 // destination x, y
+                  canvas.width, srcHeight   // destination width, height
+                );
+                
+                // If this is the last page fill the rest with white.
+                if (srcHeight < pageCanvasHeight) {
+                  ctx.fillStyle = "#FFFFFF";
+                  ctx.fillRect(0, srcHeight, canvas.width, pageCanvasHeight - srcHeight);
+                }
+          
+                // Convert the temporary canvas slice to an image.
+                const img = pageCanvas.toDataURL("image/png");
+                if (page > 0) {
+                  pdf.addPage();
+                }
+                
+                pdf.addImage(img, "PNG", 0, 0, pageWidth, pageHeight);
+              }
+
+            console.log("Canvas Height:", canvas.height);
+            console.log("Page Height in Pixels:", pageCanvasHeight);
+            console.log("Total Pages:", totalPages);
+            //Save pdf
             pdf.save("test.pdf")
-            componentRef.current.style.height = "";
-            div.style.overflow = "scroll";
         } catch(error) {
             console.error("Error generating PDF: ", error)
+        } finally {
+            //reset styles
+            componentRef.current.style.height = "";
+            div.style.overflow = "scroll";
         }
     }
 
