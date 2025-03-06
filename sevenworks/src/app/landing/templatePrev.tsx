@@ -39,14 +39,11 @@ export default function TemplatePreview() {
             </motion.div>
           ))}
         </div>
-      </div>
-      <div className="flex justify-center mt-4">
-        <a
-          href="/templates"
-          className="text-black text-lg font-medium hover:text-black transition"
-        >
-          See all templates →
-        </a>
+        <div className="flex flex-row w-fit h-fit gap-[12px] pl-[2px] mt-[24px]">
+          <a href="/templates" className="font-medium text-[20px] text-navy hover:underline">
+            See all templates →
+          </a>
+        </div>
       </div>
     </>
   );
