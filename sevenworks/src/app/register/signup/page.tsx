@@ -96,7 +96,7 @@ export default function Signup() {
                 {error && <p className="text-red-500 text-center">{error}</p>}
 
                 <div className="flex flex-col h-fit gap-1">
-                    <p className="text-lightGray text-[16px] font-medium pl-1">Email</p>
+                    <p className="text-black text-[16px] font-medium pl-1">Email</p>
                     <input
                         type="email"
                         placeholder="example@email.com"
@@ -108,7 +108,7 @@ export default function Signup() {
                     />
                 </div>
                 <div className="flex flex-col h-fit gap-1 mt-5">
-                    <p className="text-lightGray text-[16px] font-medium pl-1">Password</p>
+                    <p className="text-black text-[16px] font-medium pl-1">Password</p>
                     <input
                         type="password"
                         placeholder="password"
@@ -120,7 +120,7 @@ export default function Signup() {
                     />
                 </div>
                 <div className="flex flex-col h-fit gap-1 mt-5">
-                    <p className="text-lightGray text-[16px] font-medium pl-1">Confirm Password</p>
+                    <p className="text-black text-[16px] font-medium pl-1">Confirm Password</p>
                     <input
                         type="password"
                         placeholder="confirm password"
