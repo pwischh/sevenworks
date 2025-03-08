@@ -28,7 +28,7 @@ export default function Navbar() {
     return (
         <div className="bg-white">
             <div className="pt-18 pb-18 pl-90 pr-90">
-                <nav ref={navRef} className="text-black flex flex-row gap-10 p-3 w-fit text-nowrap font-semibold mx-auto bg-[#E6E6E6] rounded-full p-4">
+                <nav ref={navRef} className="text-black flex flex-row gap-10 pt-2 pb-2 pl-4 pr-4 w-fit text-nowrap font-semibold mx-auto bg-[#E6E6E6] rounded-[1.25vw]">
                     <span className="flex items-center gap-2">
                         <span className={`${markazi.className} text-3xl`}>SevenWorks</span>
                     </span>
@@ -61,13 +61,13 @@ export default function Navbar() {
                         <span>Font Size</span>
                         <img src="/chevron-down.svg" alt="chevron down" className="w-6 h-6" />
                         {fontSizeDropdownOpen && (
-                          <div className="absolute top-full left-0 mt-2 bg-white border border-gray-300 rounded shadow-lg z-10">
-                            <ul className="py-2">
-                              <li className="px-4 py-1 hover:bg-gray-100 cursor-pointer">Small</li>
-                              <li className="px-4 py-1 hover:bg-gray-100 cursor-pointer">Medium</li>
-                              <li className="px-4 py-1 hover:bg-gray-100 cursor-pointer">Large</li>
-                            </ul>
-                          </div>
+                            <div className="absolute top-full left-0 mt-2 bg-white border border-gray-300 rounded shadow-lg z-10">
+                                <ul className="py-2">
+                                    <li className="px-4 py-1 hover:bg-gray-100 cursor-pointer">Small</li>
+                                    <li className="px-4 py-1 hover:bg-gray-100 cursor-pointer">Medium</li>
+                                    <li className="px-4 py-1 hover:bg-gray-100 cursor-pointer">Large</li>
+                                </ul>
+                            </div>
                         )}
                     </span>
                     <span className="flex items-center gap-2">
