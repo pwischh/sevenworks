@@ -37,7 +37,7 @@ export default function Landing() {
                 </div>
             </div>
             <div className="flex flex-col w-[1000px] h-full justify-center items-center p-[50px] pr-[100px] mt-[-80px]"> {/* Adjusted margin-top to raise the images */}
-                <div className="min-h-screen flex items-center justify-center">
+                <div className="min-h-screen flex items-center justify-center id=">
                     <ImageGrid />
                 </div>
             </div>

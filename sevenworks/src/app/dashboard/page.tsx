@@ -37,6 +37,11 @@ const Sidebar = () => (
           </Link>
         </li>
         <li className="mb-4">
+          <Link href="/editor" className="hover:underline">
+            Editor
+          </Link>
+        </li>
+        <li className="mb-4">
           <a href="#" className="hover:underline">Settings</a>
         </li>
         <li className="mb-4">

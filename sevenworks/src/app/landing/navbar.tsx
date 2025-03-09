@@ -18,7 +18,7 @@ export default function Navbar() {
                     </div>
                 {/* <Logo /> */}
                 <nav className = "flex flex-row gap-7 px-1 w-fit text-nowrap font-semibold">
-                    <a href = "../templates">Resumes</a>
+                    <a href="#resumes">Resumes</a>
                     <a href = "../templates">Cover Letters</a>
                     <a href = "#">Examples</a>
                     <a href = "#">About</a>

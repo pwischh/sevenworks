@@ -47,9 +47,10 @@ export default function Navbar() {
                         {fontDropdownOpen && (
                             <div className="absolute top-full left-0 mt-2 bg-white border border-gray-300 rounded shadow-lg z-10">
                                 <ul className="py-2">
-                                    <li className="px-4 py-1 hover:bg-gray-100 cursor-pointer">Arial</li>
-                                    <li className="px-4 py-1 hover:bg-gray-100 cursor-pointer">Times New Roman</li>
-                                    <li className="px-4 py-1 hover:bg-gray-100 cursor-pointer">Courier New</li>
+                                    <li className="px-4 py-1 hover:bg-gray-100 cursor-pointer font-[Arial]">Arial</li>
+                                    <li className="px-4 py-1 hover:bg-gray-100 cursor-pointer font-[Calibri]">Calibri</li>
+                                    <li className="px-4 py-1 hover:bg-gray-100 cursor-pointer font-[TimesNewRoman]">Times New Roman</li>
+                                    <li className="px-4 py-1 hover:bg-gray-100 cursor-pointer font-[CourierNew]">Courier New</li>
                                 </ul>
                             </div>
                         )}

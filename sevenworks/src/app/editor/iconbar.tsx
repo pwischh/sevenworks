@@ -26,9 +26,11 @@ const IconBar = () => {
           <img src="/plus-square.svg" alt="plus square" className="w-8 h-8" style={{ filter: 'invert(29%) sepia(14%) saturate(1580%) hue-rotate(175deg) brightness(92%) contrast(88%)' }} />
         </div>
         <div className="mt-auto p-0.5 flex items-center justify-center">
-          <img src="/chevron-left.svg" alt="chevron left" className="w-8 h-8" style={{ filter: 'invert(29%) sepia(14%) saturate(1580%) hue-rotate(175deg) brightness(92%) contrast(88%)' }} />
-        </div>
+          <a href="/dashboard">
+            <img src="/chevron-left.svg" alt="chevron left" className="w-8 h-8" style={{ filter: 'invert(29%) sepia(14%) saturate(1580%) hue-rotate(175deg) brightness(92%) contrast(88%)' }} />
+          </a>
       </div>
+    </div>
     </div>
   );
 };
