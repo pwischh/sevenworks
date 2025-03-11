@@ -1,8 +1,8 @@
 "use client";
 import { useState } from "react";
-import { useRef } from "react";
-import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
+import { PDFDownloadLink, BlobProvider } from '@react-pdf/renderer';
+//import jsPDF from "jspdf";
+//import html2canvas from "html2canvas";
 import BusinessTemplate from "../TEST-TEMPLATES/business-template";
 
 export default function Demo() {
@@ -12,7 +12,7 @@ export default function Demo() {
         content: "",
     })
 
-    const componentRef = useRef<HTMLDivElement>(null);
+    /*const componentRef = useRef<HTMLDivElement>(null);
 
     async function exportToPDF(){
 
@@ -115,11 +115,11 @@ export default function Demo() {
             componentRef.current.style.height = "";
             div.style.overflow = "scroll";
         }
-    }
+    }*/
 
     return(
         <div className="flex flex-row w-screen h-screen justify-between bg-white">
-            <form className="flex flex-col gap-2 p-6" onSubmit={(e) => e.preventDefault()}>
+            <div className="flex flex-col gap-2 p-6">
                 <input
                     className="border-[2px] border-gray-400 px-2 rounded-md text-gray-700"
                     value={form.firstName}
@@ -141,14 +141,29 @@ export default function Demo() {
                     placeholder="content"
                     name="content"
                 />
-                <button
-                    onClick={exportToPDF}
-                    className="px-4 py-2 border-2 border-gray-400 text-gray-700 rounded-md">
-                    Export as PDF
-                </button>
-            </form>
+                <PDFDownloadLink 
+                    document={<BusinessTemplate form={form} />}
+                    fileName="test.pdf"
+                    className="px-4 py-2 bg-blue-500 text-white text-center rounded"
+                >
+                    Export to PDF
+                </PDFDownloadLink>
+            </div>
             <div className="flex justify-center items-center w-full h-screen bg-offWhite">
-                <BusinessTemplate values={form} ref={componentRef}/>
+               <BlobProvider document={<BusinessTemplate form={form} />}>
+               {({ url, loading, error }) => {
+                    if (loading) return 'Loading document...';
+                    if (error) return 'Error generating PDF';
+                // Append #toolbar=0 to try to hide browser toolbar (supported in some browsers)
+                    return (
+                        <iframe
+                        src={`${url}#toolbar=0`}
+                        style={{ width: "100%", height: "100%", backgroundColor: "white"}}
+                        title="PDF Preview"
+                        />
+                    );
+                }}
+               </BlobProvider>
             </div>
         </div>
     )
