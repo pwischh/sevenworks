@@ -16,9 +16,6 @@ export default {
         offWhite: '#edf2f4',
         darkRed: '#91031b',
         lightGray: '#8d99ae',
-        mediumGray: '#454545',
-        darkGray: '#363636',
-        highlightGray: '#666666'
       },
       fontFamily: {
         "markazi": "var(--font-markazi)",
