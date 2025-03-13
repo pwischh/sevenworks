@@ -1,20 +1,11 @@
 "use client";
 import React, { useState } from "react";
-//import { PDFDownloadLink, BlobProvider } from '@react-pdf/renderer';
+import { PDFDownloadLink, BlobProvider } from '@react-pdf/renderer';
 import BusinessTemplate from "../TEST-TEMPLATES/business-template";
+import dynamic from "next/dynamic";
 
-const LazyPDFDownloadLink = React.lazy(() =>
-    import("@react-pdf/renderer").then((mod) => ({
-      default: mod.PDFDownloadLink,
-    }))
-  );
-  
-  const LazyBlobProvider = React.lazy(() =>
-    import("@react-pdf/renderer").then((mod) => ({
-      default: mod.BlobProvider,
-    }))
-  );
-  
+const NewPDFDownloadLink = dynamic(() => Promise.resolve(PDFDownloadLink), { ssr: false });
+const NewBlobProvider = dynamic(() => Promise.resolve(BlobProvider), { ssr: false });
 
 export default function Demo() {
     const [form, setForm] = useState({
@@ -47,16 +38,16 @@ export default function Demo() {
                     placeholder="content"
                     name="content"
                 />
-                <LazyPDFDownloadLink 
+                <NewPDFDownloadLink 
                     document={<BusinessTemplate form={form} />}
                     fileName="test.pdf"
                     className="px-4 py-2 bg-blue-500 text-white text-center rounded"
                 >
                     Export to PDF
-                </LazyPDFDownloadLink>
+                </NewPDFDownloadLink>
             </div>
             <div className="flex justify-center items-center w-full h-screen bg-offWhite">
-               <LazyBlobProvider document={<BusinessTemplate form={form} />}>
+               <NewBlobProvider document={<BusinessTemplate form={form} />}>
                {({ url, loading, error }) => {
                     if (loading) return 'Loading document...';
                     if (error) return 'Error generating PDF';
@@ -69,7 +60,7 @@ export default function Demo() {
                         />
                     );
                 }}
-               </LazyBlobProvider>
+               </NewBlobProvider>
             </div>
         </div>
     )

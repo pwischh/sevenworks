@@ -7,7 +7,6 @@ import {
     StyleSheet,
 } from "@react-pdf/renderer";
 
-// Create styles using react-pdf's StyleSheet.
 const styles = StyleSheet.create({
   page: {
     flexDirection: 'column',
@@ -43,8 +42,6 @@ export default function BusinessTemplate({form}: {form: formValues}){
           </Text>
         </View>
         <View style={styles.content}>
-          {/* The Text component automatically wraps text that exceeds the page boundaries.
-              If the content is long enough, it will continue on the next page. */}
           <Text>
             {form.content}
           </Text>
