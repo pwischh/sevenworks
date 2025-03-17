@@ -1,4 +1,5 @@
-import { formValues } from "@/app/types";
+import React from "react";
+import { formValues } from "../types";
 import {
     Document,
     Page,
