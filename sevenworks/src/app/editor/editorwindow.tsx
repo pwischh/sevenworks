@@ -1,10 +1,11 @@
 "use client";
 import React, { useState } from "react";
-import { PDFDownloadLink, BlobProvider } from '@react-pdf/renderer';
+import { BlobProvider } from '@react-pdf/renderer';
+// import { PDFDownloadLink } from "@react-pdf/renderer";
 import BusinessTemplate from "../TEST-TEMPLATES/business-template";
 import dynamic from "next/dynamic";
 
-const NewPDFDownloadLink = dynamic(() => Promise.resolve(PDFDownloadLink), { ssr: false });
+// const NewPDFDownloadLink = dynamic(() => Promise.resolve(PDFDownloadLink), { ssr: false });
 const NewBlobProvider = dynamic(() => Promise.resolve(BlobProvider), { ssr: false });
 
 const EditorWindow = () => {

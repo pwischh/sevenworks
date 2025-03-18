@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useState, useRef, useEffect } from "react";
 
 const IconBar = () => {
@@ -12,24 +13,24 @@ const IconBar = () => {
   const addSection = () => {
     const newSection = (
       <div key={sections.length} className="pr-2 pl-2 flex items-center justify-center">
-      <img src="/user.svg" alt="user" className="w-8 h-8" style={{ filter: 'invert(29%) sepia(14%) saturate(1580%) hue-rotate(175deg) brightness(92%) contrast(88%)' }} />
+      <Image src="/user.svg" alt="user" width={32} height={32} className="w-8 h-8" style={{ filter: 'invert(29%) sepia(14%) saturate(1580%) hue-rotate(175deg) brightness(92%) contrast(88%)' }} />
       </div>
     );
     setSections([...sections, newSection]);
   };
 
-  const [overlay, setOverlay] = useState<React.JSX.Element[]>([]);
+  const [overlay] = useState<React.JSX.Element[]>([]);
   const [isCreateNewSectionOverlayVisible, setCreateNewSectionOverlay] = useState(false);
-  const [isNewSectionIconOverlayVisible, setNewSectionIconOverlay] = useState(false);
+  // const [isNewSectionIconOverlayVisible, setNewSectionIconOverlay] = useState(false);
   const newSectionOverlayRef = useRef<HTMLDivElement>(null);
 
   const displayCreateNewSectionOverlay = () => {
     setCreateNewSectionOverlay((prev) => !prev);
   };
 
-  const displayNewSectionIconOverlay = () => {
-    setNewSectionIconOverlay((prev) => !prev);
-  };
+  // const displayNewSectionIconOverlay = () => {
+  //   setNewSectionIconOverlay((prev) => !prev);
+  // };
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -51,9 +52,10 @@ const IconBar = () => {
       {sections}
         <div className="p-0.5 flex items-center justify-center">
           <Link href="/editor?tab=personal#personal-section">
-            <img
+            <Image
               src="/user.svg"
               alt="user"
+              width={32} height={32}
               className="w-8 h-8"
               style={{ filter: 'invert(29%) sepia(14%) saturate(1580%) hue-rotate(175deg) brightness(92%) contrast(88%)' }}
             />
@@ -61,9 +63,10 @@ const IconBar = () => {
         </div>
         <div className="p-0.5 flex items-center justify-center">
           <Link href="/editor?tab=phone#phone-section">
-            <img
+            <Image
               src="/phone.svg"
               alt="phone"
+              width={32} height={32}
               className="w-8 h-8"
               style={{ filter: 'invert(29%) sepia(14%) saturate(1580%) hue-rotate(175deg) brightness(92%) contrast(88%)' }}
             />
@@ -71,9 +74,10 @@ const IconBar = () => {
         </div>
         <div className="p-0.5 flex items-center justify-center">
           <Link href="/editor?tab=book#book-section">
-            <img
+            <Image
               src="/book-open.svg"
               alt="open book"
+              width={32} height={32}
               className="w-8 h-8"
               style={{ filter: 'invert(29%) sepia(14%) saturate(1580%) hue-rotate(175deg) brightness(92%) contrast(88%)' }}
             />
@@ -81,9 +85,10 @@ const IconBar = () => {
         </div>
         <div className="p-0.5 flex items-center justify-center">
           <Link href="/editor?tab=work#work-section">
-            <img
+            <Image
               src="/briefcase.svg"
               alt="briefcase"
+              width={32} height={32}
               className="w-8 h-8"
               style={{ filter: 'invert(29%) sepia(14%) saturate(1580%) hue-rotate(175deg) brightness(92%) contrast(88%)' }}
             />
@@ -91,9 +96,10 @@ const IconBar = () => {
         </div>
         <div className="p-0.5 flex items-center justify-center">
           <Link href="/editor?tab=award#award-section">
-            <img
+            <Image
               src="/award.svg"
               alt="award"
+              width={32} height={32}
               className="w-8 h-8"
               style={{ filter: 'invert(29%) sepia(14%) saturate(1580%) hue-rotate(175deg) brightness(92%) contrast(88%)' }}
             />
@@ -102,7 +108,7 @@ const IconBar = () => {
         <div ref={newSectionOverlayRef} className="relative p-0.5 flex items-center justify-center">
          {overlay}
          <button className="p-0.5 aspect-square rounded-lg flex items-center justify-center bg-[#435058] hover:bg-[#BFB7B6]" onClick={() => displayCreateNewSectionOverlay()}>
-           <img src="/plus-square.svg" alt="plus square" className="w-8 h-8" style={{ filter: 'invert(100%) sepia(14%) saturate(1580%) hue-rotate(175deg) brightness(100%) contrast(88%)' }} />
+           <Image src="/plus-square.svg" alt="plus square" width={32} height={32} className="w-8 h-8" style={{ filter: 'invert(100%) sepia(14%) saturate(1580%) hue-rotate(175deg) brightness(100%) contrast(88%)' }} />
            </button>
           {isCreateNewSectionOverlayVisible &&
           <div className="absolute top-0 left-full p-3 ml-2 w-80 gap-4 bg-[#BFB7B6] text-black rounded-lg shadow-lg">
@@ -111,23 +117,24 @@ const IconBar = () => {
               <div className="flex items-center border bg-[#BFB7B6] border-[#999999] shadow-md rounded-lg w-5/6">
                 <input type="text" className="bg-[#BFB7B6] border-[#999999] p-2 rounded-lg w-full text-white placeholder-white" placeholder="New Section"/>
                 <button className="relative m-2 w-14 h-8 aspect-square rounded-lg flex items-center justify-left bg-[#BFB7B6] border border-[#888888] hover:bg-[#999999]" onClick={() => addSection()}>
-                  <img src="/award.svg" alt="award" className="w-8 h-8 p-0.5" style={{ filter: 'invert(29%) sepia(14%) saturate(1580%) hue-rotate(175deg) brightness(92%) contrast(88%)' }} />
-                  <img src="/chevron-down.svg" alt="chevron-down" className="absolute right-0.5 w-3 h-3" style={{ filter: 'invert(29%) sepia(14%) saturate(1580%) hue-rotate(175deg) brightness(92%) contrast(88%)' }} />
+                  <Image src="/award.svg" alt="award" width={32} height={32} className="w-8 h-8 p-0.5" style={{ filter: 'invert(29%) sepia(14%) saturate(1580%) hue-rotate(175deg) brightness(92%) contrast(88%)' }} />
+                  <Image src="/chevron-down.svg" alt="chevron-down" width={32} height={32} className="absolute right-0.5 w-3 h-3" style={{ filter: 'invert(29%) sepia(14%) saturate(1580%) hue-rotate(175deg) brightness(92%) contrast(88%)' }} />
                 </button>
               </div>
               <button className="rounded-lg size-8 flex items-center justify-center bg-[#435058] hover:bg-[#999999]" onClick={() => addSection()}>
-                <img src="/check.svg" alt="check" className="w-8 h-8" style={{ filter: 'invert(100%) sepia(14%) saturate(1580%) hue-rotate(175deg) brightness(100%) contrast(88%)' }} />
+                <Image src="/check.svg" alt="check" width={32} height={32} className="w-8 h-8" style={{ filter: 'invert(100%) sepia(14%) saturate(1580%) hue-rotate(175deg) brightness(100%) contrast(88%)' }} />
               </button>
             </div>
-            <img src="/x.svg" alt="x" className="absolute top-2 right-2 w-4 h-4" onClick={() => displayCreateNewSectionOverlay()} style={{ filter: 'invert(29%) sepia(14%) saturate(1580%) hue-rotate(175deg) brightness(92%) contrast(88%)' }} />
+            <Image src="/x.svg" alt="x" width={32} height={32} className="absolute top-2 right-2 w-4 h-4" onClick={() => displayCreateNewSectionOverlay()} style={{ filter: 'invert(29%) sepia(14%) saturate(1580%) hue-rotate(175deg) brightness(92%) contrast(88%)' }} />
           </div> }
         </div>
         
         <div className="mt-auto p-0.5 flex items-center justify-center">
           <Link href="/dashboard">
-            <img
+            <Image
               src="/chevron-left.svg"
               alt="chevron left"
+              width={32} height={32}
               className="w-8 h-8"
               style={{ filter: 'invert(29%) sepia(14%) saturate(1580%) hue-rotate(175deg) brightness(92%) contrast(88%)' }}
             />
