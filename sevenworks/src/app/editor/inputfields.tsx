@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 
 const InputFields = () => {
@@ -17,7 +17,7 @@ const InputFields = () => {
     }
   }, [searchParams]);
 
-  const changeTab = (tab) => {
+  const changeTab = (tab: string) => {
     setActiveTab(tab);
     router.push(`?tab=${tab}`);
   };
@@ -103,9 +103,23 @@ const InputFields = () => {
 
   return (
     <div className="flex-[1.5] bg-[#E6E6E6] p-2 rounded-lg">
+      <div className="flex gap-4 mb-4">
+        <button onClick={() => changeTab("personal")} className={`p-2 rounded-lg ${activeTab === "personal" ? "bg-blue-500 text-white" : "bg-gray-300"}`}>
+          Personal
+        </button>
+        <button onClick={() => changeTab("phone")} className={`p-2 rounded-lg ${activeTab === "phone" ? "bg-blue-500 text-white" : "bg-gray-300"}`}>
+          Work
+        </button>
+      </div>
       {renderFields()}
     </div>
   );
 };
 
-export default InputFields;
+const InputFieldsWrapper = () => (
+  <Suspense fallback={<div>Loading...</div>}>
+    <InputFields />
+  </Suspense>
+);
+
+export default InputFieldsWrapper;

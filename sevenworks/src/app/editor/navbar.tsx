@@ -1,6 +1,7 @@
 "use client";
 import { Markazi_Text } from "next/font/google";
 import { useState, useRef, useEffect } from "react";
+import Image from "next/image";
 
 const markazi = Markazi_Text({
     subsets: ["latin"],
@@ -33,9 +34,9 @@ export default function Navbar() {
                         <span className={`${markazi.className} text-3xl`}>SevenWorks</span>
                     </span>
                     <span className="flex items-center gap-2">
-                        <img src="/zoom-out.svg" alt="zoom out" className="w-6 h-6" />
+                        <Image src="/zoom-out.svg" alt="zoom out" width={24} height={24} />
                         <span>Zoom</span>
-                        <img src="/zoom-in.svg" alt="zoom in" className="w-6 h-6" />
+                        <Image src="/zoom-in.svg" alt="zoom in" width={24} height={24} />
                     </span>
                     <span className="self-center h-6 border-r border-black"></span>
                     <span className="relative flex items-center gap-2 cursor-pointer" onClick={() => {
@@ -43,7 +44,7 @@ export default function Navbar() {
                         setFontSizeDropdownOpen(false);
                     }}>
                         <span>Font</span>
-                        <img src="/chevron-down.svg" alt="chevron down" className="w-6 h-6" />
+                        <Image src="/chevron-down.svg" alt="chevron down" width={24} height={24} />
                         {fontDropdownOpen && (
                             <div className="absolute top-full left-0 mt-2 bg-white border border-gray-300 rounded shadow-lg z-10">
                                 <ul className="py-2">
@@ -60,7 +61,7 @@ export default function Navbar() {
                         setFontDropdownOpen(false);
                     }}>
                         <span>Font Size</span>
-                        <img src="/chevron-down.svg" alt="chevron down" className="w-6 h-6" />
+                        <Image src="/chevron-down.svg" alt="chevron down" width={24} height={24} />
                         {fontSizeDropdownOpen && (
                             <div className="absolute top-full left-0 mt-2 bg-white border border-gray-300 rounded shadow-lg z-10">
                                 <ul className="py-2">
@@ -72,26 +73,26 @@ export default function Navbar() {
                         )}
                     </span>
                     <span className="flex items-center gap-2">
-                        <img src="/list.svg" alt="list" className="w-6 h-6" />
+                        <Image src="/list.svg" alt="list" width={24} height={24} />
                     </span>
                     <span className="flex items-center gap-2">
-                        <img src="/link.svg" alt="link" className="w-6 h-6" />
+                        <Image src="/link.svg" alt="link" width={24} height={24} />
                     </span>
                     <span className="self-center h-6 border-r border-black"></span>
                     <span className="flex items-center gap-2">
-                        <img src="/save.svg" alt="save" className="w-6 h-6" />
+                        <Image src="/save.svg" alt="save" width={24} height={24} />
                     </span>
                     <span className="flex items-center gap-2">
-                        <img src="/refresh-cw.svg" alt="refresh-cw" className="w-6 h-6" />
+                        <Image src="/refresh-cw.svg" alt="refresh" width={24} height={24} />
                     </span>
                     <span className="flex items-center gap-2">
-                        <img src="/download.svg" alt="download" className="w-6 h-6" />
+                        <Image src="/download.svg" alt="download" width={24} height={24} />
                     </span>
                     <span className="flex items-center gap-2">
-                        <img src="/settings.svg" alt="settings" className="w-6 h-6" />
+                        <Image src="/settings.svg" alt="settings" width={24} height={24} />
                     </span>
                     <span className="flex items-center gap-2 text-red-500">
-                        <img src="/log-out.svg" alt="logout" className="w-6 h-6" />
+                        <Image src="/log-out.svg" alt="logout" width={24} height={24} />
                     </span>
                 </nav>
             </div>
