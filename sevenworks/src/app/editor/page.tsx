@@ -8,6 +8,7 @@ import RightView from "./rightview";
 import { useEffect } from "react";
 import { useAuth } from "../authContext";
 import { useRouter } from "next/navigation";
+import { FormProvider } from "./formcontext";
 
 export default function Editor() {
 
@@ -22,14 +23,16 @@ export default function Editor() {
     }, [user, loading, router]);
 
     return (
-    <div className="bg-white h-screen p-3 flex flex-col">
-      <Navbar />
-      <div className="flex-1 flex w-full pt-5 gap-2">
-        <IconBar />
-        <InputFields />
-        <EditorWindow />
-        <RightView />
-      </div>
-    </div>
+      <FormProvider>
+        <div className="bg-white h-screen p-3 flex flex-col">
+          <Navbar />
+          <div className="flex-1 flex w-full pt-5 gap-2">
+            <IconBar />
+            <InputFields />
+            <EditorWindow />
+            <RightView />
+          </div>
+        </div>
+      </FormProvider>
     );
 }
