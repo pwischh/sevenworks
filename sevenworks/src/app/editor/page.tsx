@@ -5,8 +5,22 @@ import IconBar from "./iconbar";
 import InputFields from "./inputfields";
 import EditorWindow from "./editorwindow";
 import RightView from "./rightview";
+import { useEffect } from "react";
+import { useAuth } from "../authContext";
+import { useRouter } from "next/navigation";
 
 export default function Editor() {
+
+    const { user, loading } = useAuth();
+    const router = useRouter();
+
+    //redirect if user isn't logged in
+    useEffect(() => {
+      if (!loading && !user) {
+        router.push("/register/login");
+      }
+    }, [user, loading, router]);
+
     return (
     <div className="bg-white h-screen p-3 flex flex-col">
       <Navbar />
@@ -15,7 +29,7 @@ export default function Editor() {
         <InputFields />
         <EditorWindow />
         <RightView />
-        </div>
+      </div>
     </div>
     );
 }
