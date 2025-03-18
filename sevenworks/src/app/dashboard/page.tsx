@@ -8,56 +8,70 @@ import Image from "next/image";
 import { Markazi_Text } from "next/font/google";
 import { collection, getDocs } from "firebase/firestore";
 import { auth, db } from "../lib/firebase";
+import { signOut } from "firebase/auth";
+
 
 const markazi = Markazi_Text({
   subsets: ["latin"],
   variable: "--font-markazi",
 });
 
+
+async function handleSignOut(){
+  try {
+    await signOut(auth);
+  } catch (error){
+    console.error("Sign out error: ", error);
+  }
+};
+
 // Sidebar Component
-const Sidebar = () => (
-  <aside className="w-64 h-screen bg-gray-800 text-white p-6 fixed">
-    <div className="flex flex-row w-full items-center mb-2">
-      <div className={markazi.className}>
-        <Link href="/" className="text-3xl font-bold text-offWhite hover:underline">
-          SevenWorks
-        </Link>
+const Sidebar = () => {
+
+  return (
+    <aside className="w-64 h-screen bg-navy text-offWhite p-6 fixed">
+      <div className="flex flex-row w-full items-center mb-2">
+        <div className={markazi.className}>
+          <Link href="/" className="text-3xl font-bold text-offWhite hover:underline">
+            SevenWorks
+          </Link>
+        </div>
       </div>
-    </div>
-    <nav>
-      <ul>
-        <li className="mb-4">
-          <Link href="/dashboard" className="hover:underline">
-            Home
-          </Link>
-        </li>
-        <li className="mb-4">
-          <Link href="/templates" className="hover:underline">
-            Resumes
-          </Link>
-        </li>
-        <li className="mb-4">
-          <Link href="/editor" className="hover:underline">
-            Editor
-          </Link>
-        </li>
-        <li className="mb-4">
-          <a href="#" className="hover:underline">Settings</a>
-        </li>
-        <li className="mb-4">
-          <Link href="/profile" className="hover:underline">
-            Profile
-          </Link>
-        </li>
-        <li className="mb-4">
-          <Link href="../" className="hover:underline">
-            Sign Out
-          </Link>
-        </li>
-      </ul>
-    </nav>
-  </aside>
-);
+      <nav>
+        <ul>
+          <li className="mb-4">
+            <Link href="/dashboard" className="hover:underline">
+              Home
+            </Link>
+          </li>
+          <li className="mb-4">
+            <Link href="/templates" className="hover:underline">
+              Resumes
+            </Link>
+          </li>
+          <li className="mb-4">
+            <Link href="/editor" className="hover:underline">
+              Editor
+            </Link>
+          </li>
+          <li className="mb-4">
+            <a href="#" className="hover:underline">Settings</a>
+          </li>
+          <li className="mb-4">
+            <Link href="/profile" className="hover:underline">
+              Profile
+            </Link>
+          </li>
+          <li className="mb-4">
+            <button onClick={handleSignOut} className="hover:underline">
+              Sign Out
+            </button>
+          </li>
+        </ul>
+      </nav>
+    </aside>
+  )
+};
 
 interface Resume {
   id: string;
@@ -164,7 +178,7 @@ const Dashboard = () => {
   return (
     <div className="flex">
       <Sidebar />
-      <main className="flex-1 h-screen p-8 bg-gray-100 text-gray-800 ml-64 overflow-y-auto">
+      <main className="flex-1 h-screen p-8 bg-gray-100 text-navy ml-64 overflow-y-auto">
         {/* Resume Templates Section (Horizontal Scrolling) */}
         <h1 className="text-3xl font-bold mb-8">Resume Templates</h1>
         <div className="flex space-x-4 overflow-x-auto pb-4">

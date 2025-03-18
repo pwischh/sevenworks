@@ -60,5 +60,5 @@
   
   .navbar {
       position: fixed; /* or absolute/fixed depending on your layout */
-      z-index: 10; /* Ensure this value is higher than the image container */
+      z-index: 11; /* Ensure this value is higher than the image container */
   }

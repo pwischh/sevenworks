@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import classNames from 'classnames';
+import { AuthProvider } from "./authContext";
 
 // const markazi = Markazi_Text({
 //     subsets: ["latin"],
@@ -27,7 +28,9 @@ export default function RootLayout({
     <html lang="en">
       <body
         className={classNames(inter.className, "antialiased bg-[#2b2d42]")}>
-        {children}
+        <AuthProvider>
+          {children}
+        </AuthProvider> 
       </body>
     </html>
   );

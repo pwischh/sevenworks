@@ -95,7 +95,7 @@ export default function Login() {
                 {resetMessage && <p className="text-green-500 text-center mt-2">{resetMessage}</p>}
                 
                 <div className="flex flex-col gap-1 mt-4">
-                    <p className="text-black text-[16px] font-medium">Email</p>
+                    <p className="text-black/60 text-[16px] font-medium">Email</p>
                     <input 
                         type="email" 
                         placeholder="example@email.com" 
@@ -107,7 +107,7 @@ export default function Login() {
                 </div>
 
                 <div className="flex flex-col gap-1 mt-4">
-                    <p className="text-black text-[16px] font-medium">Password</p>
+                    <p className="text-black/60 text-[16px] font-medium">Password</p>
                     <input 
                         type="password" 
                         placeholder="password" 
