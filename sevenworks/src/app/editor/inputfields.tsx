@@ -1,11 +1,27 @@
+ "use client";
 import React, { useEffect, useState, Suspense } from "react";
+import { PDFDownloadLink, BlobProvider } from '@react-pdf/renderer';
+import dynamic from "next/dynamic";
+import BusinessTemplate from "../TEST-TEMPLATES/business-template";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useFormContext, FormProvider } from "./formcontext";
+
+const NewPDFDownloadLink = dynamic(() => Promise.resolve(PDFDownloadLink), { ssr: false });
+const NewBlobProvider = dynamic(() => Promise.resolve(BlobProvider), { ssr: false });
 
 const InputFields = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { formData, setFormData } = useFormContext();
+  const [form, setForm] = useState({
+      firstName: "",
+      middleName: "",
+      lastName: "",
+      email: "",
+      phone: "",
+      companyName: "",
+      role: ""
+  });
   const initialTab = searchParams.get("tab") || "personal";
   const [activeTab, setActiveTab] = useState(initialTab);
 
@@ -22,7 +38,9 @@ const InputFields = () => {
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData(e.target.name, e.target.value);
+    const { name, value } = e.target;
+    setFormData(name, value);
+    setForm(prevForm => ({ ...prevForm, [name]: value }));
   };
 
   const renderFields = () => {
@@ -94,6 +112,30 @@ const InputFields = () => {
         </button>
       </div>
       {renderFields()}
+      <div className="flex flex-col pt-3">
+        <NewPDFDownloadLink 
+          document={<BusinessTemplate form={form} />}
+          fileName="exported_form.pdf"
+          className="px-4 py-2 bg-blue-500 text-white text-center rounded"
+        >
+          Export to PDF
+        </NewPDFDownloadLink>
+      </div>
+      <div className="flex justify-center items-center w-full h-[500px] bg-offWhite mt-4">
+        <NewBlobProvider document={<BusinessTemplate form={form} />}>
+          {({ url, loading, error }) => {
+            if (loading) return 'Loading document...';
+            if (error) return 'Error generating PDF';
+            return (
+              <iframe
+                src={`${url}#toolbar=0`}
+                style={{ width: "100%", height: "100%", backgroundColor: "white"}}
+                title="PDF Preview"
+              />
+            );
+          }}
+        </NewBlobProvider>
+      </div>
     </div>
   );
 };
