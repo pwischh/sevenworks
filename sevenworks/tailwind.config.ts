@@ -14,12 +14,7 @@ export default {
         navy: '#2b2d42',
         lightRed: '#ef233c',
         offWhite: '#edf2f4',
-        darkRed: '#91031b',
-        lightGray: '#8d99ae',
-      },
-      fontFamily: {
-        "markazi": "var(--font-markazi)",
-        "inter": "var(--font-inter)",
+        darkRed: '#91031b'
       },
     },
   },

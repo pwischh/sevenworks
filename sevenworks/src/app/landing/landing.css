@@ -54,8 +54,11 @@
     }
   }
   
-  /* Preventing the images from wrapping */
   .image-container .relative {
     flex-shrink: 0;
   }
-    
+  
+  .navbar {
+      position: fixed; /* or absolute/fixed depending on your layout */
+      z-index: 11; /* Ensure this value is higher than the image container */
+  }
