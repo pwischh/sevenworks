@@ -18,6 +18,11 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: 5,
   },
+  contactInfo: {
+    fontSize: 12,
+    marginTop: 10,
+    lineHeight: 1.5,
+  },
   content: {
     fontSize: 12,
     lineHeight: 1.5,
@@ -30,11 +35,12 @@ export default function BusinessTemplate({ form }: { form: formValues }) {
       <Page size="LETTER" style={styles.page}>
         <View style={styles.header}>
           <Text style={styles.title}>
-            {form?.firstName || "N/A"} {form?.lastName || "N/A"}
+            {form?.firstName || "FIRST"} {form?.middleName || "MIDDLE"} {form?.lastName || "LAST"}
           </Text>
-          <Text style={styles.subtitle}>
-            Email: {form?.email || "No Email"} | Phone: {form?.phone || "No Phone"}
-          </Text>
+          <View style={styles.contactInfo}>
+            <Text>Email: {form?.email || "email@email.com"}</Text>
+            <Text>Phone: {form?.phone || "(111) 111-1111"}</Text>
+          </View>
         </View>
         <View style={styles.content}>
           <Text>

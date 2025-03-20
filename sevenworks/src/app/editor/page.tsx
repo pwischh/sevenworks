@@ -27,7 +27,7 @@ export default function Editor() {
         <div className="flex-1 flex w-full pt-5 gap-2">
           <IconBar />
           <Suspense fallback={<div>Loading Input Fields...</div>}>
-            <InputFields />
+            {/* <InputFields /> */}
           </Suspense>
           <Suspense fallback={<div>Loading Editor...</div>}>
             <EditorWindow />
