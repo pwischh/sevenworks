@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Navbar from "./navbar";
 import IconBar from "./iconbar";
 import InputFields from "./inputfields";
@@ -28,8 +29,8 @@ export default function Editor() {
           <Navbar />
           <div className="flex-1 flex w-full pt-5 gap-2">
             <IconBar />
-            <InputFields />
-            <EditorWindow />
+            <InputFields form={form} setForm={setForm} />
+            <EditorWindow form={form} />
             <RightView />
           </div>
         </div>
