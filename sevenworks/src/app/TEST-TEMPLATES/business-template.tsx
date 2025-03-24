@@ -1,5 +1,5 @@
 import React from "react";
-import { formValues } from "../types";
+import { TemplateProps } from "../types";
 import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
 
 const styles = StyleSheet.create({
@@ -29,22 +29,22 @@ const styles = StyleSheet.create({
   },
 });
 
-export default function BusinessTemplate({ form }: { form: formValues }) {
+export default function BusinessTemplate({ formData }: TemplateProps) {
   return (
     <Document>
       <Page size="LETTER" style={styles.page}>
         <View style={styles.header}>
           <Text style={styles.title}>
-            {form?.firstName || "FIRST"} {form?.middleName || "MIDDLE"} {form?.lastName || "LAST"}
+            {formData?.firstName || "FIRST"} {formData?.middleName || "MIDDLE"} {formData?.lastName || "LAST"}
           </Text>
           <View style={styles.contactInfo}>
-            <Text>Email: {form?.email || "email@email.com"}</Text>
-            <Text>Phone: {form?.phone || "(111) 111-1111"}</Text>
+            <Text>Email: {formData?.email || "email@email.com"}</Text>
+            <Text>Phone: {formData?.phone || "(111) 111-1111"}</Text>
           </View>
         </View>
         <View style={styles.content}>
           <Text>
-            {form?.content || "No content provided."}
+            {formData?.content || "No content provided."}
           </Text>
         </View>
       </Page>

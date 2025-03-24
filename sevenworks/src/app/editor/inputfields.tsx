@@ -21,7 +21,7 @@ const InputFields = () => {
     if (tab !== activeTab) {
       setActiveTab(tab);
     }
-  }, [searchParams]);
+  }, [activeTab, searchParams]);
 
   const changeTab = (tab: string) => {
     setActiveTab(tab);

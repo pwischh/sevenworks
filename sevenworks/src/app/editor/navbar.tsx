@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import { signOut } from "firebase/auth";
 import { auth } from "../lib/firebase";
+import Link from "next/link";
 
 const markazi = Markazi_Text({
     subsets: ["latin"],
@@ -42,7 +43,7 @@ export default function Navbar() {
             <div className="pt-18 pb-18 pl-90 pr-90">
                 <nav ref={navRef} className="text-black flex flex-row gap-10 pt-2 pb-2 pl-4 pr-4 w-fit text-nowrap font-semibold mx-auto bg-[#E6E6E6] rounded-[1.25vw]">
                     <span className="flex items-center gap-2 hover:opacity-50 transition-opacity duration-200">
-                        <a href="/" className={`${markazi.className} text-3xl`}>SevenWorks</a>
+                        <Link href="/" className={`${markazi.className} text-3xl`}>SevenWorks</Link>
                     </span>
                     <span className="flex items-center gap-2 hover:opacity-50 transition-opacity duration-200">
                         <Image src="/zoom-out.svg" alt="zoom out" width={24} height={24} className="hover:scale-125 transition-transform duration-200" />
