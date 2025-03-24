@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { PDFDownloadLink, BlobProvider } from '@react-pdf/renderer';
-import BusinessTemplate from "../TEST-TEMPLATES/business-template";
+import BusinessTemplate from "../editor/business-template";
 import dynamic from "next/dynamic";
 
 const NewPDFDownloadLink = dynamic(() => Promise.resolve(PDFDownloadLink), { ssr: false });
@@ -39,7 +39,7 @@ export default function Demo() {
                     name="content"
                 />
                 <NewPDFDownloadLink 
-                    document={<BusinessTemplate form={form} />}
+                    document={<BusinessTemplate formData={form}/>}
                     fileName="test.pdf"
                     className="px-4 py-2 bg-blue-500 text-white text-center rounded"
                 >
@@ -47,7 +47,7 @@ export default function Demo() {
                 </NewPDFDownloadLink>
             </div>
             <div className="flex justify-center items-center w-full h-screen bg-offWhite">
-               <NewBlobProvider document={<BusinessTemplate form={form} />}>
+               <NewBlobProvider document={<BusinessTemplate formData={form}/>}>
                {({ url, loading, error }) => {
                     if (loading) return 'Loading document...';
                     if (error) return 'Error generating PDF';
