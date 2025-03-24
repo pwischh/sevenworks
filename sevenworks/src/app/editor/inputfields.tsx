@@ -1,12 +1,12 @@
  "use client";
 import React, { useEffect, useState } from "react";
-import { PDFDownloadLink, PDFViewer } from '@react-pdf/renderer';
+import { PDFDownloadLink, BlobProvider } from '@react-pdf/renderer';
 import dynamic from "next/dynamic";
 import BusinessTemplate from "./business-template";
 import { useSearchParams, useRouter } from "next/navigation";
-import { useFormContext, FormProvider } from "./formcontext";
+import { useFormContext } from "./formcontext";
 
-const NewPDFViewer = dynamic(() => Promise.resolve(PDFViewer), { ssr: false });
+const NewBlobProvider = dynamic(() => Promise.resolve(BlobProvider), { ssr: false });
 const NewPDFDownloadLink = dynamic(() => Promise.resolve(PDFDownloadLink), { ssr: false });
 
 const InputFields = () => {
@@ -86,7 +86,7 @@ const InputFields = () => {
   };
 
   return (
-    <div className="flex flex-row gap-2 w-[60%]">
+    <div className="flex flex-row gap-2 w-[62.5%]">
       <div className="flex-[1.5] flex-row bg-[#E6E6E6] p-2 rounded-lg">
         <div className="flex gap-4 mb-4">
           <button
@@ -113,23 +113,24 @@ const InputFields = () => {
           </NewPDFDownloadLink>
         </div>
       </div>
-      <div className="flex-[2] p-4 rounded-lg bg-[#E6E6E6]" style={{ height: "100%" }}>
-        {typeof window !== 'undefined' ? (
-            <NewPDFViewer style={{ width: "100%", height: "100%", border: "none" }}>
-                <BusinessTemplate formData={formData}/>
-            </NewPDFViewer>
-        ) : (
-            <div>Loading PDF viewer...</div>
-        )}
+      <div className="flex-[2] p-2 rounded-lg bg-[#E6E6E6]" style={{ height: "100%" }}>
+        <NewBlobProvider document={<BusinessTemplate formData={formData}/>}>
+        {({ url, loading, error }) => {
+              if (loading) return 'Loading document...';
+              if (error) return 'Error generating PDF';
+          // Append #toolbar=0 to try to hide browser toolbar (supported in some browsers)
+              return (
+                  <iframe
+                  src={`${url}#toolbar=0`}
+                  style={{ width: "100%", height: "100%", backgroundColor: "white"}}
+                  title="PDF Preview"
+                  />
+              );
+          }}
+        </NewBlobProvider>
       </div>
     </div>
   );
 };
 
-const InputFieldsWrapper = () => (
-  <FormProvider>
-    <InputFields />
-  </FormProvider>
-);
-
-export default InputFieldsWrapper;
+export default InputFields;

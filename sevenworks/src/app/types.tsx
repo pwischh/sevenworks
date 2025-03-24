@@ -5,3 +5,7 @@ export interface formValues {
     phone?: string;
     content?: string;
   }
+
+export interface TemplateProps {
+  formData: { [key: string]: string };
+}
