@@ -1,5 +1,225 @@
+"use client"
+
+import { useState, useEffect } from "react";
+import { useAuth } from "../authContext";
+import ProfilePhoto from "../components/profilephoto";
+import { Markazi_Text } from "next/font/google";
+import Link from "next/link";
+import Image from "next/image";
+import { 
+    LuFiles, 
+    LuBriefcaseBusiness,
+    LuAtom,
+    LuHospital,
+    LuGavel,
+    LuPaintbrush } from "react-icons/lu";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../lib/firebase";
+
+const markazi = Markazi_Text({
+    subsets: ["latin"],
+    variable: "--font-markazi",
+  });
+
+interface Resume {
+    id: string;
+    title: string;
+    description: string;
+    image?: string;
+}
+
+const ResumeCard = ({ resume }: { resume: Resume }) => {
+    const categories = (category: string) => {
+        switch(category){
+            case "Business": return (
+                <LuBriefcaseBusiness className="w-[28px] h-[28px]"/>
+            );
+            case "STEM": return (
+                <LuAtom className="w-[28px] h-[28px]"/>
+            );
+            case "Health & Human Services": return (
+                <LuHospital className="w-[28px] h-[28px]"/>
+            );
+            case "Law": return (
+                <LuGavel className="w-[28px] h-[28px]"/>
+            );
+            case "Creative": return (
+                <LuPaintbrush className="w-[28px] h-[28px]"/>
+            );
+        }
+
+        return;
+    }
+
+    return(
+        <div className="relative flex flex-col items-center w-full p-4 bg-gray-100 rounded-lg border-[1px] border-gray-200">
+        {/* Triangle */}
+        <div className="flex absolute top-0 right-0 z-10 rounded-tr-lg inline-block w-0 h-0 border-solid border-t-0 border-r-[80px] border-l-0 border-b-[80px] border-l-transparent border-r-navy border-t-transparent border-b-transparent">
+            <div className="absolute left-[42px] top-[9px] z-11 text-offWhite">
+                {categories(resume.description)}
+            </div>
+        </div>
+        {/* Document Thumbnail */}
+        <div className="relative w-full aspect-[8.5/11] bg-white rounded-md shadow overflow-hidden">
+        {resume.image && (
+            <Image
+                src={resume.image}
+                alt={resume.title}
+                fill
+                className="object-cover"
+            />
+        )}
+        </div>
+  
+        {/* Title & Description */}
+        <div className="mt-2 text-center">
+            <h3 className=" text-navy text-md font-semibold">{resume.title}</h3>
+            <p className="text-sm font-medium text-gray-600">{resume.description}</p>
+        </div>
+    </div>
+    );
+};
+
 export default function Templates() {
+    const { user, loading } = useAuth();
+    const [activeCategory, setActiveCategory] = useState("all");
+    const [resumeList, setResumeList] = useState<Resume[]>([]);
+
+    useEffect(() => {
+        const fetchTemplateResumes = async () => {
+          try {
+            const querySnapshot = await getDocs(collection(db, "resume_templates"));
+            const templatesData = querySnapshot.docs.map((doc) => {
+              const data = doc.data();
+              return {
+                id: doc.id,
+                title: data.name,
+                description: data.category,
+                image: "/sample-business-resume.png",
+              };
+            });
+            setResumeList(templatesData);
+          } catch (error) {
+            console.error("Error fetching resume templates:", error);
+          }
+        };
+    
+        fetchTemplateResumes();
+      }, []);
+
     return (
-        <h1 className = "text-black">Templates</h1>
+        <div className="flex flex-col w-screen h-screen justify-start items-center bg-white gap-2 overflow-scroll">
+            <div className="flex flex-col w-screen h-fit justify-start items-center gap-2 bg-gradient-to-b from-navy to-darkRed">
+                {/* Navbar */}
+                <div className = "flex flex-row p-4 gap-3 bg-transparent text-white w-full text-offWhite text-l">
+                    <div className = "flex flex-row items-center gap-5 w-full">
+                        <div className={markazi.className}>
+                            <Link href="/" className="text-3xl font-bold text-offWhite hover:none">
+                                SevenWorks
+                            </Link>
+                        </div>
+                        <div className="w-[2px] h-[80%] bg-gray-400/30 rounded-md"></div>
+                        <nav className = "flex flex-row gap-7 px-1 w-fit text-nowrap font-semibold">
+                            <Link href="/templates" className="hover:scale-[1.05] transition">Templates</Link>
+                            <Link href = "#" className="hover:scale-[1.05] transition">Examples</Link>
+                            <Link href = "#" className="hover:scale-[1.05] transition">About</Link>
+                        </nav>
+                    </div>
+                    <div className = "flex flex-row justify-end items-center gap-4 text-nowrap">
+                        {(loading || !user) ? (
+                            <>  
+                                <a href = "../register/login" 
+                                className = "border-2 border-offWhite px-2 py-1 rounded-xl hover:bg-lightRed hover:border-transparent">
+                                    Log In
+                                </a>
+                                <a href = "../register/signup" 
+                                className = "bg-lightRed border-2 border-lightRed px-2 py-1 rounded-xl hover:bg-darkRed hover:border-darkRed">
+                                    Sign Up
+                                </a>
+                            </>
+                        ) : (
+                            <>  
+                                <Link href="/dashboard">
+                                    <ProfilePhoto/>
+                                </Link>
+                            </>
+                        )}
+                    </div>
+                </div>
+                {/* Heading Text */}
+                <div className="flex flex-col w-screen h-fit gap-2 items-center py-2 text-offWhite px-20">
+                    <h1 className="color-offWhite text-[36px] font-bold text-center">Resume Templates</h1>
+                    <h2 className="color-offWhite text-[22px] font-medium italic text-center">Choose from our list of curated resume templates, designed for your success.</h2>
+                </div>
+                {/* Categories */}
+                <div className="flex flex-col justify-center items-center w-screen h-fit g-2 pt-6 pb-4 px-20">
+                    <div className="flex flex-row justify-start items-center w-[99%] h-fit mb-1 gap-5 text-[16px] font-medium">
+                        <div 
+                            className={`flex items-center justify-center p-1 px-2 gap-2 w-fit h-fit rounded-3xl cursor-pointer hover:text-offWhite transition duration-200
+                                ${activeCategory === "all" ? "text-offWhite bg-white/10 scale-105" : "text-[#b59a9a]"}`}
+                            onClick={()=>setActiveCategory("all")}
+                        >
+                            <LuFiles className="w-[24px] h-[24px]"/>
+                            <p>All Templates</p>
+                        </div>
+                        <div 
+                            className={`flex items-center justify-center p-1 px-2 gap-2 w-fit h-fit rounded-3xl cursor-pointer hover:text-offWhite transition duration-200
+                                ${activeCategory === "Business" ? "text-offWhite bg-white/10 scale-105" : "text-[#b59a9a]"}`}
+                            onClick={()=>setActiveCategory("Business")}
+                        >
+                            <LuBriefcaseBusiness className="w-[24px] h-[24px]"/>
+                            <p>Business</p>
+                        </div>
+                        <div 
+                            className={`flex items-center justify-center p-1 px-2 gap-2 w-fit h-fit rounded-3xl cursor-pointer hover:text-offWhite transition duration-200
+                                ${activeCategory === "STEM" ? "text-offWhite bg-white/10 scale-105" : "text-[#b59a9a]"}`}
+                            onClick={()=>setActiveCategory("STEM")}
+                        >
+                            <LuAtom className="w-[24px] h-[24px]"/>
+                            <p>STEM</p>
+                        </div>
+                        <div 
+                            className={`flex items-center justify-center p-1 px-2 gap-2 w-fit h-fit rounded-3xl cursor-pointer hover:text-offWhite transition duration-200
+                                ${activeCategory === "Health & Human Services" ? "text-offWhite bg-white/10 scale-105" : "text-[#b59a9a]"}`}
+                            onClick={()=>setActiveCategory("Health & Human Services")}
+                        >
+                            <LuHospital className="w-[24px] h-[24px]"/>
+                            <p>Health & Human Services</p>
+                        </div>
+                        <div 
+                            className={`flex items-center justify-center p-1 px-2 gap-2 w-fit h-fit rounded-3xl cursor-pointer hover:text-offWhite transition duration-200
+                                ${activeCategory === "Law" ? "text-offWhite bg-white/10 scale-105" : "text-[#b59a9a]"}`}
+                            onClick={()=>setActiveCategory("Law")}
+                        >
+                            <LuGavel className="w-[24px] h-[24px]"/>
+                            <p>Law</p>
+                        </div>
+                        <div 
+                            className={`flex items-center justify-center p-1 px-2 gap-2 w-fit h-fit rounded-3xl cursor-pointer hover:text-offWhite transition duration-200
+                                ${activeCategory === "Creative" ? "text-offWhite bg-white/10 scale-105" : "text-[#b59a9a]"}`}
+                            onClick={()=>setActiveCategory("Creative")}
+                        >
+                            <LuPaintbrush className="w-[24px] h-[24px]"/>
+                            <p>Creative</p>
+                        </div>
+                    </div>
+                    <div className="w-full h-px bg-offWhite"></div>
+                </div>
+            </div>
+            {/* Resumes */}
+            <div className="grid grid-cols-3 gap-6 pb-4 w-full justify-items-center mt-2 px-20">
+                {resumeList.map((resume) => {
+                    if (!(activeCategory === "all") && (resume.description !== activeCategory)){
+                        return;
+                    }
+
+                    return(
+                        <div key={resume.id} className="flex w-full max-w-md">
+                            <ResumeCard resume={resume} />
+                        </div>
+                    );
+                })}
+            </div>
+        </div>
     );
 }

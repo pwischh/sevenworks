@@ -17,7 +17,7 @@ export default function Navbar() {
     const { user, loading } = useAuth();
 
     return (
-        <div className = "navbar flex flex-row p-4 gap-3 bg-navy text-white w-full text-offWhite text-l fixed top-0 right-0 left-0">
+        <div className = "flex flex-row p-4 gap-3 bg-navy text-white w-full text-offWhite text-l">
             <div className = "flex flex-row items-center gap-5 w-full">
                 <div className={markazi.className}>
                     <Link href="/" className="text-3xl font-bold text-offWhite hover:none">

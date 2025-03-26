@@ -11,7 +11,7 @@ export default function Home() {
         <title>Sevenworks</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <div className="flex flex-col w-full h-fit justify-start pt-[75px]">
+      <div className="flex flex-col w-full h-fit justify-start pt-[30px]">
         <Landing />
         <TemplatePreview />
       </div>

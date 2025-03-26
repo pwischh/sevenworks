@@ -1,6 +1,9 @@
 import React from "react";
-import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
+import { Document, Page, Text, View, StyleSheet, Font } from "@react-pdf/renderer";
 import { TemplateProps } from "../types";
+
+Font.register({family: "Arial", src: "/fonts/ARIAL.TTF"});
+Font.register({family: "Calibri", src: "/fonts/calibri.ttf"});
 
 const styles = StyleSheet.create({
   page: {
@@ -25,18 +28,20 @@ const styles = StyleSheet.create({
 });
 
 export default function BusinessTemplate({formData}: TemplateProps) {
+
   return (
     <Document>
       <Page size="LETTER" style={styles.page}>
         <View style={styles.header}>
-          <Text style={styles.title}>
+          <Text 
+          style={{fontSize: 18, fontWeight: 'bold', fontFamily: formData.font}}>
             {formData.firstName} {formData.lastName}
           </Text>
-          <Text style={styles.subtitle}>
+          <Text style={{fontSize: 12, marginTop: 5, fontFamily: formData.font}}>
             Email: {formData?.email || "No Email"} | Phone: {formData?.phone || "No Phone"}
           </Text>
         </View>
-        <View style={styles.content}>
+        <View style={{fontSize: 12, lineHeight: 1.5, fontFamily: formData.font}}>
           <Text>
             {formData?.content || "No content provided."}
           </Text>

@@ -46,69 +46,64 @@ const IconBar = () => {
   }, []);
 
   return (
-    <div className="flex-none w-[70] h-full p-2 rounded-lg bg-[#E6E6E6]">
+    <div className="flex-none w-[60] h-full p-2 rounded-lg bg-[#E6E6E6]">
       {/* vertical stack */}
-      <div className="flex flex-col gap-4 h-full">
+      <div className="flex flex-col gap-3 h-full">
       {sections}
-        <div className="p-0.5 flex items-center justify-center">
+        <div className="p-1 aspect-square rounded-lg flex items-center justify-center hover:bg-[#BFB7B6]/60">
           <Link href="/editor?tab=personal#personal-section">
             <Image
               src="/user.svg"
               alt="user"
               width={32} height={32}
               className="w-8 h-8"
-              style={{ filter: 'invert(29%) sepia(14%) saturate(1580%) hue-rotate(175deg) brightness(92%) contrast(88%)' }}
             />
           </Link>
         </div>
-        <div className="p-0.5 flex items-center justify-center">
+        <div className="p-1 aspect-square rounded-lg flex items-center justify-center hover:bg-[#BFB7B6]/60">
           <Link href="/editor?tab=phone#phone-section">
             <Image
               src="/phone.svg"
               alt="phone"
               width={32} height={32}
               className="w-8 h-8"
-              style={{ filter: 'invert(29%) sepia(14%) saturate(1580%) hue-rotate(175deg) brightness(92%) contrast(88%)' }}
             />
           </Link>
         </div>
-        <div className="p-0.5 flex items-center justify-center">
+        <div className="p-1 aspect-square rounded-lg flex items-center justify-center hover:bg-[#BFB7B6]/60">
           <Link href="/editor?tab=book#book-section">
             <Image
               src="/book-open.svg"
               alt="open book"
               width={32} height={32}
               className="w-8 h-8"
-              style={{ filter: 'invert(29%) sepia(14%) saturate(1580%) hue-rotate(175deg) brightness(92%) contrast(88%)' }}
             />
           </Link>
         </div>
-        <div className="p-0.5 flex items-center justify-center">
+        <div className="p-1 aspect-square rounded-lg flex items-center justify-center hover:bg-[#BFB7B6]/60">
           <Link href="/editor?tab=work#work-section">
             <Image
               src="/briefcase.svg"
               alt="briefcase"
               width={32} height={32}
               className="w-8 h-8"
-              style={{ filter: 'invert(29%) sepia(14%) saturate(1580%) hue-rotate(175deg) brightness(92%) contrast(88%)' }}
             />
           </Link>
         </div>
-        <div className="p-0.5 flex items-center justify-center">
+        <div className="p-1 aspect-square rounded-lg flex items-center justify-center hover:bg-[#BFB7B6]/60">
           <Link href="/editor?tab=award#award-section">
             <Image
               src="/award.svg"
               alt="award"
               width={32} height={32}
               className="w-8 h-8"
-              style={{ filter: 'invert(29%) sepia(14%) saturate(1580%) hue-rotate(175deg) brightness(92%) contrast(88%)' }}
             />
           </Link>
         </div>
         <div ref={newSectionOverlayRef} className="relative p-0.5 flex items-center justify-center">
          {overlay}
-         <button className="p-0.5 aspect-square rounded-lg flex items-center justify-center bg-[#435058] hover:bg-[#BFB7B6]" onClick={() => displayCreateNewSectionOverlay()}>
-           <Image src="/plus-square.svg" alt="plus square" width={32} height={32} className="w-8 h-8" style={{ filter: 'invert(100%) sepia(14%) saturate(1580%) hue-rotate(175deg) brightness(100%) contrast(88%)' }} />
+         <button className="p-0.5 aspect-square flex items-center justify-center bg-black rounded-lg hover:bg-gray-700" onClick={() => displayCreateNewSectionOverlay()}>
+           <Image src="/plus-square.svg" alt="plus square" width={32} height={32} className="w-8 h-8" style={{filter: "invert(100%)"}}/>
            </button>
           {isCreateNewSectionOverlayVisible &&
           <div className="absolute top-0 left-full p-3 ml-2 w-80 gap-4 bg-[#BFB7B6] text-black rounded-lg shadow-lg">
@@ -136,7 +131,6 @@ const IconBar = () => {
               alt="chevron left"
               width={32} height={32}
               className="w-8 h-8"
-              style={{ filter: 'invert(29%) sepia(14%) saturate(1580%) hue-rotate(175deg) brightness(92%) contrast(88%)' }}
             />
           </Link>
         </div>

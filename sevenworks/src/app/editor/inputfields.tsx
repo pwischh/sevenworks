@@ -41,14 +41,14 @@ const InputFields = () => {
           {["firstName", "middleName", "lastName", "email", "phone"].map((field) => (
             <div key={field} className="flex flex-col">
               <span className="text-xs font-bold text-[#848C8E]">
-                {field.charAt(0).toUpperCase() + field.slice(1)}{" "}
+                {field.charAt(0).toUpperCase() + field.replace(/([A-Z])/g, ' $1').slice(1)}{" "}
                 {field === "firstName" && <span className="text-red-500">*</span>}
               </span>
               <input
                 type="text"
                 name={field}
                 value={formData[field] || ""}
-                placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
+                placeholder={field.charAt(0).toUpperCase() + field.replace(/([A-Z])/g, ' $1').slice(1)}
                 onChange={handleInputChange}
                 className="border bg-[#E6E6E6] border-[#999999] shadow-md p-2 rounded-lg w-full text-[#848C8E]"
               />
@@ -68,13 +68,13 @@ const InputFields = () => {
           {["companyName", "role"].map((field) => (
             <div key={field} className="flex flex-col">
               <span className="text-xs font-bold text-[#848C8E]">
-                {field.charAt(0).toUpperCase() + field.slice(1)}
+                {field.charAt(0).toUpperCase() + field.replace(/([A-Z])/g, ' $1').slice(1)}
               </span>
               <input
                 type="text"
                 name={field}
                 value={formData[field] || ""}
-                placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
+                placeholder={field.charAt(0).toUpperCase() + field.replace(/([A-Z])/g, ' $1').slice(1)}
                 onChange={handleInputChange}
                 className="border bg-[#E6E6E6] border-[#999999] shadow-md p-2 rounded-lg w-full text-[#848C8E]"
               />
