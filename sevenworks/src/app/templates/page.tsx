@@ -161,7 +161,7 @@ export default function Templates() {
                 </div>
                 {/* Categories */}
                 <div className="flex flex-col justify-center items-center w-screen h-fit g-2 pt-6 pb-4 px-20">
-                    <div className="flex flex-row justify-center items-center w-[100%] h-fit mb-1 gap-5 text-[14px] font-medium text-nowrap overflow-x-scroll">
+                    <div className="flex flex-row justify-center items-center w-[100%] h-fit mb-1 gap-5 text-[14px] font-medium text-nowrap">
                         <div 
                             className={`flex items-center justify-center p-1 px-2 gap-2 w-fit h-fit rounded-3xl cursor-pointer hover:text-offWhite transition duration-200
                                 ${activeCategory === "all" ? "text-offWhite bg-white/10 scale-105" : "text-[#b59a9a]"}`}
