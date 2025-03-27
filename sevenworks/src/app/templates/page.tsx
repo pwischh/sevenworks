@@ -12,7 +12,9 @@ import {
     LuAtom,
     LuHospital,
     LuGavel,
-    LuPaintbrush } from "react-icons/lu";
+    LuPaintbrush,
+    LuEarth,
+    LuLandmark } from "react-icons/lu";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../lib/firebase";
 
@@ -46,6 +48,12 @@ const ResumeCard = ({ resume }: { resume: Resume }) => {
             case "Creative": return (
                 <LuPaintbrush className="w-[28px] h-[28px]"/>
             );
+            case "Environmental & Sustainability": return (
+                <LuEarth className="w-[28px] h-[28px]"/>
+            );
+            case "Policy, Government & International Affairs": return (
+                <LuLandmark className="w-[28px] h-[28px]"/>
+            )
         }
 
         return;
@@ -153,13 +161,13 @@ export default function Templates() {
                 </div>
                 {/* Categories */}
                 <div className="flex flex-col justify-center items-center w-screen h-fit g-2 pt-6 pb-4 px-20">
-                    <div className="flex flex-row justify-start items-center w-[99%] h-fit mb-1 gap-5 text-[16px] font-medium">
+                    <div className="flex flex-row justify-center items-center w-[100%] h-fit mb-1 gap-5 text-[14px] font-medium text-nowrap overflow-x-scroll">
                         <div 
                             className={`flex items-center justify-center p-1 px-2 gap-2 w-fit h-fit rounded-3xl cursor-pointer hover:text-offWhite transition duration-200
                                 ${activeCategory === "all" ? "text-offWhite bg-white/10 scale-105" : "text-[#b59a9a]"}`}
                             onClick={()=>setActiveCategory("all")}
                         >
-                            <LuFiles className="w-[24px] h-[24px]"/>
+                            <LuFiles className="w-[22px] h-[22px]"/>
                             <p>All Templates</p>
                         </div>
                         <div 
@@ -167,7 +175,7 @@ export default function Templates() {
                                 ${activeCategory === "Business" ? "text-offWhite bg-white/10 scale-105" : "text-[#b59a9a]"}`}
                             onClick={()=>setActiveCategory("Business")}
                         >
-                            <LuBriefcaseBusiness className="w-[24px] h-[24px]"/>
+                            <LuBriefcaseBusiness className="w-[22px] h-[22px]"/>
                             <p>Business</p>
                         </div>
                         <div 
@@ -175,7 +183,7 @@ export default function Templates() {
                                 ${activeCategory === "STEM" ? "text-offWhite bg-white/10 scale-105" : "text-[#b59a9a]"}`}
                             onClick={()=>setActiveCategory("STEM")}
                         >
-                            <LuAtom className="w-[24px] h-[24px]"/>
+                            <LuAtom className="w-[22px] h-[22px]"/>
                             <p>STEM</p>
                         </div>
                         <div 
@@ -183,7 +191,7 @@ export default function Templates() {
                                 ${activeCategory === "Health & Human Services" ? "text-offWhite bg-white/10 scale-105" : "text-[#b59a9a]"}`}
                             onClick={()=>setActiveCategory("Health & Human Services")}
                         >
-                            <LuHospital className="w-[24px] h-[24px]"/>
+                            <LuHospital className="w-[22px] h-[22px]"/>
                             <p>Health & Human Services</p>
                         </div>
                         <div 
@@ -191,15 +199,31 @@ export default function Templates() {
                                 ${activeCategory === "Law" ? "text-offWhite bg-white/10 scale-105" : "text-[#b59a9a]"}`}
                             onClick={()=>setActiveCategory("Law")}
                         >
-                            <LuGavel className="w-[24px] h-[24px]"/>
+                            <LuGavel className="w-[22px] h-[22px]"/>
                             <p>Law</p>
+                        </div>
+                        <div 
+                            className={`flex items-center justify-center p-1 px-2 gap-2 w-fit h-fit rounded-3xl cursor-pointer hover:text-offWhite transition duration-200
+                                ${activeCategory === "Policy, Government & International Affairs" ? "text-offWhite bg-white/10 scale-105" : "text-[#b59a9a]"}`}
+                            onClick={()=>setActiveCategory("Policy, Government & International Affairs")}
+                        >
+                            <LuLandmark className="w-[22px] h-[22px]"/>
+                            <p>Government & Policy</p>
+                        </div>
+                        <div 
+                            className={`flex items-center justify-center p-1 px-2 gap-2 w-fit h-fit rounded-3xl cursor-pointer hover:text-offWhite transition duration-200
+                                ${activeCategory === "Environmental & Sustainability" ? "text-offWhite bg-white/10 scale-105" : "text-[#b59a9a]"}`}
+                            onClick={()=>setActiveCategory("Environmental & Sustainability")}
+                        >
+                            <LuEarth className="w-[22px] h-[22px]"/>
+                            <p>Environmental & Sustainability</p>
                         </div>
                         <div 
                             className={`flex items-center justify-center p-1 px-2 gap-2 w-fit h-fit rounded-3xl cursor-pointer hover:text-offWhite transition duration-200
                                 ${activeCategory === "Creative" ? "text-offWhite bg-white/10 scale-105" : "text-[#b59a9a]"}`}
                             onClick={()=>setActiveCategory("Creative")}
                         >
-                            <LuPaintbrush className="w-[24px] h-[24px]"/>
+                            <LuPaintbrush className="w-[22px] h-[22px]"/>
                             <p>Creative</p>
                         </div>
                     </div>
