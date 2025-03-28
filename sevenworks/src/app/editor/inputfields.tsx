@@ -1,13 +1,12 @@
  "use client";
 import React, { useEffect, useState } from "react";
-import { PDFDownloadLink, BlobProvider } from '@react-pdf/renderer';
+import { BlobProvider } from '@react-pdf/renderer';
 import dynamic from "next/dynamic";
 import BusinessTemplate from "./business-template";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useFormContext } from "./formcontext";
 
 const NewBlobProvider = dynamic(() => Promise.resolve(BlobProvider), { ssr: false });
-const NewPDFDownloadLink = dynamic(() => Promise.resolve(PDFDownloadLink), { ssr: false });
 
 const InputFields = () => {
   const searchParams = useSearchParams();
@@ -103,15 +102,6 @@ const InputFields = () => {
           </button>
         </div>
         {renderFields()}
-        <div className="flex flex-col pt-3">
-          <NewPDFDownloadLink 
-            document={<BusinessTemplate formData={formData}/>}
-            fileName="exported_form.pdf"
-            className="px-4 py-2 bg-blue-500 text-white text-center rounded"
-          >
-            Export to PDF
-          </NewPDFDownloadLink>
-        </div>
       </div>
       <div className="flex-[2] p-2 rounded-lg bg-[#E6E6E6]" style={{ height: "100%" }}>
         <NewBlobProvider document={<BusinessTemplate formData={formData}/>}>

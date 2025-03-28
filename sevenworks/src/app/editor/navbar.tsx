@@ -6,6 +6,11 @@ import { signOut } from "firebase/auth";
 import { auth } from "../lib/firebase";
 import Link from "next/link";
 import { useFormContext } from "./formcontext";
+import { PDFDownloadLink } from "@react-pdf/renderer";
+import dynamic from "next/dynamic";
+import BusinessTemplate from "./business-template";
+
+const NewPDFDownloadLink = dynamic(() => Promise.resolve(PDFDownloadLink), { ssr: false });
 
 const markazi = Markazi_Text({
     subsets: ["latin"],
@@ -26,6 +31,7 @@ export default function Navbar() {
     const [showAutosave, setShowAutosave] = useState(false);
     const navRef = useRef<HTMLDivElement>(null);
     const { formData, setFormData} = useFormContext();
+    
 
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
@@ -111,9 +117,13 @@ export default function Navbar() {
                     <span className="flex items-center gap-2 hover:opacity-65 transition-opacity duration-200">
                         <Image src="/refresh-cw.svg" alt="refresh" width={24} height={24} className="hover:scale-110 transition-transform duration-200" />
                     </span>
-                    <span className="flex items-center gap-2 hover:opacity-65 transition-opacity duration-200">
+                    <NewPDFDownloadLink
+                        document={<BusinessTemplate formData={formData} />}
+                        fileName="exported_form.pdf"
+                        className="flex items-center gap-2 hover:opacity-65 transition-opacity duration-200"
+                    >
                         <Image src="/download.svg" alt="download" width={24} height={24} className="hover:scale-110 transition-transform duration-200" />
-                    </span>
+                    </NewPDFDownloadLink>
                     <span className="flex items-center gap-2 hover:opacity-65 transition-opacity duration-200">
                         <Image src="/settings.svg" alt="settings" width={24} height={24} className="hover:scale-110 transition-transform duration-200" />
                     </span>

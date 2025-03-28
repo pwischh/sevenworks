@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "../authContext";
 import ProfilePhoto from "../components/profilephoto";
 import { Markazi_Text } from "next/font/google";
@@ -14,7 +14,8 @@ import {
     LuGavel,
     LuPaintbrush,
     LuEarth,
-    LuLandmark } from "react-icons/lu";
+    LuLandmark,
+    LuChevronUp } from "react-icons/lu";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../lib/firebase";
 
@@ -60,15 +61,15 @@ const ResumeCard = ({ resume }: { resume: Resume }) => {
     }
 
     return(
-        <div className="relative flex flex-col items-center w-full p-4 bg-gray-100 rounded-lg border-[1px] border-gray-200">
+        <div className="relative z-0 flex flex-col items-center w-full p-4 bg-gray-100 rounded-lg border-[1px] border-gray-200">
         {/* Triangle */}
-        <div className="flex absolute top-0 right-0 z-10 rounded-tr-lg inline-block w-0 h-0 border-solid border-t-0 border-r-[80px] border-l-0 border-b-[80px] border-l-transparent border-r-navy border-t-transparent border-b-transparent">
+        <div className="flex absolute top-0 right-0 z-9 rounded-tr-lg inline-block w-0 h-0 border-solid border-t-0 border-r-[80px] border-l-0 border-b-[80px] border-l-transparent border-r-navy border-t-transparent border-b-transparent">
             <div className="absolute left-[42px] top-[9px] z-11 text-offWhite">
                 {categories(resume.description)}
             </div>
         </div>
         {/* Document Thumbnail */}
-        <div className="relative w-full aspect-[8.5/11] bg-white rounded-md shadow overflow-hidden">
+        <div className="relative z-[-1] w-full aspect-[8.5/11] bg-white rounded-md shadow overflow-hidden">
         {resume.image && (
             <Image
                 src={resume.image}
@@ -92,6 +93,8 @@ export default function Templates() {
     const { user, loading } = useAuth();
     const [activeCategory, setActiveCategory] = useState("all");
     const [resumeList, setResumeList] = useState<Resume[]>([]);
+    const [buttonVisible, setButtonVisible] = useState(false);
+    const scrollRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         const fetchTemplateResumes = async () => {
@@ -115,9 +118,41 @@ export default function Templates() {
         fetchTemplateResumes();
       }, []);
 
+
+      useEffect(() => {
+        const container = scrollRef.current
+        if (!container) return;
+
+        const handleScroll = () => {
+          if (container.scrollTop > 300) {
+            setButtonVisible(true);
+          } else {
+            setButtonVisible(false);
+          }
+        };
+    
+        container.addEventListener('scroll', handleScroll);
+        return () => {
+          container.removeEventListener('scroll', handleScroll);
+        };
+      }, []);
+
     return (
-        <div className="flex flex-col w-screen h-screen justify-start items-center bg-white gap-2 overflow-scroll">
+        <div ref={scrollRef} className="flex flex-col w-screen h-screen justify-start items-center bg-white gap-2 overflow-scroll">
             <div className="flex flex-col w-screen h-fit justify-start items-center gap-2 bg-gradient-to-b from-navy to-darkRed">
+                {/* Back to top button */}
+                <div 
+                    className={`group z-10 flex justify-center items-center absolute bottom-3 right-3 p-2 text-offWhite bg-lightRed rounded-full shadow-md 
+                    ${buttonVisible ? "opacity-100 cursor-pointer" : "opacity-0"} transition duration-400`}
+                    onClick={() => {
+                        if (buttonVisible) scrollRef.current?.scrollTo({top: 0, behavior: "smooth"})
+                    }}
+                >
+                    <span className="overflow-hidden whitespace-nowrap transition-all duration-400 max-w-0 group-hover:max-w-[150px] group-hover:px-2 font-medium">
+                        Back to top
+                    </span>
+                    <LuChevronUp className="w-[38px] h-[38px]"/>
+                </div>
                 {/* Navbar */}
                 <div className = "flex flex-row p-4 gap-3 bg-transparent text-white w-full text-offWhite text-l">
                     <div className = "flex flex-row items-center gap-5 w-full">
