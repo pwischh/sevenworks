@@ -1,4 +1,4 @@
- "use client";
+"use client";
 import React, { useEffect, useState } from "react";
 import { BlobProvider } from '@react-pdf/renderer';
 import dynamic from "next/dynamic";
@@ -87,19 +87,9 @@ const InputFields = () => {
   return (
     <div className="flex flex-row gap-2 w-[62.5%]">
       <div className="flex-[1.5] flex-row bg-[#E6E6E6] p-2 rounded-lg">
-        <div className="flex gap-4 mb-4">
-          <button
-            onClick={() => changeTab("personal")}
-            className={`p-2 rounded-lg ${activeTab === "personal" ? "bg-blue-500 text-white" : "bg-gray-300"}`}
-          >
-            Personal
-          </button>
-          <button
-            onClick={() => changeTab("phone")}
-            className={`p-2 rounded-lg ${activeTab === "phone" ? "bg-blue-500 text-white" : "bg-gray-300"}`}
-          >
-            Work
-          </button>
+        <div className="hidden">
+          <button onClick={() => changeTab("personal")} />
+          <button onClick={() => changeTab("phone")} />
         </div>
         {renderFields()}
       </div>
