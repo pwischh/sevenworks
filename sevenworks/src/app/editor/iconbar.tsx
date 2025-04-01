@@ -46,7 +46,7 @@ const IconBar = () => {
   }, []);
 
   return (
-    <div className="flex-none w-[60] h-full p-2 rounded-lg bg-[#E6E6E6]">
+    <div className="flex-none w-[60] h-full p-2 rounded-lg bg-white shadow-lg border border-gray-150">
       {/* vertical stack */}
       <div className="flex flex-col gap-3 h-full">
       {sections}
@@ -61,7 +61,7 @@ const IconBar = () => {
           </Link>
         </div>
         <div className="p-1 aspect-square rounded-lg flex items-center justify-center hover:bg-[#BFB7B6]/60">
-          <Link href="/editor?tab=phone#phone-section">
+          <Link href="/editor?tab=contact">
             <Image
               src="/phone.svg"
               alt="phone"
@@ -71,7 +71,7 @@ const IconBar = () => {
           </Link>
         </div>
         <div className="p-1 aspect-square rounded-lg flex items-center justify-center hover:bg-[#BFB7B6]/60">
-          <Link href="/editor?tab=book#book-section">
+          <Link href="/editor?tab=education">
             <Image
               src="/book-open.svg"
               alt="open book"
@@ -81,7 +81,7 @@ const IconBar = () => {
           </Link>
         </div>
         <div className="p-1 aspect-square rounded-lg flex items-center justify-center hover:bg-[#BFB7B6]/60">
-          <Link href="/editor?tab=work#work-section">
+          <Link href="/editor?tab=experience">
             <Image
               src="/briefcase.svg"
               alt="briefcase"
@@ -91,7 +91,7 @@ const IconBar = () => {
           </Link>
         </div>
         <div className="p-1 aspect-square rounded-lg flex items-center justify-center hover:bg-[#BFB7B6]/60">
-          <Link href="/editor?tab=award#award-section">
+          <Link href="/editor?tab=additional">
             <Image
               src="/award.svg"
               alt="award"

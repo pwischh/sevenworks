@@ -52,9 +52,9 @@ export default function Navbar() {
     }
 
     return (
-        <div className="bg-white">
-            <div className="pt-18 pb-18 px-0">
-                <nav ref={navRef} className="text-black grid grid-cols-3 items-center pt-2 pb-2 w-full text-nowrap font-semibold bg-[#E6E6E6] rounded-lg px-4">
+        <div className="bg-white px-4">
+            <div className="max-w-7xl mx-auto pt-4 pb-4">
+                <nav ref={navRef} className="text-black grid grid-cols-3 items-center pt-2 pb-2 w-full text-nowrap font-semibold bg-white shadow-lg rounded-lg px-4 border border-gray-150">
                     <div className="flex items-center gap-6">
                         <Link href="/" className={`${markazi.className} text-3xl`}>SevenWorks</Link>
                     </div>

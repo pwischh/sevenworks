@@ -4,16 +4,28 @@ import React from "react";
 
 const RightView = () => {
   return (
-    <div className="flex-[1.5] pl-0 pr-0 rounded-lg h-full">
-      <div className="flex flex-col gap-2 p-0 h-full">
-        <div className="bg-[#BFB7B6] flex-1 w-full rounded-lg flex items-center justify-center">
-          <h2 className="text-black">Box 1</h2>
+    <div className="flex-[1.5] pl-4 pr-4 rounded-lg h-full">
+      <div className="flex flex-col gap-4 p-0 h-full">
+        {/* Resume Analysis Feature */}
+        <div className="bg-white flex-1 w-full rounded-lg flex flex-col items-center justify-center shadow-md hover:shadow-lg transition transform p-6 border border-gray-15">
+          <h2 className="text-xl font-semibold text-gray-800">Resume Analysis</h2>
+          <p className="text-sm text-gray-600 mt-2 text-center">
+            Get insights on your resume's strengths and areas for improvement with AI-powered analysis.
+          </p>
         </div>
-        <div className="bg-[#BFB7B6] flex-1 w-full rounded-lg flex items-center justify-center">
-          <h2 className="text-black">Box 2</h2>
+        {/* Content Suggestions Feature */}
+        <div className="bg-white flex-1 w-full rounded-lg flex flex-col items-center justify-center shadow-md hover:shadow-lg transition transform p-6 border border-gray-15">
+          <h2 className="text-xl font-semibold text-gray-800">Content Suggestions</h2>
+          <p className="text-sm text-gray-600 mt-2 text-center">
+            Receive AI-driven recommendations to enhance your resume content and make it more impactful.
+          </p>
         </div>
-        <div className="bg-[#BFB7B6] flex-[1.5] w-full rounded-lg flex items-center justify-center">
-          <h2 className="text-black">Box 3</h2>
+        {/* Formatting Tools Feature */}
+        <div className="bg-white flex-[1.5] w-full rounded-lg flex flex-col items-center justify-center shadow-md hover:shadow-lg transition transform p-6 border border-gray-15">
+          <h2 className="text-xl font-semibold text-gray-800">Formatting Tools</h2>
+          <p className="text-sm text-gray-600 mt-2 text-center">
+            Customize your resume layout and design for a professional, modern look.
+          </p>
         </div>
       </div>
     </div>
