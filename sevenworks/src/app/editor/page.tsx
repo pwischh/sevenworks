@@ -25,7 +25,7 @@ export default function Editor() {
       <FormProvider>
         <div className="bg-white h-screen flex flex-col overflow-hidden pb-2">
         <Navbar />
-        <div className="flex-1 flex w-full gap-2 min-h-0">
+        <div className="flex-1 flex pl-4 w-full gap-2 min-h-0">
           <IconBar />
           <Suspense fallback={<div>Loading Input Fields...</div>}>
             <InputFields />

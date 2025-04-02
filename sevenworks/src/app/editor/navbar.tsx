@@ -10,8 +10,11 @@ import { PDFDownloadLink } from "@react-pdf/renderer";
 import dynamic from "next/dynamic";
 import BusinessTemplate from "./business-template";
 
-const NewPDFDownloadLink = dynamic(() => Promise.resolve(PDFDownloadLink), { ssr: false });
-
+const NewPDFDownloadLink = dynamic(
+    () => import('@react-pdf/renderer').then((mod) => mod.PDFDownloadLink),
+    { ssr: false }
+  );
+  
 const markazi = Markazi_Text({
     subsets: ["latin"],
     variable: "--font-markazi",
@@ -32,6 +35,12 @@ export default function Navbar() {
     const navRef = useRef<HTMLDivElement>(null);
     const { formData, setFormData} = useFormContext();
     
+    const handleAutosaveClick = () => {
+      setShowAutosave(true);
+      setTimeout(() => {
+        setShowAutosave(false);
+      }, 2000);
+    };
 
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
@@ -54,11 +63,11 @@ export default function Navbar() {
     return (
         <div className="bg-white px-4">
             <div className="max-w-7xl mx-auto pt-4 pb-4">
-                <nav ref={navRef} className="text-black grid grid-cols-3 items-center pt-2 pb-2 w-full text-nowrap font-semibold bg-white shadow-lg rounded-lg px-4 border border-gray-150">
+                <nav ref={navRef} className="text-black relative pt-2 pb-2 w-full text-nowrap font-semibold bg-white shadow-lg rounded-lg px-4 border border-gray-150 flex items-center justify-between">
                     <div className="flex items-center gap-6">
                         <Link href="/" className={`${markazi.className} text-3xl`}>SevenWorks</Link>
                     </div>
-                    <div className="flex justify-center items-center gap-6">
+                    <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center gap-6">
                         <span className="flex items-center gap-2">
                             <Image src="/zoom-out.svg" alt="zoom out" width={24} height={24} className="hover:scale-110 transition-transform duration-200" />
                             <span className="text-black !text-black">Zoom</span>
@@ -106,18 +115,32 @@ export default function Navbar() {
                         <Image src="/list.svg" alt="list" width={24} height={24} className="hover:scale-110 transition-transform duration-200 hover:opacity-65" />
                         <Image src="/link.svg" alt="link" width={24} height={24} className="hover:scale-110 transition-transform duration-200 hover:opacity-65" />
                         <div className="self-center h-6 border-r border-black"></div>
-                        <div className={`flex items-center gap-2 ${showAutosave ? "" : "hover:opacity-65"} hover:scale-110 transition duration-200`} 
-                            onClick={() => {setShowAutosave(!showAutosave);}}>
-                            <Image src={showAutosave ? "/saveColored.svg" : "/save.svg"} alt="save" width={24} height={24} />
-                        </div>
-                        <Image src="/refresh-cw.svg" alt="refresh" width={24} height={24} className="hover:scale-110 transition-transform duration-200 hover:opacity-65" />
-                        <NewPDFDownloadLink
-                            document={<BusinessTemplate formData={formData} />}
-                            fileName="exported_form.pdf"
-                            className="hover:opacity-65 transition-opacity duration-200"
+                        <div 
+                            className="flex items-center gap-2 hover:scale-110 transition duration-200 cursor-pointer text-green-700" 
+                            onClick={handleAutosaveClick}
                         >
-                            <Image src="/download.svg" alt="download" width={24} height={24} className="hover:scale-110 transition-transform duration-200" />
-                        </NewPDFDownloadLink>
+                            <Image src="/save.svg" alt="save" width={24} height={24} />
+                            {showAutosave && (
+                                <span className="text-sm font-medium">Autosave is on</span>
+                            )}
+                        </div>
+                        <Image 
+                            src="/refresh-cw.svg" 
+                            alt="refresh" 
+                            width={24} 
+                            height={24} 
+                            className="hover:scale-110 transition-transform duration-200 hover:opacity-65" 
+                            onClick={() => window.location.reload()} 
+                        />
+                        {formData && (
+                            <NewPDFDownloadLink
+                                document={<BusinessTemplate formData={formData} />}
+                                fileName="exported_form.pdf"
+                                className="hover:opacity-65 transition-opacity duration-200"
+                            >
+                                <Image src="/download.svg" alt="download" width={24} height={24} className="hover:scale-110 transition-transform duration-200" />
+                            </NewPDFDownloadLink>
+                        )}
                         <Image src="/settings.svg" alt="settings" width={24} height={24} className="hover:scale-110 transition-transform duration-200 hover:opacity-65" />
                         <button onClick={handleSignOut} className="hover:underline hover:opacity-65 transition-opacity duration-200">
                             <Image src="/log-out.svg" alt="logout" width={24} height={24} className="hover:scale-110 transition-transform duration-200" /> 
