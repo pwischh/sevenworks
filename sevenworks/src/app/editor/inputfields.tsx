@@ -1,12 +1,13 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { BlobProvider } from '@react-pdf/renderer';
 import dynamic from "next/dynamic";
 import BusinessTemplate from "./business-template";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useFormContext } from "./formcontext";
-
-const NewBlobProvider = dynamic(() => Promise.resolve(BlobProvider), { ssr: false });
+import { Worker } from '@react-pdf-viewer/core';
+import { pdf } from '@react-pdf/renderer';
+const ViewerNoSSR = dynamic(() => import('@react-pdf-viewer/core').then(mod => mod.Viewer), { ssr: false });
+import '@react-pdf-viewer/core/lib/styles/index.css';
 
 const InputFields = () => {
   const searchParams = useSearchParams();
@@ -14,6 +15,7 @@ const InputFields = () => {
   const { formData, setFormData } = useFormContext();
   const initialTab = searchParams.get("tab") || "personal";
   const [activeTab, setActiveTab] = useState(initialTab);
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
 
   // New state for custom personal fields
   const [customPersonalFields, setCustomPersonalFields] = useState<{ id: number; label: string; value: string }[]>([]);
@@ -41,6 +43,20 @@ const InputFields = () => {
       setActiveTab(tab);
     }
   }, [activeTab, searchParams]);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      const generatePdf = async () => {
+        const blob = await pdf(<BusinessTemplate formData={formData} />).toBlob();
+        const url = URL.createObjectURL(blob);
+        setPdfUrl(url);
+      };
+
+      generatePdf();
+    }, 500); // wait 500ms after last change
+
+    return () => clearTimeout(timeout); // cleanup if formData changes quickly
+  }, [formData]);
 
   const changeTab = (tab: string) => {
     setActiveTab(tab);
@@ -192,32 +208,51 @@ const InputFields = () => {
   return (
     <div className="flex flex-row gap-2 w-[65.5%] h-full items-start">
       <div className="flex-[1.5] flex-col bg-white p-0 rounded-lg overflow-auto h-full">
-      {/* <div className="flex flex-row gap-2 mb-4">
-          <button onClick={() => changeTab("personal")} className={`p-2 rounded ${activeTab === "personal" ? "bg-[#435058] text-white" : "bg-white text-black"}`}>Personal</button>
-          <button onClick={() => changeTab("experience")} className={`p-2 rounded ${activeTab === "experience" ? "bg-[#435058] text-white" : "bg-white text-black"}`}>Experience</button>
-          <button onClick={() => changeTab("education")} className={`p-2 rounded ${activeTab === "education" ? "bg-[#435058] text-white" : "bg-white text-black"}`}>Education</button>
-          <button onClick={() => changeTab("additional")} className={`p-2 rounded ${activeTab === "additional" ? "bg-[#435058] text-white" : "bg-white text-black"}`}>Additional</button>
-        </div> */}
         {renderFields()}
       </div>
-      <div className="flex-[2] p-2 rounded-lg bg-white border border-gray-15 h-full overflow-auto">
-        <NewBlobProvider document={<BusinessTemplate formData={formData} />}>
-          {({ url, loading, error }) => {
-            if (loading) return 'Loading document...';
-            if (error) return 'Error generating PDF';
-            // Append #toolbar=0 to try to hide browser toolbar (supported in some browsers)
-            return (
-              <iframe
-                src={`${url}#toolbar=0`}
-                style={{ width: "100%", height: "100%", backgroundColor: "white" }}
-                title="PDF Preview"
-              />
-            );
-          }}
-        </NewBlobProvider>
+      <div className="flex-[2] p-2 rounded-lg bg-white border border-gray-15 h-full overflow-hidden flex items-center justify-center">
+        <div className="w-full h-full">
+        <Worker workerUrl={`https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js`}>
+  {pdfUrl ? (
+    <div className="w-full h-full">
+      <div className="w-full h-full">
+        <ViewerNoSSR fileUrl={pdfUrl} className="w-full h-full" />
+      </div>
+    </div>
+  ) : (
+    <div className="w-full h-full flex items-center justify-center text-sm text-gray-400">
+      Generating PDF...
+    </div>
+  )}
+</Worker>
+        </div>
       </div>
     </div>
   );
 };
+
+<style jsx global>{`
+  .rpv-core__viewer {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  .rpv-core__inner-pages {
+    width: 100% !important;
+    height: 100% !important;
+    justify-content: flex-start !important;
+  }
+
+  .rpv-core__page-layer,
+  .rpv-core__canvas-layer canvas {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important;
+  }
+
+  .rpv-core__page {
+    padding: 0 !important;
+  }
+`}</style>
 
 export default InputFields;
