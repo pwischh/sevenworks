@@ -10,7 +10,7 @@ const RightView = () => {
         <div className="bg-white flex-1 w-full rounded-lg flex flex-col items-center justify-center shadow-md hover:shadow-lg transition transform p-6 border border-gray-15">
           <h2 className="text-xl font-semibold text-gray-800">Resume Analysis</h2>
           <p className="text-sm text-gray-600 mt-2 text-center">
-            Get insights on your resume's strengths and areas for improvement with AI-powered analysis.
+            Get insights on your resume&#39;s strengths and areas for improvement with AI-powered analysis.
           </p>
         </div>
         {/* Content Suggestions Feature */}

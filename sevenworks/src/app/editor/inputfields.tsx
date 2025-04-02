@@ -2,7 +2,8 @@
 import React, { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import BusinessTemplate from "./business-template";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+// import { useRouter } from "next/router";
 import { useFormContext } from "./formcontext";
 import { Worker } from '@react-pdf-viewer/core';
 import { pdf } from '@react-pdf/renderer';
@@ -11,7 +12,7 @@ import '@react-pdf-viewer/core/lib/styles/index.css';
 
 const InputFields = () => {
   const searchParams = useSearchParams();
-  const router = useRouter();
+  // const router = useRouter();
   const { formData, setFormData } = useFormContext();
   const initialTab = searchParams.get("tab") || "personal";
   const [activeTab, setActiveTab] = useState(initialTab);
@@ -58,10 +59,10 @@ const InputFields = () => {
     return () => clearTimeout(timeout); // cleanup if formData changes quickly
   }, [formData]);
 
-  const changeTab = (tab: string) => {
-    setActiveTab(tab);
-    router.push(`?tab=${tab}`);
-  };
+  // const changeTab = (tab: string) => {
+  //   setActiveTab(tab);
+  //   router.push(`?tab=${tab}`);
+  // };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -81,7 +82,7 @@ const InputFields = () => {
               <input
                 type="text"
                 name={field}
-                value={formData[field] || ""}
+                value={typeof formData[field] === "string" ? formData[field] : ""}
                 placeholder={field.charAt(0).toUpperCase() + field.replace(/([A-Z])/g, ' $1').slice(1)}
                 onChange={handleInputChange}
                 className="border bg-[#E6E6E6] border-[#999999] shadow-md p-2 rounded-lg w-full text-[#848C8E]"
@@ -130,7 +131,7 @@ const InputFields = () => {
               <input
                 type="text"
                 name={field}
-                value={formData[field] || ""}
+                value={typeof formData[field] === "string" ? formData[field] : ""}
                 placeholder={field.charAt(0).toUpperCase() + field.replace(/([A-Z])/g, ' $1').slice(1)}
                 onChange={handleInputChange}
                 className="border bg-[#E6E6E6] border-[#999999] shadow-md p-2 rounded-lg w-full text-[#848C8E]"
@@ -141,7 +142,7 @@ const InputFields = () => {
             <span className="text-xs font-bold text-[#848C8E]">Experience Details</span>
             <textarea
               name="experienceDetails"
-              value={formData["experienceDetails"] || ""}
+              value={typeof formData["experienceDetails"] === "string" ? formData["experienceDetails"] : ""}
               placeholder="Enter job details, separate lines for each detail"
               onChange={handleInputChange}
               className="border bg-[#E6E6E6] border-[#999999] shadow-md p-2 rounded-lg w-full text-[#848C8E]"
@@ -165,7 +166,7 @@ const InputFields = () => {
               <input
                 type="text"
                 name={field}
-                value={formData[field] || ""}
+                value={typeof formData[field] === "string" ? formData[field] : ""}
                 placeholder={field === "educationSchool" ? "School" :
                   field === "educationGraduation" ? "Graduation Date" :
                   field === "educationDegree" ? "Degree" :
@@ -190,7 +191,7 @@ const InputFields = () => {
               </span>
               <textarea
                 name={field}
-                value={formData[field] || ""}
+                value={typeof formData[field] === "string" ? formData[field] : ""}
                 placeholder={field === "leadership" ? "Enter leadership experience" :
                   field === "ubsProgram" ? "Enter UBS program details" :
                   field === "honors" ? "Enter honors received" : "Enter additional skills and interests"}
@@ -217,7 +218,7 @@ const InputFields = () => {
         <Worker workerUrl={`https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js`}>
           <div className="w-full h-full">
             {pdfUrl ? (
-              <ViewerNoSSR fileUrl={pdfUrl} className="w-full h-full" />
+              <ViewerNoSSR fileUrl={pdfUrl} />
             ) : (
               <div className="flex items-center justify-center text-sm text-gray-400 w-full h-full">
                 Generating PDF...
