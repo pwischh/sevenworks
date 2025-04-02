@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { auth, googleProvider, githubProvider } from "../../lib/firebase";
-import { createUserWithEmailAndPassword, signInWithPopup } from "firebase/auth";
+import { createUserWithEmailAndPassword, signInWithPopup, sendEmailVerification } from "firebase/auth";
 import { IoIosArrowBack } from "react-icons/io";
 import { FaGithub, FaGoogle } from "react-icons/fa";
 
@@ -34,6 +34,10 @@ export default function Signup() {
                 form.password
             );
             console.log("User signed up:", userCredential.user);
+
+            await sendEmailVerification(userCredential.user);
+            console.log("Verification email sent.");
+            
             setPending(false);
             router.push("/register/login");
         } catch (error: unknown) {
