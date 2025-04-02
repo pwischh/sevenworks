@@ -206,11 +206,13 @@ const InputFields = () => {
   };
 
   return (
-    <div className="flex flex-row gap-2 w-[65.5%] h-full items-start">
-      <div className="flex-[1.5] flex-col bg-white p-0 rounded-lg overflow-auto h-full">
+    // <div className="flex flex-row gap-2 w-[65.5%] h-full items-start">
+    <div className="grid grid-cols-[1.5fr,2.5fr] gap-2 w-full max-h-screen overflow-hidden">
+      <div className="flex-[1.5] flex-col bg-white p-0 rounded-lg overflow-hidden h-full">
         {renderFields()}
       </div>
-      <div className="flex-[2] p-2 rounded-lg bg-white border border-gray-15 h-full overflow-hidden flex items-center justify-center">
+      {/* <div className="flex-[2] p-2 rounded-lg bg-white border border-gray-15 h-full overflow-hidden flex items-center justify-center"> */}
+      <div className="p-0 rounded-lg bg-white border border-gray-15 h-full overflow-hidden min-h-0">
         <div className="w-full h-full">
         <Worker workerUrl={`https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js`}>
   {pdfUrl ? (
