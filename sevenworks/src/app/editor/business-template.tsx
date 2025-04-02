@@ -44,9 +44,9 @@ export default function BusinessTemplate({ formData }: TemplateProps) {
               {formData.firstName || "First Name"} {formData.middleName ? formData.middleName + " " : ""}{formData.lastName || "Last Name"}
             </Text>
             <Text style={{ fontSize: 12, marginTop: 5, fontFamily: formData.font }}>
-              {formData.address || "Address not provided"}
+              {formData.address || "Address not provided | "}
               {formData.address && " | "}
-              {formData.phone || "Phone not provided"}
+              {formData.phone || "Phone not provided | "}
               {formData.phone && " | "}
               {formData.email || "Email not provided"}
             </Text>
@@ -93,17 +93,24 @@ export default function BusinessTemplate({ formData }: TemplateProps) {
                 {formData.leadership}
               </Text>
             ) : (
-              <Text style={styles.content}>
-                Undergraduate Finance Association — November 2020 – Present{"\n"}
-                Events and Sports Coordinator{"\n"}
-                • Help coordinate events such as keynote presentations to develop interest in finance{"\n"}
-                • Increased membership by planning events targeted at athletes{"\n\n"}
-
-                Emory University Solutions High School Conversion Project — September 2019 – Present{"\n"}
-                Finance Committee Member{"\n"}
-                • Assist in launching a $21 million project to convert a high school into a neighborhood center{"\n"}
-                • Research criteria and restrictions for low income tax credits
-              </Text>
+              <>
+                <Text style={styles.job_header}>
+                  Undergraduate Finance Association — November 2020 – Present
+                </Text>
+                <Text style={styles.content}>
+                  Events and Sports Coordinator{"\n"}
+                  • Help coordinate events such as keynote presentations to develop interest in finance{"\n"}
+                  • Increased membership by planning events targeted at athletes
+                </Text>
+                <Text style={styles.job_header}>
+                  Emory University Solutions High School Conversion Project — September 2019 – Present
+                </Text>
+                <Text style={styles.content}>
+                  Finance Committee Member{"\n"}
+                  • Assist in launching a $21 million project to convert a high school into a neighborhood center{"\n"}
+                  • Research criteria and restrictions for low income tax credits
+                </Text>
+              </>
             )}
           </View>
 

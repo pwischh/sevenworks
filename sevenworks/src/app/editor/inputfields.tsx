@@ -215,18 +215,16 @@ const InputFields = () => {
       <div className="p-0 rounded-lg bg-white border border-gray-15 h-full overflow-hidden min-h-0">
         <div className="w-full h-full">
         <Worker workerUrl={`https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js`}>
-  {pdfUrl ? (
-    <div className="w-full h-full">
-      <div className="w-full h-full">
-        <ViewerNoSSR fileUrl={pdfUrl} className="w-full h-full" />
-      </div>
-    </div>
-  ) : (
-    <div className="w-full h-full flex items-center justify-center text-sm text-gray-400">
-      Generating PDF...
-    </div>
-  )}
-</Worker>
+          <div className="w-full h-full">
+            {pdfUrl ? (
+              <ViewerNoSSR fileUrl={pdfUrl} className="w-full h-full" />
+            ) : (
+              <div className="flex items-center justify-center text-sm text-gray-400 w-full h-full">
+                Generating PDF...
+              </div>
+            )}
+          </div>
+        </Worker>
         </div>
       </div>
     </div>

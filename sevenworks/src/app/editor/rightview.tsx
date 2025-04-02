@@ -4,7 +4,7 @@ import React from "react";
 
 const RightView = () => {
   return (
-    <div className="flex-[450px] pl-0 pr-4 rounded-lg">
+    <div className="flex-[550px] pl-0 pr-4 rounded-lg">
       <div className="flex flex-col gap-4 p-0 h-full">
         {/* Resume Analysis Feature */}
         <div className="bg-white flex-1 w-full rounded-lg flex flex-col items-center justify-center shadow-md hover:shadow-lg transition transform p-6 border border-gray-15">
