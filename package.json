@@ -10,8 +10,11 @@
     "@react-pdf-viewer/default-layout": "^3.12.0",
     "@react-pdf/renderer": "^4.3.0",
     "classnames": "^2.5.1",
+    "firebase": "^11.6.0",
+    "next": "^15.2.4",
     "pdfjs-dist": "^3.11.174",
     "react-dropzone": "^14.3.5",
+    "react-icons": "^5.5.0",
     "react-pdf": "^9.2.1",
     "react-pdf-viewer": "^0.1.0",
     "tailwind-merge": "^3.0.1"
