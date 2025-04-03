@@ -1,4 +1,6 @@
-import { createContext, useState, ReactNode, useContext } from "react";
+import { createContext, useState, ReactNode, useContext, useEffect } from "react";
+import { auth, db } from "../lib/firebase";
+import { doc, setDoc } from "firebase/firestore";
 
 interface FormContextType {
   formData: { [key: string]: string };
@@ -10,8 +12,30 @@ const FormContext = createContext<FormContextType | undefined>(undefined);
 export const FormProvider = ({ children }: { children: ReactNode }) => {
   const [formData, setFormDataState] = useState<{ [key: string]: string }>({});
 
-  const setFormData = (key: string, value: string) => {
-    setFormDataState((prev) => ({ ...prev, [key]: value }));
+  useEffect(() => {
+    async function loadSessionData(){
+      const res = await fetch("/api/session/");
+      if (res.ok){
+        const {sessionData} = await res.json();
+        console.log("Session data: ", sessionData);
+        setFormDataState(sessionData?.formData || {});
+      }
+    }
+    loadSessionData();
+  }, [])
+
+  const setFormData = async (key: string, value: string) => {
+    const updatedFormData = { ...formData, [key]: value };
+    setFormDataState(updatedFormData);
+    const currentUser = auth.currentUser;
+
+    if (currentUser){
+      try {
+        await setDoc(doc(db, "sessions", currentUser.uid), {formData: updatedFormData}, {merge: true});
+      } catch (error) {
+        console.log("Error updating session data: ", error);
+      }
+    }
   };
 
   return (

@@ -6,6 +6,8 @@ import { auth, githubProvider, googleProvider } from "../../lib/firebase"; // Im
 import { signInWithEmailAndPassword, sendPasswordResetEmail, signInWithPopup } from "firebase/auth";
 import { IoIosArrowBack } from "react-icons/io";
 import { FaGithub, FaGoogle } from "react-icons/fa"; // Import FaGoogle
+import { db } from "../../lib/firebase";
+import { doc, setDoc } from "firebase/firestore";
 
 export default function Login() {
     const [email, setEmail] = useState("");
@@ -15,13 +17,43 @@ export default function Login() {
     const [resetMessage, setResetMessage] = useState<string | null>(null);
     const router = useRouter();
 
+    const updateSession = async (uid: string) => {
+        try {
+            await setDoc(doc(db, "sessions", uid), {formData: {}}, {merge: true});
+            console.log("Session updated for UID: ", uid);
+        } catch (error) {
+            console.error("Error updating session", error);
+        }
+    }
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setPending(true);
 
         try {
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            const idToken = await userCredential.user.getIdToken(true);
+            console.log("Token generated successfully, first 2 chars:", idToken.substring(0, 2) + "...");
+            console.log("Token format check:", idToken.startsWith("ey") ? "Looks like JWT format" : "Unexpected format");
+
+            const response = await fetch("/api/auth/", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({idToken}),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({ error: "Could not parse error response" }));
+                console.error("Server response error:", {
+                    status: response.status,
+                    statusText: response.statusText,
+                    data: errorData
+                });
+                throw new Error(`Server error: ${response.status} - ${JSON.stringify(errorData)}`);
+            }
+
             console.log("User logged in:", userCredential.user);
+            await updateSession(userCredential.user.uid);
             setPending(false);
             router.push("/dashboard");
         } catch (error: unknown) {

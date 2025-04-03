@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import classNames from 'classnames';
 import { AuthProvider } from "./authContext";
+import { ResumeProvider } from "./resumeContext";
 
 // const markazi = Markazi_Text({
 //     subsets: ["latin"],
@@ -29,7 +30,9 @@ export default function RootLayout({
       <body
         className={classNames(inter.className, "antialiased bg-[#2b2d42]")}>
         <AuthProvider>
-          {children}
+          <ResumeProvider>
+            {children}
+          </ResumeProvider>
         </AuthProvider> 
       </body>
     </html>

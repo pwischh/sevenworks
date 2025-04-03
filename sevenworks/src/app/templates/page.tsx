@@ -18,13 +18,15 @@ import {
     LuChevronUp } from "react-icons/lu";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../lib/firebase";
+import { useResume } from "../resumeContext";
+import { useRouter } from "next/navigation";
 
 const markazi = Markazi_Text({
     subsets: ["latin"],
     variable: "--font-markazi",
   });
 
-interface Resume {
+export interface Resume {
     id: string;
     title: string;
     description: string;
@@ -32,6 +34,11 @@ interface Resume {
 }
 
 const ResumeCard = ({ resume }: { resume: Resume }) => {
+    const [hoveredResume, setHoveredResume] = useState<string | null>(null);
+    const {setResume} = useResume();
+    const router = useRouter();
+    const {user, loading} = useAuth();
+
     const categories = (category: string) => {
         switch(category){
             case "Business": return (
@@ -61,31 +68,53 @@ const ResumeCard = ({ resume }: { resume: Resume }) => {
     }
 
     return(
-        <div className="relative z-0 flex flex-col items-center w-full p-4 bg-gray-100 rounded-lg border-[1px] border-gray-200">
-        {/* Triangle */}
-        <div className="flex absolute top-0 right-0 z-9 rounded-tr-lg inline-block w-0 h-0 border-solid border-t-0 border-r-[80px] border-l-0 border-b-[80px] border-l-transparent border-r-navy border-t-transparent border-b-transparent">
-            <div className="absolute left-[42px] top-[9px] z-11 text-offWhite">
-                {categories(resume.description)}
+        <div className="relative z-0 flex flex-col items-center w-full p-4 bg-gray-100 rounded-lg border-[1px] border-gray-200 cursor-pointer hover:shadow-md"
+            onMouseEnter={() => {setHoveredResume(resume.title)}}
+            onMouseLeave={() => {setHoveredResume(null)}}>
+            {/* Triangle */}
+            <div className="flex absolute top-0 right-0 z-9 rounded-tr-lg inline-block w-0 h-0 border-solid border-t-0 border-r-[80px] border-l-0 border-b-[80px] border-l-transparent border-r-navy border-t-transparent border-b-transparent">
+                <div className="absolute left-[42px] top-[9px] z-11 text-offWhite">
+                    {categories(resume.description)}
+                </div>
+            </div>
+            {/* Document Thumbnail */}
+            <div className="relative z-[-1] w-full aspect-[8.5/11] bg-white rounded-md border border-gray-200 overflow-hidden">
+                {resume.image && (
+                    <Image
+                        src={resume.image}
+                        alt={resume.title}
+                        fill
+                        className="object-cover"
+                    />
+                )}
+                {/* Hover Overlay */}
+                <div 
+                    className={`flex flex-col gap-2 justify-center items-center absolute top-0 rounded-md w-full h-full bg-black/40 
+                        font-medium text-offWhite text-[16px] transition duration-200
+                        ${hoveredResume === resume.title ? "opacity-100" : "opacity-0"}`}
+                >
+                    {(!user || loading) ? (
+                        <Link href="/register/login" className="px-3 py-2 bg-slate-600 rounded-xl" >
+                            Log in to use
+                        </Link>
+                    ) : (
+                        <button className="px-3 py-2 bg-lightRed rounded-xl hover:bg-darkRed" 
+                            onClick={() => {
+                                setResume(resume);
+                                router.push("/editor")
+                            }}
+                        >
+                            Use Template
+                        </button>
+                    )}
+                </div>
+            </div>
+            {/* Title & Description */}
+            <div className="mt-2 text-center">
+                <h3 className={`text-md font-semibold transition duration-200 ${hoveredResume === resume.title ? "text-lightRed" : "text-navy"}`}>{resume.title}</h3>
+                <p className={`text-sm font-medium transition duration-200 ${hoveredResume === resume.title ? "text-lightRed" : "text-gray-600"}`}>{resume.description}</p>
             </div>
         </div>
-        {/* Document Thumbnail */}
-        <div className="relative z-[-1] w-full aspect-[8.5/11] bg-white rounded-md shadow overflow-hidden">
-        {resume.image && (
-            <Image
-                src={resume.image}
-                alt={resume.title}
-                fill
-                className="object-cover"
-            />
-        )}
-        </div>
-  
-        {/* Title & Description */}
-        <div className="mt-2 text-center">
-            <h3 className=" text-navy text-md font-semibold">{resume.title}</h3>
-            <p className="text-sm font-medium text-gray-600">{resume.description}</p>
-        </div>
-    </div>
     );
 };
 
@@ -138,17 +167,17 @@ export default function Templates() {
       }, []);
 
     return (
-        <div ref={scrollRef} className="flex flex-col w-screen h-screen justify-start items-center bg-white gap-2 overflow-scroll">
+        <div ref={scrollRef} className="flex flex-col w-screen h-screen justify-start items-center bg-white gap-2 overflow-scroll pb-10">
             <div className="flex flex-col w-screen h-fit justify-start items-center gap-2 bg-gradient-to-b from-navy to-darkRed">
                 {/* Back to top button */}
                 <div 
                     className={`group z-10 flex justify-center items-center absolute bottom-3 right-3 p-2 text-offWhite bg-lightRed rounded-full shadow-md 
-                    ${buttonVisible ? "opacity-100 cursor-pointer" : "opacity-0"} transition duration-400`}
+                    ${buttonVisible ? "opacity-100 cursor-pointer" : "opacity-0"} transition duration-500`}
                     onClick={() => {
                         if (buttonVisible) scrollRef.current?.scrollTo({top: 0, behavior: "smooth"})
                     }}
                 >
-                    <span className="overflow-hidden whitespace-nowrap transition-all duration-400 max-w-0 group-hover:max-w-[150px] group-hover:px-2 font-medium">
+                    <span className="overflow-hidden whitespace-nowrap transition-all duration-300 max-w-0 group-hover:max-w-[150px] group-hover:px-2 font-medium">
                         Back to top
                     </span>
                     <LuChevronUp className="w-[38px] h-[38px]"/>

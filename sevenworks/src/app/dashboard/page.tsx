@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useEffect, useState } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useRouter } from "next/navigation";
@@ -15,7 +14,6 @@ const markazi = Markazi_Text({
   subsets: ["latin"],
   variable: "--font-markazi",
 });
-
 
 async function handleSignOut(){
   try {

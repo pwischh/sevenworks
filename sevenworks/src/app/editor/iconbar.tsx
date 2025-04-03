@@ -8,7 +8,23 @@ import { useState, useRef, useEffect } from "react";
 const IconBar = () => {
 
   const [sections, setSections] = useState<React.JSX.Element[]>([]);
+  const [hovering, setHovering] = useState("");
+  const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
 
+  const handleMouseEnter = (hoveredElement: string) => {
+    const id = setTimeout(() => {
+      setHovering(hoveredElement);
+    }, 500);
+    setTimeoutId(id);
+  };
+
+  const handleMouseLeave = () => {
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+      setTimeoutId(null);
+    }
+    setHovering("")
+  };
 
   const addSection = () => {
     const newSection = (
@@ -50,7 +66,9 @@ const IconBar = () => {
       {/* vertical stack */}
       <div className="flex flex-col gap-3 h-full">
       {sections}
-        <div className="p-1 aspect-square rounded-lg flex items-center justify-center hover:bg-[#BFB7B6]/60">
+        <div className="relative p-1 aspect-square rounded-lg flex items-center justify-center hover:bg-[#BFB7B6]/60"
+          onMouseEnter={() => {handleMouseEnter("personal")}}
+          onMouseLeave={() => {handleMouseLeave()}}>
           <Link href="/editor?tab=personal#personal-section">
             <Image
               src="/user.svg"
@@ -59,9 +77,18 @@ const IconBar = () => {
               className="w-8 h-8"
             />
           </Link>
+          <span 
+            className={`pointer-events-none cursor-default absolute left-10 ml-2 px-1 rounded-md bg-[#435058]/70 
+                      border border-gray-600 text-offWhite text-[10px] w-fit text-nowrap transition duration-300
+                      ${hovering === "personal" ? "opacity-100" : "opacity-0"}`}
+            >
+              Personal Information
+          </span>
         </div>
-        <div className="p-1 aspect-square rounded-lg flex items-center justify-center hover:bg-[#BFB7B6]/60">
-          <Link href="/editor?tab=phone#phone-section">
+        <div className="relative p-1 aspect-square rounded-lg flex items-center justify-center hover:bg-[#BFB7B6]/60"
+          onMouseEnter={() => {handleMouseEnter("contact")}}
+          onMouseLeave={() => {handleMouseLeave()}}>
+          <Link href="/editor?tab=contact#contact-information">
             <Image
               src="/phone.svg"
               alt="phone"
@@ -69,8 +96,17 @@ const IconBar = () => {
               className="w-8 h-8"
             />
           </Link>
+          <span 
+            className={`pointer-events-none cursor-default absolute left-10 ml-2 px-1 rounded-md bg-[#435058]/70 
+                      border border-gray-600 text-offWhite text-[10px] w-fit text-nowrap transition duration-300
+                      ${hovering === "contact" ? "opacity-100" : "opacity-0"}`}
+            >
+              Contact Information
+          </span>
         </div>
-        <div className="p-1 aspect-square rounded-lg flex items-center justify-center hover:bg-[#BFB7B6]/60">
+        <div className="relative p-1 aspect-square rounded-lg flex items-center justify-center hover:bg-[#BFB7B6]/60"
+          onMouseEnter={() => {handleMouseEnter("education")}}
+          onMouseLeave={() => {handleMouseLeave()}}>
           <Link href="/editor?tab=book#book-section">
             <Image
               src="/book-open.svg"
@@ -79,8 +115,17 @@ const IconBar = () => {
               className="w-8 h-8"
             />
           </Link>
+          <span 
+            className={`pointer-events-none cursor-default absolute left-10 ml-2 px-1 rounded-md bg-[#435058]/70 
+                      border border-gray-600 text-offWhite text-[10px] w-fit text-nowrap transition duration-300
+                      ${hovering === "education" ? "opacity-100" : "opacity-0"}`}
+            >
+              Education
+          </span>
         </div>
-        <div className="p-1 aspect-square rounded-lg flex items-center justify-center hover:bg-[#BFB7B6]/60">
+        <div className="relative p-1 aspect-square rounded-lg flex items-center justify-center hover:bg-[#BFB7B6]/60"
+          onMouseEnter={() => {handleMouseEnter("experience")}}
+          onMouseLeave={() => {handleMouseLeave()}}>
           <Link href="/editor?tab=work#work-section">
             <Image
               src="/briefcase.svg"
@@ -89,8 +134,17 @@ const IconBar = () => {
               className="w-8 h-8"
             />
           </Link>
+          <span 
+            className={`pointer-events-none cursor-default absolute left-10 ml-2 px-1 rounded-md bg-[#435058]/70 
+                      border border-gray-600 text-offWhite text-[10px] w-fit text-nowrap transition duration-300
+                      ${hovering === "experience" ? "opacity-100" : "opacity-0"}`}
+            >
+              Experience
+          </span>
         </div>
-        <div className="p-1 aspect-square rounded-lg flex items-center justify-center hover:bg-[#BFB7B6]/60">
+        <div className="relative p-1 aspect-square rounded-lg flex items-center justify-center hover:bg-[#BFB7B6]/60"
+          onMouseEnter={() => {handleMouseEnter("skills")}}
+          onMouseLeave={() => {handleMouseLeave()}}>
           <Link href="/editor?tab=award#award-section">
             <Image
               src="/award.svg"
@@ -99,8 +153,24 @@ const IconBar = () => {
               className="w-8 h-8"
             />
           </Link>
+          <span 
+            className={`pointer-events-none cursor-default absolute left-10 ml-2 px-1 rounded-md bg-[#435058]/70 
+                      border border-gray-600 text-offWhite text-[10px] w-fit text-nowrap transition duration-300
+                      ${hovering === "skills" ? "opacity-100" : "opacity-0"}`}
+            >
+              Skills & Awards
+          </span>
         </div>
-        <div ref={newSectionOverlayRef} className="relative p-0.5 flex items-center justify-center">
+        <div ref={newSectionOverlayRef} className="relative p-0.5 flex items-center justify-center"
+          onMouseEnter={() => {handleMouseEnter("addSection")}}
+          onMouseLeave={() => {handleMouseLeave()}}>
+          <span 
+            className={`pointer-events-none cursor-default absolute left-10 ml-2 px-1 rounded-md bg-[#435058]/70 
+                      border border-gray-600 text-offWhite text-[10px] w-fit text-nowrap transition duration-300
+                      ${hovering === "addSection" ? "opacity-100" : "opacity-0"}`}
+            >
+              Add Section
+          </span>
          {overlay}
          <button className="p-0.5 aspect-square flex items-center justify-center bg-black rounded-lg hover:bg-gray-700" onClick={() => displayCreateNewSectionOverlay()}>
            <Image src="/plus-square.svg" alt="plus square" width={32} height={32} className="w-8 h-8" style={{filter: "invert(100%)"}}/>
