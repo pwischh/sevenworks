@@ -65,7 +65,13 @@ export default function BusinessTemplate({ formData }: TemplateProps) {
           <View style={{ marginTop: 10, fontFamily: formData.font }}>
             <Text style={styles.title}>EXPERIENCE</Text>
             {formData.experience && formData.experience.length > 0 ? (
-              formData.experience.map((job: any, index: number) => (
+              formData.experience.map((job: {
+                company?: string;
+                location?: string;
+                duration?: string;
+                role?: string;
+                details?: string[];
+              }, index: number) => (
                 <View key={index} style={{ marginBottom: 4 }}>
                   <Text style={styles.job_header}>
                     {job.company || "Company Name"}, {job.location || "Location"} — {job.duration || "Duration"}

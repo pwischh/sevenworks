@@ -1,16 +1,18 @@
 import { createContext, useState, ReactNode, useContext } from "react";
 
+type CustomPersonalField = { id: number; label: string; value: string };
+
 interface FormContextType {
-  formData: { [key: string]: string };
-  setFormData: (key: string, value: string) => void;
+  formData: { [key: string]: string | CustomPersonalField[] };
+  setFormData: (key: string, value: string | CustomPersonalField[]) => void;
 }
 
 const FormContext = createContext<FormContextType | undefined>(undefined);
 
 export const FormProvider = ({ children }: { children: ReactNode }) => {
-  const [formData, setFormDataState] = useState<{ [key: string]: string }>({});
+  const [formData, setFormDataState] = useState<{ [key: string]: string | CustomPersonalField[] }>({});
 
-  const setFormData = (key: string, value: string) => {
+  const setFormData = (key: string, value: string | CustomPersonalField[]) => {
     setFormDataState((prev) => ({ ...prev, [key]: value }));
   };
 

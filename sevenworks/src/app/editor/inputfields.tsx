@@ -1,8 +1,8 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef, useMemo } from "react";
 import dynamic from "next/dynamic";
 import BusinessTemplate from "./business-template";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useFormContext } from "./formcontext";
 import { Worker } from '@react-pdf-viewer/core';
 import { pdf } from '@react-pdf/renderer';
@@ -11,11 +11,23 @@ import '@react-pdf-viewer/core/lib/styles/index.css';
 
 const InputFields = () => {
   const searchParams = useSearchParams();
-  const router = useRouter();
   const { formData, setFormData } = useFormContext();
   const initialTab = searchParams.get("tab") || "personal";
   const [activeTab, setActiveTab] = useState(initialTab);
-  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  
+  // References for PDF URLs and transitions
+  const [primaryPdfUrl, setPrimaryPdfUrl] = useState<string | null>(null);
+  const [secondaryPdfUrl, setSecondaryPdfUrl] = useState<string | null>(null);
+  const [isPrimaryActive, setIsPrimaryActive] = useState(true);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
+  
+  // Refs for tracking and cleanup
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const transitionTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const previousFormDataRef = useRef(formData);
+  const isFirstRender = useRef(true);
 
   // New state for custom personal fields
   const [customPersonalFields, setCustomPersonalFields] = useState<{ id: number; label: string; value: string }[]>([]);
@@ -44,24 +56,132 @@ const InputFields = () => {
     }
   }, [activeTab, searchParams]);
 
+  // Generate initial PDF on first load
   useEffect(() => {
-    const timeout = setTimeout(() => {
-      const generatePdf = async () => {
-        const blob = await pdf(<BusinessTemplate formData={formData} />).toBlob();
-        const url = URL.createObjectURL(blob);
-        setPdfUrl(url);
-      };
+    if (isFirstRender.current) {
+      setIsGenerating(true); // Set generating state immediately
+      // Small timeout to ensure UI renders before heavy PDF generation
+      setTimeout(() => {
+        generatePdf().then(() => {
+          setInitialLoadComplete(true);
+        });
+        isFirstRender.current = false;
+      }, 100);
+    }
+  }, []);
 
-      generatePdf();
-    }, 500); // wait 500ms after last change
+  // Function to generate a PDF without directly updating state
+  const generatePdf = async () => {
+    if (isGenerating && !isFirstRender.current) return;
+    
+    setIsGenerating(true);
+    try {
+      const blob = await pdf(<BusinessTemplate formData={formData} />).toBlob();
+      const newUrl = URL.createObjectURL(blob);
+      
+      // Store the new PDF in the inactive slot
+      if (isPrimaryActive) {
+        // Clean up any existing secondary URL
+        if (secondaryPdfUrl) {
+          URL.revokeObjectURL(secondaryPdfUrl);
+        }
+        setSecondaryPdfUrl(newUrl);
+      } else {
+        // Clean up any existing primary URL
+        if (primaryPdfUrl) {
+          URL.revokeObjectURL(primaryPdfUrl);
+        }
+        setPrimaryPdfUrl(newUrl);
+      }
+      
+      // Start transition if we have a PDF already displayed
+      if ((primaryPdfUrl || secondaryPdfUrl) && !isFirstRender.current) {
+        setIsTransitioning(true);
+        
+        // Wait for the new PDF to fully load before switching
+        if (transitionTimerRef.current) {
+          clearTimeout(transitionTimerRef.current);
+        }
+        
+        transitionTimerRef.current = setTimeout(() => {
+          setIsPrimaryActive(!isPrimaryActive);
+          setIsTransitioning(false);
+        }, 300); // Transition duration
+      } else {
+        // First load - no transition needed
+        if (!primaryPdfUrl && !secondaryPdfUrl) {
+          setPrimaryPdfUrl(newUrl);
+          setIsPrimaryActive(true);
+        }
+      }
+      
+      // Save current form data to compare for future changes
+      previousFormDataRef.current = {...formData};
+      
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
-    return () => clearTimeout(timeout); // cleanup if formData changes quickly
+  // Check if form data has actually changed
+  const hasFormDataChanged = useMemo(() => {
+    if (isFirstRender.current) return true;
+    
+    // Do a deep comparison of current and previous form data
+    const prevData = previousFormDataRef.current;
+    const currData = formData;
+    
+    for (const key in currData) {
+      if (JSON.stringify(currData[key]) !== JSON.stringify(prevData[key])) {
+        return true;
+      }
+    }
+    
+    return false;
   }, [formData]);
 
-  const changeTab = (tab: string) => {
-    setActiveTab(tab);
-    router.push(`?tab=${tab}`);
-  };
+  // Improved PDF generation with debouncing
+  useEffect(() => {
+    // Don't regenerate if form data hasn't changed or during initial load
+    if (!hasFormDataChanged || isFirstRender.current) return;
+    
+    // Clear any existing timer
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+    
+    // Set a new timer
+    debounceTimerRef.current = setTimeout(() => {
+      generatePdf();
+    }, 800);
+    
+    // Cleanup function
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, [formData, hasFormDataChanged]);
+
+  // Clean up URLs on component unmount
+  useEffect(() => {
+    return () => {
+      if (primaryPdfUrl) {
+        URL.revokeObjectURL(primaryPdfUrl);
+      }
+      if (secondaryPdfUrl) {
+        URL.revokeObjectURL(secondaryPdfUrl);
+      }
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+      if (transitionTimerRef.current) {
+        clearTimeout(transitionTimerRef.current);
+      }
+    };
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -71,7 +191,8 @@ const InputFields = () => {
   const renderFields = () => {
     if (activeTab === "personal") {
       return (
-        <div className="bg-white rounded-lg shadow-lg hover:shadow-lg transition transform p-6 border border-gray-150 flex flex-col flex-1 min-h-full">          <h1 className="text-black text-center">Personal Information</h1>
+        <div className="bg-white rounded-lg shadow-lg hover:shadow-lg transition transform p-6 border border-gray-150 flex flex-col flex-1 min-h-full">          
+          <h1 className="text-black text-center">Personal Information</h1>
           {["firstName", "middleName", "lastName", "email", "phone", "address"].map((field) => (
             <div key={field} className="flex flex-col mt-2">
               <span className="text-xs font-bold text-[#848C8E]">
@@ -81,7 +202,7 @@ const InputFields = () => {
               <input
                 type="text"
                 name={field}
-                value={formData[field] || ""}
+                value={typeof formData[field] === "string" ? formData[field] : ""}
                 placeholder={field.charAt(0).toUpperCase() + field.replace(/([A-Z])/g, ' $1').slice(1)}
                 onChange={handleInputChange}
                 className="border bg-[#E6E6E6] border-[#999999] shadow-md p-2 rounded-lg w-full text-[#848C8E]"
@@ -120,56 +241,65 @@ const InputFields = () => {
       );
     } else if (activeTab === "experience") {
       return (
-        <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition transform hover:scale-105 p-6">
-          <h1 className="text-black text-center">Work Experience</h1>
-          {["companyName", "role", "location", "duration"].map((field) => (
-            <div key={field} className="flex flex-col mt-2">
-              <span className="text-xs font-bold text-[#848C8E]">
-                {field.charAt(0).toUpperCase() + field.replace(/([A-Z])/g, ' $1').slice(1)}
-              </span>
+        <div className="bg-white rounded-lg shadow-lg hover:shadow-lg transition transform p-6 border border-gray-150 flex flex-col flex-1 min-h-full">
+          <h1 className="text-black text-center">Experience</h1>
+          {formData.experience.map((exp, index) => (
+            <div key={index} className="flex flex-col mt-2">
+              <span className="text-xs font-bold text-[#848C8E]">Job Title</span>
               <input
                 type="text"
-                name={field}
-                value={formData[field] || ""}
-                placeholder={field.charAt(0).toUpperCase() + field.replace(/([A-Z])/g, ' $1').slice(1)}
+                name={`experience[${index}].title`}
+                value={exp.title}
+                onChange={handleInputChange}
+                className="border bg-[#E6E6E6] border-[#999999] shadow-md p-2 rounded-lg w-full text-[#848C8E]"
+              />
+              <span className="text-xs font-bold text-[#848C8E] mt-2">Company</span>
+              <input
+                type="text"
+                name={`experience[${index}].company`}
+                value={exp.company}
+                onChange={handleInputChange}
+                className="border bg-[#E6E6E6] border-[#999999] shadow-md p-2 rounded-lg w-full text-[#848C8E]"
+              />
+              <span className="text-xs font-bold text-[#848C8E] mt-2">Years</span>
+              <input
+                type="text"
+                name={`experience[${index}].years`}
+                value={exp.years}
                 onChange={handleInputChange}
                 className="border bg-[#E6E6E6] border-[#999999] shadow-md p-2 rounded-lg w-full text-[#848C8E]"
               />
             </div>
           ))}
-          <div className="flex flex-col mt-2">
-            <span className="text-xs font-bold text-[#848C8E]">Experience Details</span>
-            <textarea
-              name="experienceDetails"
-              value={formData["experienceDetails"] || ""}
-              placeholder="Enter job details, separate lines for each detail"
-              onChange={handleInputChange}
-              className="border bg-[#E6E6E6] border-[#999999] shadow-md p-2 rounded-lg w-full text-[#848C8E]"
-              rows={4}
-            />
-          </div>
         </div>
       );
     } else if (activeTab === "education") {
       return (
-        <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition transform hover:scale-105 p-6">
-          <h1 className="text-black text-center">Education Information</h1>
-          {["educationSchool", "educationGraduation", "educationDegree", "educationDescription", "educationGPA"].map((field) => (
-            <div key={field} className="flex flex-col mt-2">
-              <span className="text-xs font-bold text-[#848C8E]">
-                {field === "educationSchool" ? "School" :
-                  field === "educationGraduation" ? "Graduation Date" :
-                  field === "educationDegree" ? "Degree" :
-                  field === "educationDescription" ? "Coursework/Description" : "GPA"}
-              </span>
+        <div className="bg-white rounded-lg shadow-lg hover:shadow-lg transition transform p-6 border border-gray-150 flex flex-col flex-1 min-h-full">
+          <h1 className="text-black text-center">Education</h1>
+          {formData.education.map((edu, index) => (
+            <div key={index} className="flex flex-col mt-2">
+              <span className="text-xs font-bold text-[#848C8E]">Degree</span>
               <input
                 type="text"
-                name={field}
-                value={formData[field] || ""}
-                placeholder={field === "educationSchool" ? "School" :
-                  field === "educationGraduation" ? "Graduation Date" :
-                  field === "educationDegree" ? "Degree" :
-                  field === "educationDescription" ? "Coursework/Description" : "GPA"}
+                name={`education[${index}].degree`}
+                value={edu.degree}
+                onChange={handleInputChange}
+                className="border bg-[#E6E6E6] border-[#999999] shadow-md p-2 rounded-lg w-full text-[#848C8E]"
+              />
+              <span className="text-xs font-bold text-[#848C8E] mt-2">Institution</span>
+              <input
+                type="text"
+                name={`education[${index}].institution`}
+                value={edu.institution}
+                onChange={handleInputChange}
+                className="border bg-[#E6E6E6] border-[#999999] shadow-md p-2 rounded-lg w-full text-[#848C8E]"
+              />
+              <span className="text-xs font-bold text-[#848C8E] mt-2">Years</span>
+              <input
+                type="text"
+                name={`education[${index}].years`}
+                value={edu.years}
                 onChange={handleInputChange}
                 className="border bg-[#E6E6E6] border-[#999999] shadow-md p-2 rounded-lg w-full text-[#848C8E]"
               />
@@ -179,50 +309,61 @@ const InputFields = () => {
       );
     } else if (activeTab === "additional") {
       return (
-        <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition transform hover:scale-105 p-6">
+        <div className="bg-white rounded-lg shadow-lg hover:shadow-lg transition transform p-6 border border-gray-150 flex flex-col flex-1 min-h-full">
           <h1 className="text-black text-center">Additional Information</h1>
-          {["leadership", "ubsProgram", "honors", "skillsInterests"].map((field) => (
-            <div key={field} className="flex flex-col mt-2">
-              <span className="text-xs font-bold text-[#848C8E]">
-                {field === "leadership" ? "Leadership and Community Engagement" :
-                  field === "ubsProgram" ? "UBS Freshman Frenzy Program" :
-                  field === "honors" ? "Honors" : "Additional Skills and Interests"}
-              </span>
-              <textarea
-                name={field}
-                value={formData[field] || ""}
-                placeholder={field === "leadership" ? "Enter leadership experience" :
-                  field === "ubsProgram" ? "Enter UBS program details" :
-                  field === "honors" ? "Enter honors received" : "Enter additional skills and interests"}
-                onChange={handleInputChange}
-                className="border bg-[#E6E6E6] border-[#999999] shadow-md p-2 rounded-lg w-full text-[#848C8E]"
-                rows={4}
-              />
-            </div>
-          ))}
+          <textarea
+            name="additionalInfo"
+            value={formData.additionalInfo}
+            onChange={handleInputChange}
+            className="border bg-[#E6E6E6] border-[#999999] shadow-md p-2 rounded-lg w-full text-[#848C8E] h-32"
+            placeholder="Enter any additional information here..."
+          />
         </div>
       );
     }
   };
 
   return (
-    // <div className="flex flex-row gap-2 w-[65.5%] h-full items-start">
-    <div className="grid grid-cols-[1.5fr,2.5fr] gap-2 w-full max-h-screen overflow-hidden">
-      <div className="flex-[1.5] flex-col bg-white p-0 rounded-lg overflow-hidden h-full">
+    <div className="grid grid-cols-[1.5fr,2.5fr] gap-0 w-full h-screen overflow-hidden overflow-y-hidden">
+      <div className="flex flex-col bg-white h-full overflow-auto">
         {renderFields()}
       </div>
-      {/* <div className="flex-[2] p-2 rounded-lg bg-white border border-gray-15 h-full overflow-hidden flex items-center justify-center"> */}
-      <div className="p-0 rounded-lg bg-white border border-gray-15 h-full overflow-hidden min-h-0">
-        <div className="w-full h-full">
+      <div className="bg-white h-full overflow-hidden">
+        <div className="w-full h-full flex flex-col">
         <Worker workerUrl={`https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js`}>
-          <div className="w-full h-full">
-            {pdfUrl ? (
-              <ViewerNoSSR fileUrl={pdfUrl} className="w-full h-full" />
-            ) : (
-              <div className="flex items-center justify-center text-sm text-gray-400 w-full h-full">
-                Generating PDF...
+          <div className="flex-1 overflow-auto max-h-full relative">
+            {/* PDF content container with fade-in animation */}
+            <div className={`w-full h-full ${initialLoadComplete ? 'opacity-100' : 'opacity-0'} transition-opacity duration-500`}>
+              {/* Primary PDF Layer */}
+              <div 
+                className={`absolute top-0 left-0 w-full h-full transition-opacity duration-300 ${
+                  isPrimaryActive ? 'opacity-100 z-10' : 'opacity-0 z-0'
+                }`}
+              >
+                {primaryPdfUrl && <ViewerNoSSR fileUrl={primaryPdfUrl} />}
               </div>
-            )}
+              
+              {/* Secondary PDF Layer */}
+              <div 
+                className={`absolute top-0 left-0 w-full h-full transition-opacity duration-300 ${
+                  !isPrimaryActive ? 'opacity-100 z-10' : 'opacity-0 z-0'
+                }`}
+              >
+                {secondaryPdfUrl && <ViewerNoSSR fileUrl={secondaryPdfUrl} />}
+              </div>
+            </div>
+            
+            {/* Initial loading indicator - shows before any PDF is ready */}
+            <div 
+              className={`absolute top-0 left-0 w-full h-full flex items-center justify-center bg-white
+                ${initialLoadComplete ? 'opacity-0 pointer-events-none' : 'opacity-100'} 
+                transition-opacity duration-500 z-20`}
+            >
+              <div className="text-center">
+                <div className="inline-block w-8 h-8 border-4 border-[#435058] border-t-transparent rounded-full animate-spin mb-4"></div>
+                <p className="text-gray-600">Preparing your document...</p>
+              </div>
+            </div>
           </div>
         </Worker>
         </div>
@@ -231,6 +372,7 @@ const InputFields = () => {
   );
 };
 
+// Keep your existing styles but update transition duration
 <style jsx global>{`
   .rpv-core__viewer {
     width: 100% !important;
@@ -239,8 +381,9 @@ const InputFields = () => {
 
   .rpv-core__inner-pages {
     width: 100% !important;
-    height: 100% !important;
+    max-height: 100% !important;
     justify-content: flex-start !important;
+    overflow-y: auto !important;
   }
 
   .rpv-core__page-layer,
@@ -248,6 +391,12 @@ const InputFields = () => {
     width: 100% !important;
     height: 100% !important;
     object-fit: contain !important;
+    max-height: 100% !important;
+  }
+
+  .rpv-core__page-layer {
+    max-height: 100% !important;
+    overflow: hidden !important;
   }
 
   .rpv-core__page {

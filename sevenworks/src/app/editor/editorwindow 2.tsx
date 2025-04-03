@@ -43,7 +43,7 @@ const EditorWindow = () => {
 
                 {/* PDF Preview */}
                 <div className="flex justify-center items-center w-full h-[500px] bg-offWhite mt-4">
-                    <NewBlobProvider document={<BusinessTemplate form={form} />}>
+                    <NewBlobProvider document={<BusinessTemplate formData={form} />}>
                         {({ url, loading, error }) => {
                             if (loading) return 'Loading document...';
                             if (error) return 'Error generating PDF';

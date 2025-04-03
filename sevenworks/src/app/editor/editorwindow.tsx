@@ -1,5 +1,6 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
+// import { useEffect } from "react";
 import { PDFDownloadLink, BlobProvider } from '@react-pdf/renderer';
 import dynamic from "next/dynamic";
 import BusinessTemplate from "../TEST-TEMPLATES/business-template";
@@ -16,12 +17,12 @@ const EditorWindow = () => {
     const initialTab = searchParams.get("tab") || "personal";
     const [activeTab, setActiveTab] = useState(initialTab);
 
-    useEffect(() => {
-        const tab = searchParams.get("tab") || "personal";
-        if (tab !== activeTab) {
-            setActiveTab(tab);
-        }
-    }, [searchParams]);
+    // useEffect(() => {
+    //     const tab = searchParams.get("tab") || "personal";
+    //     if (tab !== activeTab) {
+    //         setActiveTab(tab);
+    //     }
+    // }, [searchParams]);
 
     const changeTab = (tab: string) => {
         setActiveTab(tab);
@@ -47,7 +48,7 @@ const EditorWindow = () => {
                             <input
                                 type="text"
                                 name={field}
-                                value={formData[field] || ""}
+                                value={typeof formData[field] === "string" ? formData[field] : ""}
                                 placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
                                 onChange={handleInputChange}
                                 className="border bg-[#E6E6E6] border-[#999999] shadow-md p-2 rounded-lg w-full text-[#848C8E]"
@@ -73,7 +74,7 @@ const EditorWindow = () => {
                             <input
                                 type="text"
                                 name={field}
-                                value={formData[field] || ""}
+                                value={typeof formData[field] === "string" ? formData[field] : ""}
                                 placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
                                 onChange={handleInputChange}
                                 className="border bg-[#E6E6E6] border-[#999999] shadow-md p-2 rounded-lg w-full text-[#848C8E]"
@@ -106,7 +107,7 @@ const EditorWindow = () => {
                 {renderFields()}
                 <div className="flex flex-col pt-3">
                     <NewPDFDownloadLink 
-                        document={<BusinessTemplate form={formData} />}
+                        document={<BusinessTemplate formData={formData} />}
                         fileName="exported_form.pdf"
                         className="px-4 py-2 bg-blue-500 text-white text-center rounded"
                     >
@@ -123,7 +124,7 @@ const EditorWindow = () => {
                         <div className="text-sm text-gray-500">Real-time PDF Preview</div>
                     </div> */}
                     <div className="flex justify-center items-center w-full h-[700px] bg-w mt-0">
-                        <NewBlobProvider document={<BusinessTemplate form={formData} />}>
+                        <NewBlobProvider document={<BusinessTemplate formData={formData} />}>
                             {({ url, loading, error }) => {
                                 if (loading) return 'Loading document...';
                                 if (error) return 'Error generating PDF';
