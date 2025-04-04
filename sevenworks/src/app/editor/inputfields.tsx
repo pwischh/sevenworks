@@ -6,12 +6,15 @@ import { useSearchParams } from "next/navigation";
 import { useFormContext } from "./formcontext";
 import { Worker } from '@react-pdf-viewer/core';
 import { pdf } from '@react-pdf/renderer';
+import { useZoom } from "./zoomcontext";
+ 
 const ViewerNoSSR = dynamic(() => import('@react-pdf-viewer/core').then(mod => mod.Viewer), { ssr: false });
 import '@react-pdf-viewer/core/lib/styles/index.css';
 
 const InputFields = () => {
   const searchParams = useSearchParams();
   const { formData, setFormData } = useFormContext();
+  const { zoom } = useZoom();
   const initialTab = searchParams.get("tab") || "personal";
   const [activeTab, setActiveTab] = useState(initialTab);
   
@@ -28,6 +31,7 @@ const InputFields = () => {
   const transitionTimerRef = useRef<NodeJS.Timeout | null>(null);
   const previousFormDataRef = useRef(formData);
   const isFirstRender = useRef(true);
+
 
   // New state for custom personal fields
   const [customPersonalFields, setCustomPersonalFields] = useState<{ id: number; label: string; value: string }[]>([]);
@@ -243,7 +247,7 @@ const InputFields = () => {
       return (
         <div className="bg-white rounded-lg shadow-lg hover:shadow-lg transition transform p-6 border border-gray-150 flex flex-col flex-1 min-h-full">
           <h1 className="text-black text-center">Experience</h1>
-          {formData.experience.map((exp, index) => (
+          {(formData.experience || []).map((exp, index) => (
             <div key={index} className="flex flex-col mt-2">
               <span className="text-xs font-bold text-[#848C8E]">Job Title</span>
               <input
@@ -277,7 +281,7 @@ const InputFields = () => {
       return (
         <div className="bg-white rounded-lg shadow-lg hover:shadow-lg transition transform p-6 border border-gray-150 flex flex-col flex-1 min-h-full">
           <h1 className="text-black text-center">Education</h1>
-          {formData.education.map((edu, index) => (
+          {(formData.education || []).map((edu, index) => (
             <div key={index} className="flex flex-col mt-2">
               <span className="text-xs font-bold text-[#848C8E]">Degree</span>
               <input
@@ -324,55 +328,66 @@ const InputFields = () => {
   };
 
   return (
-    <div className="grid grid-cols-[1.5fr,2.5fr] gap-0 w-full h-screen overflow-hidden overflow-y-hidden">
-      <div className="flex flex-col bg-white h-full overflow-auto">
+  <div className="flex w-full h-screen overflow-hidden">
+      <div className="w-[38%] flex flex-col bg-white h-full overflow-auto">
         {renderFields()}
       </div>
-      <div className="bg-white h-full overflow-hidden">
+      <div className="flex-1 overflow-auto bg-white h-full">
         <div className="w-full h-full flex flex-col">
-        <Worker workerUrl={`https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js`}>
-          <div className="flex-1 overflow-auto max-h-full relative">
-            {/* PDF content container with fade-in animation */}
-            <div className={`w-full h-full ${initialLoadComplete ? 'opacity-100' : 'opacity-0'} transition-opacity duration-500`}>
-              {/* Primary PDF Layer */}
-              <div 
-                className={`absolute top-0 left-0 w-full h-full transition-opacity duration-300 ${
-                  isPrimaryActive ? 'opacity-100 z-10' : 'opacity-0 z-0'
-                }`}
-              >
-                {primaryPdfUrl && <ViewerNoSSR fileUrl={primaryPdfUrl} />}
+          {/* Zoom controls removed; zoom now handled in the Navbar */}
+          
+          <Worker workerUrl={`https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js`}>
+              <div className={`flex-1 overflow-auto max-h-full relative`}>
+              {/* PDF content container with fade-in animation */}
+              <div className={`w-full h-full ${initialLoadComplete ? 'opacity-100' : 'opacity-0'} transition-opacity duration-500`}>
+              <div className="pdf-container" style={{ 
+                minWidth: '100%', 
+                minHeight: '100%', 
+                width: zoom > 100 ? `${zoom}%` : '100%',
+                height: '100%'
+              }}>
+                  {/* Primary PDF Layer */}
+                  <div 
+                    className={`absolute top-0 left-0 w-full h-full transition-opacity duration-300 ${
+                      isPrimaryActive ? 'opacity-100 z-10' : 'opacity-0 z-0'
+                    }`}
+                    style={{ transform: `scale(${zoom / 100})`, transformOrigin: 'top left' }}
+                  >
+                    {primaryPdfUrl && <ViewerNoSSR fileUrl={primaryPdfUrl} />}
+                  </div>
+                  
+                  {/* Secondary PDF Layer */}
+                  <div 
+                    className={`absolute top-0 left-0 w-full h-full transition-opacity duration-300 ${
+                      !isPrimaryActive ? 'opacity-100 z-10' : 'opacity-0 z-0'
+                    }`}
+                    style={{ transform: `scale(${zoom / 100})`, transformOrigin: 'top left' }}
+                  >
+                    {secondaryPdfUrl && <ViewerNoSSR fileUrl={secondaryPdfUrl} />}
+                  </div>
+                </div>
               </div>
               
-              {/* Secondary PDF Layer */}
+              {/* Initial loading indicator - shows before any PDF is ready */}
               <div 
-                className={`absolute top-0 left-0 w-full h-full transition-opacity duration-300 ${
-                  !isPrimaryActive ? 'opacity-100 z-10' : 'opacity-0 z-0'
-                }`}
+                className={`absolute top-0 left-0 w-full h-full flex items-center justify-center bg-white
+                  ${initialLoadComplete ? 'opacity-0 pointer-events-none' : 'opacity-100'} 
+                  transition-opacity duration-500 z-20`}
               >
-                {secondaryPdfUrl && <ViewerNoSSR fileUrl={secondaryPdfUrl} />}
+                <div className="text-center">
+                  <div className="inline-block w-8 h-8 border-4 border-[#435058] border-t-transparent rounded-full animate-spin mb-4"></div>
+                  <p className="text-gray-600">Preparing your document...</p>
+                </div>
               </div>
             </div>
-            
-            {/* Initial loading indicator - shows before any PDF is ready */}
-            <div 
-              className={`absolute top-0 left-0 w-full h-full flex items-center justify-center bg-white
-                ${initialLoadComplete ? 'opacity-0 pointer-events-none' : 'opacity-100'} 
-                transition-opacity duration-500 z-20`}
-            >
-              <div className="text-center">
-                <div className="inline-block w-8 h-8 border-4 border-[#435058] border-t-transparent rounded-full animate-spin mb-4"></div>
-                <p className="text-gray-600">Preparing your document...</p>
-              </div>
-            </div>
-          </div>
-        </Worker>
+          </Worker>
         </div>
       </div>
     </div>
   );
 };
 
-// Keep your existing styles but update transition duration
+// Updated styles to enable horizontal scrolling
 <style jsx global>{`
   .rpv-core__viewer {
     width: 100% !important;
@@ -383,7 +398,7 @@ const InputFields = () => {
     width: 100% !important;
     max-height: 100% !important;
     justify-content: flex-start !important;
-    overflow-y: auto !important;
+    overflow: auto !important;
   }
 
   .rpv-core__page-layer,
@@ -392,15 +407,22 @@ const InputFields = () => {
     height: 100% !important;
     object-fit: contain !important;
     max-height: 100% !important;
+    transition: transform 0.3s ease-in-out;
   }
 
   .rpv-core__page-layer {
     max-height: 100% !important;
-    overflow: hidden !important;
+    overflow: visible !important;
   }
 
   .rpv-core__page {
     padding: 0 !important;
+  }
+
+  /* Additional styles for horizontal scrolling */
+  .pdf-container {
+    position: relative;
+    overflow: visible;
   }
 `}</style>
 

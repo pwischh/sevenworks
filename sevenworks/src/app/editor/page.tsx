@@ -8,6 +8,7 @@ import { useEffect, Suspense } from "react";
 import { useAuth } from "../authContext";
 import { useRouter } from "next/navigation";
 import { FormProvider } from "./formcontext";
+import { ZoomProvider } from "./zoomcontext";
 
 export default function Editor() {
 
@@ -22,20 +23,22 @@ export default function Editor() {
     }, [user, loading, router]);
 
     return (
-      <FormProvider>
-        <div className="bg-white h-screen flex flex-col overflow-hidden pb-2">
-        <Navbar />
-        <div className="flex-1 flex pl-4 w-full gap-2 min-h-0">
-          <IconBar />
-          <Suspense fallback={<div>Loading Input Fields...</div>}>
-            <InputFields />
-          </Suspense>
-          <Suspense fallback={<div>Loading Editor...</div>}>
-            {/* <EditorWindow /> */}
-          </Suspense>
-          <RightView />
+      <ZoomProvider>
+        <FormProvider>
+          <div className="bg-white h-screen flex flex-col overflow-hidden pb-2">
+          <Navbar />
+          <div className="flex-1 flex pl-4 w-full gap-2 min-h-0">
+            <IconBar />
+            <Suspense fallback={<div>Loading Input Fields...</div>}>
+              <InputFields />
+            </Suspense>
+            <Suspense fallback={<div>Loading Editor...</div>}>
+              {/* <EditorWindow /> */}
+            </Suspense>
+            <RightView />
+          </div>
         </div>
-      </div>
-      </FormProvider>
+        </FormProvider>
+      </ZoomProvider>
     );
 }

@@ -10,6 +10,8 @@ import { PDFDownloadLink } from "@react-pdf/renderer";
 import dynamic from "next/dynamic";
 import BusinessTemplate from "./business-template";
 
+import { useZoom } from "./zoomcontext";
+
 const NewPDFDownloadLink = dynamic(
     () => import('@react-pdf/renderer').then((mod) => mod.PDFDownloadLink),
     { ssr: false }
@@ -55,6 +57,8 @@ export default function Navbar() {
         };
     }, [navRef]);
 
+    const { zoom, zoomIn, zoomOut, setZoom } = useZoom();
+
     function handleFontClick(value: string) {
         setFormData("font", value);
         console.log(formData);
@@ -69,9 +73,11 @@ export default function Navbar() {
                     </div>
                     <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center gap-6">
                         <span className="flex items-center gap-2">
-                            <Image src="/zoom-out.svg" alt="zoom out" width={24} height={24} className="hover:scale-110 transition-transform duration-200" />
-                            <span className="text-black !text-black">Zoom</span>
-                            <Image src="/zoom-in.svg" alt="zoom in" width={24} height={24} className="hover:scale-110 transition-transform duration-200" />
+                            <button onClick={zoomOut} className="hover:scale-110 transition-transform duration-200 text-xl">➖</button>
+                            <button onClick={() => setZoom(100)} className="text-black hover:underline focus:outline-none">
+                                {zoom}%
+                            </button>
+                            <button onClick={zoomIn} className="hover:scale-110 transition-transform duration-200 text-xl">➕</button>
                         </span>
                         <span className="relative flex items-center gap-2 cursor-pointer transition-opacity duration-200" onClick={() => {
                             setFontDropdownOpen(!fontDropdownOpen);

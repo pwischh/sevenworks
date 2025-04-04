@@ -21,16 +21,16 @@ const IconBar = () => {
 
   const [overlay] = useState<React.JSX.Element[]>([]);
   const [isCreateNewSectionOverlayVisible, setCreateNewSectionOverlay] = useState(false);
-  // const [isNewSectionIconOverlayVisible, setNewSectionIconOverlay] = useState(false);
+  const [isNewSectionIconOverlayVisible, setNewSectionIconOverlay] = useState(false);
   const newSectionOverlayRef = useRef<HTMLDivElement>(null);
 
   const displayCreateNewSectionOverlay = () => {
     setCreateNewSectionOverlay((prev) => !prev);
   };
 
-  // const displayNewSectionIconOverlay = () => {
-  //   setNewSectionIconOverlay((prev) => !prev);
-  // };
+  const displayNewSectionIconOverlay = () => {
+    setNewSectionIconOverlay((prev) => !prev);
+  };
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -106,12 +106,12 @@ const IconBar = () => {
            <Image src="/plus-square.svg" alt="plus square" width={32} height={32} className="w-8 h-8" style={{filter: "invert(100%)"}}/>
            </button>
           {isCreateNewSectionOverlayVisible &&
-          <div className="absolute top-0 left-full p-3 ml-2 w-80 gap-4 bg-[#BFB7B6] text-black rounded-lg shadow-lg">
+          <div className="absolute top-0 left-full p-3 ml-2 w-80 gap-4 bg-[#BFB7B6] text-black rounded-lg shadow-lg z-10">
              Create New Section
             <div className="flex w-full gap-4 items-center justify-center">
               <div className="flex items-center border bg-[#BFB7B6] border-[#999999] shadow-md rounded-lg w-5/6">
                 <input type="text" className="bg-[#BFB7B6] border-[#999999] p-2 rounded-lg w-full text-white placeholder-white" placeholder="New Section"/>
-                <button className="relative m-2 w-14 h-8 aspect-square rounded-lg flex items-center justify-left bg-[#BFB7B6] border border-[#888888] hover:bg-[#999999]" onClick={() => addSection()}>
+                <button className="relative m-2 w-14 h-8 aspect-square rounded-lg flex items-center justify-left bg-[#BFB7B6] border border-[#888888] hover:bg-[#999999]" onClick={() => displayNewSectionIconOverlay()}>
                   <Image src="/award.svg" alt="award" width={32} height={32} className="w-8 h-8 p-0.5" style={{ filter: 'invert(29%) sepia(14%) saturate(1580%) hue-rotate(175deg) brightness(92%) contrast(88%)' }} />
                   <Image src="/chevron-down.svg" alt="chevron-down" width={32} height={32} className="absolute right-0.5 w-3 h-3" style={{ filter: 'invert(29%) sepia(14%) saturate(1580%) hue-rotate(175deg) brightness(92%) contrast(88%)' }} />
                 </button>
@@ -121,7 +121,22 @@ const IconBar = () => {
               </button>
             </div>
             <Image src="/x.svg" alt="x" width={32} height={32} className="absolute top-2 right-2 w-4 h-4" onClick={() => displayCreateNewSectionOverlay()} style={{ filter: 'invert(29%) sepia(14%) saturate(1580%) hue-rotate(175deg) brightness(92%) contrast(88%)' }} />
-          </div> }
+            {isNewSectionIconOverlayVisible &&
+            <div>
+              <div className="absolute top-0 left-full p-3 ml-2 w-80 gap-4 bg-[#BFB7B6] text-black rounded-lg shadow-lg z-10">
+                Select Icon
+                <div className="flex w-full gap-4 items-center justify-center">
+                  <Image src="/user.svg" alt="user" width={32} height={32} className="w-8 h-8" />
+                  <Image src="/phone.svg" alt="phone" width={32} height={32} className="w-8 h-8" />
+                  <Image src="/book-open.svg" alt="open book" width={32} height={32} className="w-8 h-8" />
+                  <Image src="/briefcase.svg" alt="briefcase" width={32} height={32} className="w-8 h-8" />
+                  <Image src="/award.svg" alt="award" width={32} height={32} className="w-8 h-8" />
+                </div>
+              </div>
+            </div>
+            }
+          </div>
+          }
         </div>
         
         <div className="mt-auto p-0.5 flex items-center justify-center">
