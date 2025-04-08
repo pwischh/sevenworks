@@ -1,7 +1,8 @@
 "use client";
+
 import Image from "next/image";
 import { motion } from "framer-motion";
-import "./landing.css"; // Keep this import if you need the CSS
+import "./landing.css";
 
 const images = [
   "/sample-business-resume.png",
@@ -13,10 +14,13 @@ export default function AutoScrollImagesDown() {
   return (
     <>
       <div className="relative w-full h-[700px] overflow-hidden flex justify-center">
+        {/* Top and bottom fade overlays */}
         <div className="fade-overlay top-0 h-[100px] w-full absolute z-10"></div>
         <div className="fade-overlay bottom-0 h-[100px] w-full absolute z-10"></div>
+
+        {/* Scrolling image container */}
         <motion.div
-          className="image-container"
+          className="image-container space-y-4" // Added spacing between images
           initial={{ y: 0 }}
           animate={{ y: "-100%" }}
           transition={{
@@ -33,10 +37,9 @@ export default function AutoScrollImagesDown() {
               <Image
                 src={src}
                 alt={`Resume ${index + 1}`}
-                layout="responsive"
                 width={400}
                 height={500}
-                objectFit="cover"
+                style={{ objectFit: "cover" }}
                 className="rounded-lg"
               />
             </div>
