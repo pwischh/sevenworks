@@ -46,7 +46,7 @@ const IconBar = () => {
   }, []);
 
   return (
-    <div className="flex-none w-[60] h-full p-2 rounded-lg bg-white shadow-lg border border-gray-150">
+    <div className="flex-none w-[60] h-full p-2 rounded-lg bg-white shadow-lg border border-gray-300">
       {/* vertical stack */}
       <div className="flex flex-col gap-3 h-full">
       {sections}

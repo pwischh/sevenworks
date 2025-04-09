@@ -1,6 +1,6 @@
 import React from "react";
 import { Document, Page, Text, View, StyleSheet, Font } from "@react-pdf/renderer";
-import { TemplateProps } from "../types";
+import { TemplateProps } from "../../types";
 
 Font.register({family: "Arial", src: "/fonts/ARIAL.TTF"});
 Font.register({family: "Calibri", src: "/fonts/calibri.ttf"});

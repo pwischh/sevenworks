@@ -1,0 +1,17 @@
+[
+  {
+    "title": "Resume Analysis",
+    "description": "Get insights on your resume's strengths and areas for improvement with AI-powered analysis.",
+    "buttonText": "Analyze Resume"
+  },
+  {
+    "title": "Content Suggestions",
+    "description": "Receive AI-driven recommendations to enhance your resume content and make it more impactful.",
+    "buttonText": "Suggest Content"
+  },
+  {
+    "title": "Formatting Tools",
+    "description": "Customize your resume layout and design for a professional, modern look.",
+    "buttonText": "Format Resume"
+  }
+]

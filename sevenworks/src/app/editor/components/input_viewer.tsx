@@ -1,15 +1,16 @@
 "use client";
 import React, { useEffect, useState, useRef, useMemo } from "react";
 import dynamic from "next/dynamic";
-import BusinessTemplate from "./business-template";
+import BusinessTemplate from "./business_template";
 import { useSearchParams } from "next/navigation";
-import { useFormContext } from "./formcontext";
+import { useFormContext } from "../formcontext";
 import { Worker } from '@react-pdf-viewer/core';
 import { pdf } from '@react-pdf/renderer';
-import { useZoom } from "./zoomcontext";
+import { useZoom } from "../zoomcontext";
  
 const ViewerNoSSR = dynamic(() => import('@react-pdf-viewer/core').then(mod => mod.Viewer), { ssr: false });
 import '@react-pdf-viewer/core/lib/styles/index.css';
+import { FaSearch, FaLightbulb, FaEdit } from "react-icons/fa";
 
 const InputFields = () => {
   const searchParams = useSearchParams();
@@ -195,7 +196,7 @@ const InputFields = () => {
   const renderFields = () => {
     if (activeTab === "personal") {
       return (
-        <div className="bg-white rounded-lg shadow-lg hover:shadow-lg transition transform p-6 border border-gray-150 flex flex-col flex-1 min-h-full">          
+        <div className="bg-white rounded-lg shadow-lg hover:shadow-lg transition transform p-6 border border-gray-300 flex flex-col flex-1 min-h-full">          
           <h1 className="text-black text-center">Personal Information</h1>
           {["firstName", "middleName", "lastName", "email", "phone", "address"].map((field) => (
             <div key={field} className="flex flex-col mt-2">
@@ -236,7 +237,7 @@ const InputFields = () => {
           <div className="flex flex-col pt-3">
             <button
               onClick={addCustomField}
-              className="border bg-[#435058] border-[#999999] shadow-md p-2 rounded-lg w-full text-white"
+              className="border bg-[#435058] border-[#999999] shadow-md p-2 rounded-lg w-full hover:bg-[#1c2428] transition text-white"
             >
               + Add a New Element
             </button>
@@ -245,7 +246,7 @@ const InputFields = () => {
       );
     } else if (activeTab === "experience") {
       return (
-        <div className="bg-white rounded-lg shadow-lg hover:shadow-lg transition transform p-6 border border-gray-150 flex flex-col flex-1 min-h-full">
+        <div className="bg-white rounded-lg shadow-lg hover:shadow-lg transition transform p-6 border border-gray-300 flex flex-col flex-1 min-h-full">
           <h1 className="text-black text-center">Experience</h1>
           {(formData.experience || []).map((exp, index) => (
             <div key={index} className="flex flex-col mt-2">
@@ -279,7 +280,7 @@ const InputFields = () => {
       );
     } else if (activeTab === "education") {
       return (
-        <div className="bg-white rounded-lg shadow-lg hover:shadow-lg transition transform p-6 border border-gray-150 flex flex-col flex-1 min-h-full">
+        <div className="bg-white rounded-lg shadow-lg hover:shadow-lg transition transform p-6 border border-gray-300 flex flex-col flex-1 min-h-full">
           <h1 className="text-black text-center">Education</h1>
           {(formData.education || []).map((edu, index) => (
             <div key={index} className="flex flex-col mt-2">
@@ -313,7 +314,7 @@ const InputFields = () => {
       );
     } else if (activeTab === "additional") {
       return (
-        <div className="bg-white rounded-lg shadow-lg hover:shadow-lg transition transform p-6 border border-gray-150 flex flex-col flex-1 min-h-full">
+        <div className="bg-white rounded-lg shadow-lg hover:shadow-lg transition transform p-6 border border-gray-300 flex flex-col flex-1 min-h-full">
           <h1 className="text-black text-center">Additional Information</h1>
           <textarea
             name="additionalInfo"
@@ -328,19 +329,17 @@ const InputFields = () => {
   };
 
   return (
-  <div className="flex w-full h-screen overflow-hidden">
-      <div className="w-[38%] flex flex-col bg-white h-full overflow-auto">
+  <div className="bg-[#F8F8F8] flex w-full h-screen overflow-hidden">
+        <div className="w-[38%] flex flex-col bg-[#F8F8F8] h-full overflow-auto">
         {renderFields()}
       </div>
-      <div className="flex-1 overflow-auto bg-white h-full">
+        <div className="flex-1 overflow-auto bg-[#F8F8F8] h-full">
         <div className="w-full h-full flex flex-col">
-          {/* Zoom controls removed; zoom now handled in the Navbar */}
-          
           <Worker workerUrl={`https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js`}>
-              <div className={`flex-1 overflow-auto max-h-full relative`}>
+              <div className={`flex-1 overflow-auto max-h-full relative bg-[#F8F8F8]`}>
               {/* PDF content container with fade-in animation */}
-              <div className={`w-full h-full ${initialLoadComplete ? 'opacity-100' : 'opacity-0'} transition-opacity duration-500`}>
-              <div className="pdf-container" style={{ 
+              <div className={`w-full h-full ${initialLoadComplete ? 'opacity-100' : 'opacity-0'} transition-opacity duration-500 bg-[#F8F8F8]`}>
+                  <div className="pdf-container bg-[#F8F8F8]" style={{ 
                 minWidth: '100%', 
                 minHeight: '100%', 
                 width: zoom > 100 ? `${zoom}%` : '100%',
@@ -348,7 +347,7 @@ const InputFields = () => {
               }}>
                   {/* Primary PDF Layer */}
                   <div 
-                    className={`absolute top-0 left-0 w-full h-full transition-opacity duration-300 ${
+                    className={`absolute bg-[#F8F8F8] top-0 left-0 w-full h-full transition-opacity duration-300 ${
                       isPrimaryActive ? 'opacity-100 z-10' : 'opacity-0 z-0'
                     }`}
                     style={{ transform: `scale(${zoom / 100})`, transformOrigin: 'top left' }}
@@ -358,7 +357,7 @@ const InputFields = () => {
                   
                   {/* Secondary PDF Layer */}
                   <div 
-                    className={`absolute top-0 left-0 w-full h-full transition-opacity duration-300 ${
+                    className={`absolute bg-[#F8F8F8] top-0 left-0 w-full h-full transition-opacity duration-300 ${
                       !isPrimaryActive ? 'opacity-100 z-10' : 'opacity-0 z-0'
                     }`}
                     style={{ transform: `scale(${zoom / 100})`, transformOrigin: 'top left' }}
@@ -370,7 +369,7 @@ const InputFields = () => {
               
               {/* Initial loading indicator - shows before any PDF is ready */}
               <div 
-                className={`absolute top-0 left-0 w-full h-full flex items-center justify-center bg-white
+                className={`absolute top-0 left-0 w-full h-full flex items-center justify-center bg-[#F8F8F8]
                   ${initialLoadComplete ? 'opacity-0 pointer-events-none' : 'opacity-100'} 
                   transition-opacity duration-500 z-20`}
               >
@@ -387,43 +386,63 @@ const InputFields = () => {
   );
 };
 
-// Updated styles to enable horizontal scrolling
-<style jsx global>{`
-  .rpv-core__viewer {
-    width: 100% !important;
-    height: 100% !important;
-  }
-
-  .rpv-core__inner-pages {
-    width: 100% !important;
-    max-height: 100% !important;
-    justify-content: flex-start !important;
-    overflow: auto !important;
-  }
-
-  .rpv-core__page-layer,
-  .rpv-core__canvas-layer canvas {
-    width: 100% !important;
-    height: 100% !important;
-    object-fit: contain !important;
-    max-height: 100% !important;
-    transition: transform 0.3s ease-in-out;
-  }
-
-  .rpv-core__page-layer {
-    max-height: 100% !important;
-    overflow: visible !important;
-  }
-
-  .rpv-core__page {
-    padding: 0 !important;
-  }
-
-  /* Additional styles for horizontal scrolling */
-  .pdf-container {
-    position: relative;
-    overflow: visible;
-  }
-`}</style>
 
 export default InputFields;
+
+const RightView = ({
+  features,
+  expandedIndex,
+  setExpandedIndex,
+  exampleEdits,
+}: {
+  features: { title: string; description: string; buttonText: string }[];
+  expandedIndex: number | null;
+  setExpandedIndex: React.Dispatch<React.SetStateAction<number | null>>;
+  exampleEdits: { experience: { role: string; company: string; duration: string; location: string; descriptions: string[] }[] };
+}) => {
+  const featureIcons: Record<string, JSX.Element> = {
+    "Resume Analysis": <FaSearch className="text-2xl text-[#435058] mb-2" />,
+    "Content Suggestions": <FaLightbulb className="text-2xl text-[#435058] mb-2" />,
+    "Formatting Tools": <FaEdit className="text-2xl text-[#435058] mb-2" />,
+  };
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {features.map((feature, index) => (
+        <div
+          key={index}
+          className="bg-[#F8F8F8] w-full min-h-[220px] rounded-lg flex flex-col items-center justify-between shadow-sm hover:shadow-md hover:scale-[1.01] transition transform p-6 border border-gray-100"
+        >
+          {featureIcons[feature.title]}
+          <h2 className="text-base font-semibold text-gray-800 text-center">{feature.title}</h2>
+          <p className="text-sm text-gray-600 mt-2 text-center">{feature.description}</p>
+          <button
+            onClick={() => setExpandedIndex(expandedIndex === index ? null : index)}
+            className="mt-4 px-4 py-2 bg-[#435058] text-white rounded-lg hover:bg-[#1c2428] transition"
+          >
+            {feature.buttonText}
+          </button>
+          {expandedIndex === index && feature.title === "Content Suggestions" && (
+            <div className="mt-4 w-full text-xs text-left bg-gray-100 text-black p-4 rounded space-y-4 overflow-y-auto max-h-60">
+              {exampleEdits.experience.map((exp, idx) => (
+                <div key={idx} className="border-b pb-2">
+                  <div className="font-semibold text-sm">
+                    {exp.role} — {exp.company}
+                  </div>
+                  <div className="text-gray-600 text-xs italic">
+                    {exp.duration} | {exp.location}
+                  </div>
+                  <ul className="list-disc list-inside mt-1 space-y-1">
+                    {exp.descriptions.map((desc, i) => (
+                      <li key={i}>{desc}</li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+};

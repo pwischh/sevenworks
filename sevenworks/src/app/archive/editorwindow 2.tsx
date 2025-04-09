@@ -1,3 +1,4 @@
+// was in src/app/editor/editorwindow.tsx
 "use client";
 import React, { useState } from "react";
 import { BlobProvider } from '@react-pdf/renderer';

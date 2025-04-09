@@ -3,8 +3,8 @@
 import { Markazi_Text } from "next/font/google";
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { useAuth } from "../authContext";
-import ProfilePhoto from "../components/profilephoto";
+import { useAuth } from "../../authContext";
+import ProfilePhoto from "../../../components/profilephoto";
 
 const markazi = Markazi_Text({
     subsets: ["latin"],

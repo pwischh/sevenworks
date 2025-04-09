@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "../authContext";
-import ProfilePhoto from "../components/profilephoto";
+import ProfilePhoto from "../../components/profilephoto";
 import { Markazi_Text } from "next/font/google";
 import Link from "next/link";
 import Image from "next/image";

@@ -1,6 +1,6 @@
 import { FaRegCircleCheck } from "react-icons/fa6";
-import "./landing.css";
-import ImageGrid from "./imagegrid.js";
+import "./components/landing.css";
+import ImageGrid from "./components/imagegrid.js";
 
 export default function Landing() {
     return (
