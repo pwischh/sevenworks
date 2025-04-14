@@ -9,13 +9,14 @@ import { useFormContext } from "./../formcontext";
 import BusinessTemplate from "./../components/business_template";
 import ProfilePhoto from "../../../components/profilephoto";
 import { useZoom } from "../zoomcontext";
-import DownloadButton from "./DownloadButton";
+import dynamic from "next/dynamic";
 
 const markazi = Markazi_Text({
     subsets: ["latin"],
     variable: "--font-markazi",
 });
 
+const DownloadButton = dynamic(() => import("./DownloadButton"), { ssr: false });
 
 async function handleSignOut(){
     try {

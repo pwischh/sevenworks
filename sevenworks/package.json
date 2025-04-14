@@ -11,7 +11,6 @@
   "dependencies": {
     "@react-pdf-viewer/core": "^3.12.0",
     "@react-pdf/renderer": "^4.3.0",
-    "autoprefixer": "^10.4.20",
     "classnames": "^2.5.1",
     "firebase": "^11.4.0",
     "framer-motion": "^12.4.10",
@@ -32,6 +31,7 @@
     "@types/node": "^20",
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19",
+    "autoprefixer": "^10.4.21",
     "canvas": "^3.1.0",
     "eslint": "^9",
     "eslint-config-next": "^15.2.4",

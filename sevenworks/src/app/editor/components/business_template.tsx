@@ -1,6 +1,5 @@
 import React from "react";
 import { Document, Page, Text, View, StyleSheet, Font } from "@react-pdf/renderer";
-import { TemplateProps } from "../../types";
 
 Font.register({family: "Arial", src: "/fonts/ARIAL.TTF"});
 Font.register({family: "Calibri", src: "/fonts/calibri.ttf"});
@@ -34,6 +33,41 @@ const styles = StyleSheet.create({
   },
 });
 
+interface EducationEntry {
+  degree: string;
+  institution: string;
+  years: string;
+}
+interface ExperienceEntry {
+  title: string;
+  company: string;
+  years: string;
+}
+interface TemplateFormData {
+  font?: string;
+  firstName?: string;
+  middleName?: string;
+  lastName?: string;
+  address?: string;
+  phone?: string;
+  email?: string;
+  education?: EducationEntry[];
+  experience?: ExperienceEntry[];
+  educationSchool?: string;
+  educationGraduation?: string;
+  educationDegree?: string;
+  educationDescription?: string;
+  educationGPA?: string;
+  leadership?: string;
+  ubsProgram?: string;
+  honors?: string;
+  skillsInterests?: string;
+  [key: string]: any;
+}
+interface TemplateProps {
+  formData: TemplateFormData;
+}
+
 export default function BusinessTemplate({ formData }: TemplateProps) {
   if (!formData) return null;
 
@@ -56,34 +90,36 @@ export default function BusinessTemplate({ formData }: TemplateProps) {
 
           <View style={{ marginTop: 10, fontFamily: formData?.font ?? "Helvetica" }}>
             <Text style={styles.title}>EDUCATION</Text>
-            <Text style={styles.content}>
-              {formData.educationSchool || "Education School"} — {formData.educationGraduation || "Graduation Date"}{"\n"}
-              {formData.educationDegree || "Degree"}{"\n"}
-              {formData.educationDescription || "Coursework/Description"}{"\n"}
-              {formData.educationGPA ? "GPA: " + formData.educationGPA : ""}
-            </Text>
+            {formData.education && formData.education.length > 0 ? (
+              <View style={{ marginBottom: 16 }}>
+                {formData.education.map((edu, idx) => (
+                  <View key={idx} style={{ marginBottom: 6 }}>
+                    <Text style={{ fontSize: 12, fontWeight: 'bold' }}>{edu.degree} at {edu.institution}</Text>
+                    <Text style={{ fontSize: 12 }}>{edu.years}</Text>
+                  </View>
+                ))}
+              </View>
+            ) : (
+              <Text style={styles.content}>
+                {formData.educationSchool || "Education School"} — {formData.educationGraduation || "Graduation Date"}{"\n"}
+                {formData.educationDegree || "Degree"}{"\n"}
+                {formData.educationDescription || "Coursework/Description"}{"\n"}
+                {formData.educationGPA ? "GPA: " + formData.educationGPA : ""}
+              </Text>
+            )}
           </View>
 
           <View style={{ marginTop: 10, fontFamily: formData?.font ?? "Helvetica" }}>
             <Text style={styles.title}>EXPERIENCE</Text>
             {formData.experience && formData.experience.length > 0 ? (
-              formData.experience.map((job: {
-                company?: string;
-                location?: string;
-                duration?: string;
-                role?: string;
-                details?: string[];
-              }, index: number) => (
-                <View key={index} style={{ marginBottom: 4 }}>
-                  <Text style={styles.job_header}>
-                    {job.company || "Company Name"}, {job.location || "Location"} — {job.duration || "Duration"}
-                  </Text>
-                  <Text style={styles.content}>
-                    {job.role || "Role"}{"\n"}
-                    {job.details ? job.details.join("\n") : ""}
-                  </Text>
-                </View>
-              ))
+              <View style={{ marginBottom: 16 }}>
+                {formData.experience.map((exp, idx) => (
+                  <View key={idx} style={{ marginBottom: 6 }}>
+                    <Text style={{ fontSize: 12, fontWeight: 'bold' }}>{exp.title} at {exp.company}</Text>
+                    <Text style={{ fontSize: 12 }}>{exp.years}</Text>
+                  </View>
+                ))}
+              </View>
             ) : (
               <>
                 <Text style={styles.job_header}>Company Name — Role</Text>

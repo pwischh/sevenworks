@@ -64,7 +64,7 @@ const ResumeCard = ({ resume }: { resume: Resume }) => {
     return(
         <div className="relative z-0 flex flex-col items-center w-full p-4 bg-gray-100 rounded-lg border-[1px] border-gray-200">
         {/* Triangle */}
-        <div className="flex absolute top-0 right-0 z-9 rounded-tr-lg inline-block w-0 h-0 border-solid border-t-0 border-r-[80px] border-l-0 border-b-[80px] border-l-transparent border-r-navy border-t-transparent border-b-transparent">
+        <div className="flex absolute top-0 right-0 z-9 rounded-tr-lg w-0 h-0 border-solid border-t-0 border-r-[80px] border-l-0 border-b-[80px] border-l-transparent border-r-navy border-t-transparent border-b-transparent">
             <div className="absolute left-[42px] top-[9px] z-11 text-offWhite">
                 {categories(resume.description)}
             </div>

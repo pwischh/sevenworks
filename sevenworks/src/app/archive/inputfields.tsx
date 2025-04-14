@@ -214,7 +214,7 @@ const InputFields = () => {
                 value={typeof formData[field] === "string" ? formData[field] : ""}
                 placeholder={field.charAt(0).toUpperCase() + field.replace(/([A-Z])/g, ' $1').slice(1)}
                 onChange={handleInputChange}
-                className={`border bg-[#E6E6E6] border-[#999999] shadow-md p-2 rounded-lg w-full text-[#848C8E] text-black ${["firstName", "middleName", "lastName"].includes(field) ? "font-bold" : ""}`}
+                className={`border bg-[#E6E6E6] border-[#999999] shadow-md p-2 rounded-lg w-full text-[#848C8E] ${["firstName", "middleName", "lastName"].includes(field) ? "font-bold" : ""}`}
                 style={["firstName", "middleName", "lastName"].includes(field) ? { fontWeight: 700 } : undefined}
               />
             </div>

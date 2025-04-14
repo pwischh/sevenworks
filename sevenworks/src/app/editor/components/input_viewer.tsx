@@ -4,14 +4,27 @@ import type { JSX } from "react";
 import dynamic from "next/dynamic";
 import BusinessTemplate from "./business_template";
 import { useSearchParams } from "next/navigation";
-import { useFormContext } from "../formcontext";
+import { useFormContext, saveFormDataToFirestore, loadFormDataFromFirestore } from "../formcontext";
 import { Worker } from '@react-pdf-viewer/core';
 import { pdf } from '@react-pdf/renderer';
 import { useZoom } from "../zoomcontext";
- 
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+
 const ViewerNoSSR = dynamic(() => import('@react-pdf-viewer/core').then(mod => mod.Viewer), { ssr: false });
 import '@react-pdf-viewer/core/lib/styles/index.css';
 import { FaSearch, FaLightbulb, FaEdit } from "react-icons/fa";
+
+// Add these types at the top of the file
+interface ExperienceEntry {
+  title: string;
+  company: string;
+  years: string;
+}
+interface EducationEntry {
+  degree: string;
+  institution: string;
+  years: string;
+}
 
 const InputFields = () => {
   const searchParams = useSearchParams();
@@ -19,7 +32,7 @@ const InputFields = () => {
   const { zoom } = useZoom();
   const initialTab = searchParams.get("tab") || "personal";
   const [activeTab, setActiveTab] = useState(initialTab);
-  
+
   // References for PDF URLs and transitions
   const [primaryPdfUrl, setPrimaryPdfUrl] = useState<string | null>(null);
   const [secondaryPdfUrl, setSecondaryPdfUrl] = useState<string | null>(null);
@@ -27,16 +40,23 @@ const InputFields = () => {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
-  
+
   // Refs for tracking and cleanup
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const transitionTimerRef = useRef<NodeJS.Timeout | null>(null);
   const previousFormDataRef = useRef(formData);
   const isFirstRender = useRef(true);
-
+  const isFirstLoad = useRef(true);
 
   // New state for custom personal fields
   const [customPersonalFields, setCustomPersonalFields] = useState<{ id: number; label: string; value: string }[]>([]);
+
+  // Add state for save/load status
+  const [saveStatus, setSaveStatus] = useState<string>("");
+  const [loadStatus, setLoadStatus] = useState<string>("");
+
+  // State for user authentication readiness
+  const [isUserReady, setIsUserReady] = useState(false);
 
   // Function to add a new custom field
   const addCustomField = () => {
@@ -55,12 +75,71 @@ const InputFields = () => {
     setFormData("customPersonal", updatedFields);
   };
 
+  // Add new experience entry
+  const addExperience = () => {
+    const updated = [...(formData.experience || []), { title: '', company: '', years: '' }];
+    setFormData('experience', updated);
+  };
+
+  // Add new education entry
+  const addEducation = () => {
+    const updated = [...(formData.education || []), { degree: '', institution: '', years: '' }];
+    setFormData('education', updated);
+  };
+
+  // Handle experience field change
+  const handleExperienceChange = (idx: number, key: keyof ExperienceEntry, value: string) => {
+    const updated = [...(formData.experience || [])];
+    updated[idx][key] = value;
+    setFormData('experience', updated);
+  };
+
+  // Handle education field change
+  const handleEducationChange = (idx: number, key: keyof EducationEntry, value: string) => {
+    const updated = [...(formData.education || [])];
+    updated[idx][key] = value;
+    setFormData('education', updated);
+  };
+
   useEffect(() => {
     const tab = searchParams.get("tab") || "personal";
     if (tab !== activeTab) {
       setActiveTab(tab);
     }
   }, [activeTab, searchParams]);
+
+  // Check user authentication state
+  useEffect(() => {
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setIsUserReady(!!user);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // Automatically load form data on mount (after user is ready, with delay)
+  useEffect(() => {
+    if (!isUserReady) return;
+    const timer = setTimeout(async () => {
+      const loaded = await loadFormDataFromFirestore();
+      if (loaded) {
+        Object.entries(loaded).forEach(([key, value]) => {
+          setFormData(key, value);
+        });
+      }
+      isFirstLoad.current = false;
+    }, 500); // 500ms delay
+    return () => clearTimeout(timer);
+  }, [isUserReady]);
+
+  // Automatically save form data when it changes (debounced)
+  useEffect(() => {
+    if (isFirstLoad.current) return;
+    const handler = setTimeout(() => {
+      saveFormDataToFirestore(formData);
+    }, 1000); // 1 second debounce
+    return () => clearTimeout(handler);
+  }, [formData]);
 
   // Generate initial PDF on first load
   useEffect(() => {
@@ -79,12 +158,12 @@ const InputFields = () => {
   // Function to generate a PDF without directly updating state
   const generatePdf = async () => {
     if (isGenerating && !isFirstRender.current) return;
-    
+
     setIsGenerating(true);
     try {
       const blob = await pdf(<BusinessTemplate formData={formData} />).toBlob();
       const newUrl = URL.createObjectURL(blob);
-      
+
       // Store the new PDF in the inactive slot
       if (isPrimaryActive) {
         // Clean up any existing secondary URL
@@ -99,16 +178,16 @@ const InputFields = () => {
         }
         setPrimaryPdfUrl(newUrl);
       }
-      
+
       // Start transition if we have a PDF already displayed
       if ((primaryPdfUrl || secondaryPdfUrl) && !isFirstRender.current) {
         setIsTransitioning(true);
-        
+
         // Wait for the new PDF to fully load before switching
         if (transitionTimerRef.current) {
           clearTimeout(transitionTimerRef.current);
         }
-        
+
         transitionTimerRef.current = setTimeout(() => {
           setIsPrimaryActive(!isPrimaryActive);
           setIsTransitioning(false);
@@ -120,10 +199,10 @@ const InputFields = () => {
           setIsPrimaryActive(true);
         }
       }
-      
+
       // Save current form data to compare for future changes
-      previousFormDataRef.current = {...formData};
-      
+      previousFormDataRef.current = { ...formData };
+
     } catch (error) {
       console.error("Error generating PDF:", error);
     } finally {
@@ -134,17 +213,17 @@ const InputFields = () => {
   // Check if form data has actually changed
   const hasFormDataChanged = useMemo(() => {
     if (isFirstRender.current) return true;
-    
+
     // Do a deep comparison of current and previous form data
     const prevData = previousFormDataRef.current;
     const currData = formData;
-    
+
     for (const key in currData) {
       if (JSON.stringify(currData[key]) !== JSON.stringify(prevData[key])) {
         return true;
       }
     }
-    
+
     return false;
   }, [formData]);
 
@@ -152,17 +231,17 @@ const InputFields = () => {
   useEffect(() => {
     // Don't regenerate if form data hasn't changed or during initial load
     if (!hasFormDataChanged || isFirstRender.current) return;
-    
+
     // Clear any existing timer
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
     }
-    
-    // Set a new timer
+
+    // Set a new timer with a short debounce for instant feedback
     debounceTimerRef.current = setTimeout(() => {
       generatePdf();
-    }, 800);
-    
+    }, 100); // 100ms debounce for more responsive updates
+
     // Cleanup function
     return () => {
       if (debounceTimerRef.current) {
@@ -197,7 +276,7 @@ const InputFields = () => {
   const renderFields = () => {
     if (activeTab === "personal") {
       return (
-        <div className="bg-white rounded-lg shadow-lg hover:shadow-lg transition transform p-6 border border-gray-300 flex flex-col flex-1 min-h-full">          
+        <div className="bg-white rounded-lg shadow-lg hover:shadow-lg transition transform p-6 border border-gray-300 flex flex-col flex-1 min-h-full">
           <h1 className="text-black text-center">Personal Information</h1>
           {["firstName", "middleName", "lastName", "email", "phone", "address"].map((field) => (
             <div key={field} className="flex flex-col mt-2">
@@ -249,68 +328,80 @@ const InputFields = () => {
       return (
         <div className="bg-white rounded-lg shadow-lg hover:shadow-lg transition transform p-6 border border-gray-300 flex flex-col flex-1 min-h-full">
           <h1 className="text-black text-center">Experience</h1>
-          {(formData.experience || []).map((exp, index) => (
-            <div key={index} className="flex flex-col mt-2">
+          {(formData.experience || []).map((exp, idx) => (
+            <div key={idx} className="flex flex-col mt-2 border-b pb-2">
               <span className="text-xs font-bold text-[#848C8E]">Job Title</span>
               <input
                 type="text"
-                name={`experience[${index}].title`}
                 value={exp.title}
-                onChange={handleInputChange}
+                onChange={e => handleExperienceChange(idx, 'title', e.target.value)}
                 className="border bg-[#E6E6E6] border-[#999999] shadow-md p-2 rounded-lg w-full text-[#848C8E]"
+                placeholder="Job Title"
               />
               <span className="text-xs font-bold text-[#848C8E] mt-2">Company</span>
               <input
                 type="text"
-                name={`experience[${index}].company`}
                 value={exp.company}
-                onChange={handleInputChange}
+                onChange={e => handleExperienceChange(idx, 'company', e.target.value)}
                 className="border bg-[#E6E6E6] border-[#999999] shadow-md p-2 rounded-lg w-full text-[#848C8E]"
+                placeholder="Company"
               />
               <span className="text-xs font-bold text-[#848C8E] mt-2">Years</span>
               <input
                 type="text"
-                name={`experience[${index}].years`}
                 value={exp.years}
-                onChange={handleInputChange}
+                onChange={e => handleExperienceChange(idx, 'years', e.target.value)}
                 className="border bg-[#E6E6E6] border-[#999999] shadow-md p-2 rounded-lg w-full text-[#848C8E]"
+                placeholder="Years"
               />
             </div>
           ))}
+          <button
+            onClick={addExperience}
+            className="border bg-[#435058] border-[#999999] shadow-md p-2 rounded-lg w-full hover:bg-[#1c2428] transition text-white mt-4"
+          >
+            + Add Experience
+          </button>
         </div>
       );
     } else if (activeTab === "education") {
       return (
         <div className="bg-white rounded-lg shadow-lg hover:shadow-lg transition transform p-6 border border-gray-300 flex flex-col flex-1 min-h-full">
           <h1 className="text-black text-center">Education</h1>
-          {(formData.education || []).map((edu, index) => (
-            <div key={index} className="flex flex-col mt-2">
+          {(formData.education && Array.isArray(formData.education) ? formData.education : []).map((edu, idx) => (
+            <div key={idx} className="flex flex-col mt-2 border-b pb-2">
               <span className="text-xs font-bold text-[#848C8E]">Degree</span>
               <input
                 type="text"
-                name={`education[${index}].degree`}
-                value={edu.degree}
-                onChange={handleInputChange}
+                value={edu.degree || ''}
+                onChange={e => handleEducationChange(idx, 'degree', e.target.value)}
                 className="border bg-[#E6E6E6] border-[#999999] shadow-md p-2 rounded-lg w-full text-[#848C8E]"
+                placeholder="Degree"
               />
               <span className="text-xs font-bold text-[#848C8E] mt-2">Institution</span>
               <input
                 type="text"
-                name={`education[${index}].institution`}
-                value={edu.institution}
-                onChange={handleInputChange}
+                value={edu.institution || ''}
+                onChange={e => handleEducationChange(idx, 'institution', e.target.value)}
                 className="border bg-[#E6E6E6] border-[#999999] shadow-md p-2 rounded-lg w-full text-[#848C8E]"
+                placeholder="Institution"
               />
               <span className="text-xs font-bold text-[#848C8E] mt-2">Years</span>
               <input
                 type="text"
-                name={`education[${index}].years`}
-                value={edu.years}
-                onChange={handleInputChange}
+                value={edu.years || ''}
+                onChange={e => handleEducationChange(idx, 'years', e.target.value)}
                 className="border bg-[#E6E6E6] border-[#999999] shadow-md p-2 rounded-lg w-full text-[#848C8E]"
+                placeholder="Years"
               />
             </div>
           ))}
+          <button
+            onClick={addEducation}
+            className="border bg-[#435058] border-[#999999] shadow-md p-2 rounded-lg w-full hover:bg-[#1c2428] transition text-white mt-4"
+          >
+            + Add Education
+          </button>
         </div>
       );
     } else if (activeTab === "additional") {
@@ -330,24 +421,24 @@ const InputFields = () => {
   };
 
   return (
-  <div className="bg-[#F8F8F8] flex w-full h-screen overflow-hidden">
-        <div className="w-[38%] flex flex-col bg-[#F8F8F8] h-full overflow-auto">
+    <div className="bg-[#F8F8F8] flex w-full h-screen overflow-hidden">
+      <div className="w-[38%] flex flex-col bg-[#F8F8F8] h-full overflow-auto">
         {renderFields()}
       </div>
-        <div className="flex-1 overflow-auto bg-[#F8F8F8] h-full">
+      <div className="flex-1 overflow-auto bg-[#F8F8F8] h-full">
         <div className="w-full h-full flex flex-col">
           <Worker workerUrl={`https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js`}>
-              <div className={`flex-1 overflow-auto max-h-full relative bg-[#F8F8F8]`}>
+            <div className={`flex-1 overflow-auto max-h-full relative bg-[#F8F8F8]`}>
               {/* PDF content container with fade-in animation */}
               <div className={`w-full h-full ${initialLoadComplete ? 'opacity-100' : 'opacity-0'} transition-opacity duration-500 bg-[#F8F8F8]`}>
-                  <div className="pdf-container bg-[#F8F8F8]" style={{ 
-                minWidth: '100%', 
-                minHeight: '100%', 
-                width: zoom > 100 ? `${zoom}%` : '100%',
-                height: '100%'
-              }}>
+                <div className="pdf-container bg-[#F8F8F8]" style={{
+                  minWidth: '100%',
+                  minHeight: '100%',
+                  width: zoom > 100 ? `${zoom}%` : '100%',
+                  height: '100%'
+                }}>
                   {/* Primary PDF Layer */}
-                  <div 
+                  <div
                     className={`absolute bg-[#F8F8F8] top-0 left-0 w-full h-full transition-opacity duration-300 ${
                       isPrimaryActive ? 'opacity-100 z-10' : 'opacity-0 z-0'
                     }`}
@@ -355,9 +446,9 @@ const InputFields = () => {
                   >
                     {primaryPdfUrl && <ViewerNoSSR fileUrl={primaryPdfUrl} />}
                   </div>
-                  
+
                   {/* Secondary PDF Layer */}
-                  <div 
+                  <div
                     className={`absolute bg-[#F8F8F8] top-0 left-0 w-full h-full transition-opacity duration-300 ${
                       !isPrimaryActive ? 'opacity-100 z-10' : 'opacity-0 z-0'
                     }`}
@@ -367,9 +458,9 @@ const InputFields = () => {
                   </div>
                 </div>
               </div>
-              
+
               {/* Initial loading indicator - shows before any PDF is ready */}
-              <div 
+              <div
                 className={`absolute top-0 left-0 w-full h-full flex items-center justify-center bg-[#F8F8F8]
                   ${initialLoadComplete ? 'opacity-0 pointer-events-none' : 'opacity-100'} 
                   transition-opacity duration-500 z-20`}
@@ -386,7 +477,6 @@ const InputFields = () => {
     </div>
   );
 };
-
 
 export default InputFields;
 
