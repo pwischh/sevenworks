@@ -18,6 +18,7 @@ import {
     LuChevronUp } from "react-icons/lu";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../lib/firebase";
+import Navbar from "../landing/components/navbar";
 
 const markazi = Markazi_Text({
     subsets: ["latin"],
@@ -139,6 +140,7 @@ export default function Templates() {
 
     return (
         <div ref={scrollRef} className="flex flex-col w-screen h-screen justify-start items-center bg-white gap-2 overflow-scroll">
+            <Navbar />
             <div className="flex flex-col w-screen h-fit justify-start items-center gap-2 bg-gradient-to-b from-navy to-darkRed">
                 {/* Back to top button */}
                 <div 
@@ -153,45 +155,9 @@ export default function Templates() {
                     </span>
                     <LuChevronUp className="w-[38px] h-[38px]"/>
                 </div>
-                {/* Navbar */}
-                <div className = "flex flex-row p-4 gap-3 bg-transparent text-white w-full text-offWhite text-l">
-                    <div className = "flex flex-row items-center gap-5 w-full">
-                        <div className={markazi.className}>
-                            <Link href="/" className="text-3xl font-bold text-offWhite hover:none">
-                                SevenWorks
-                            </Link>
-                        </div>
-                        <div className="w-[2px] h-[80%] bg-gray-400/30 rounded-md"></div>
-                        <nav className = "flex flex-row gap-7 px-1 w-fit text-nowrap font-semibold">
-                            <Link href="/templates" className="hover:scale-[1.05] transition">Templates</Link>
-                            <Link href = "#" className="hover:scale-[1.05] transition">Examples</Link>
-                            <Link href = "#" className="hover:scale-[1.05] transition">About</Link>
-                        </nav>
-                    </div>
-                    <div className = "flex flex-row justify-end items-center gap-4 text-nowrap">
-                        {(loading || !user) ? (
-                            <>  
-                                <a href = "../register/login" 
-                                className = "border-2 border-offWhite px-2 py-1 rounded-xl hover:bg-lightRed hover:border-transparent">
-                                    Log In
-                                </a>
-                                <a href = "../register/signup" 
-                                className = "bg-lightRed border-2 border-lightRed px-2 py-1 rounded-xl hover:bg-darkRed hover:border-darkRed">
-                                    Sign Up
-                                </a>
-                            </>
-                        ) : (
-                            <>  
-                                <Link href="/dashboard">
-                                    <ProfilePhoto/>
-                                </Link>
-                            </>
-                        )}
-                    </div>
-                </div>
                 {/* Heading Text */}
                 <div className="flex flex-col w-screen h-fit gap-2 items-center py-2 text-offWhite px-20">
-                    <h1 className="color-offWhite text-[36px] font-bold text-center">Resume Templates</h1>
+                    <h1 className="color-offWhite text-[36px] font-bold text-center pt-20">Resume Templates</h1>
                     <h2 className="color-offWhite text-[22px] font-medium italic text-center">Choose from our list of curated resume templates, designed for your success.</h2>
                 </div>
                 {/* Categories */}

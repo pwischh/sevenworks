@@ -1,9 +1,15 @@
 "use client";
-import { createContext, useContext, useState } from "react";
 
-const ZoomContext = createContext(null);
+import { createContext, useContext, useState, ReactNode } from "react";
 
-export function ZoomProvider({ children }) {
+const ZoomContext = createContext<{
+  zoom: number;
+  zoomIn: () => void;
+  zoomOut: () => void;
+  setZoom: (z: number) => void;
+} | null>(null);
+
+export function ZoomProvider({ children }: { children: ReactNode }) {
   const [zoom, setZoom] = useState(100);
 
   const zoomIn = () => setZoom((prev) => Math.min(prev + 10, 300));

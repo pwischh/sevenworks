@@ -2,14 +2,14 @@
 "use client";
 import React, { useState } from "react";
 // import { useEffect } from "react";
-import { PDFDownloadLink, BlobProvider } from '@react-pdf/renderer';
+import { PDFDownloadLink } from '@react-pdf/renderer';
 import dynamic from "next/dynamic";
 import BusinessTemplate from "../TEST-TEMPLATES/business-template";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useFormContext, FormProvider } from "../editor/formcontext";
 
 const NewPDFDownloadLink = dynamic(() => Promise.resolve(PDFDownloadLink), { ssr: false });
-const NewBlobProvider = dynamic(() => Promise.resolve(BlobProvider), { ssr: false });
+const NewBlobProvider = dynamic(() => import('@react-pdf/renderer').then((mod) => mod.BlobProvider), { ssr: false });
 
 const EditorWindow = () => {
     const searchParams = useSearchParams();

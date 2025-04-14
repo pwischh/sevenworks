@@ -26,7 +26,7 @@ export default function TemplatePreview() {
   };
 
   return (
-    <section id="resumes" className="py-24 px-4 bg-gray-50">
+    <section id="resumes" className="py-20 px-4 bg-gray-50">
       <div className="max-w-7xl mx-auto">
         {/* Heading */}
         <motion.div 
@@ -83,7 +83,7 @@ export default function TemplatePreview() {
         
         {/* "See all" link */}
         <motion.div 
-          className="text-center mt-12"
+          className="text-center mt-6"
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}

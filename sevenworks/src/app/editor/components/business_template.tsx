@@ -35,15 +35,17 @@ const styles = StyleSheet.create({
 });
 
 export default function BusinessTemplate({ formData }: TemplateProps) {
+  if (!formData) return null;
+
   return (
     <Document>
       <Page size="LETTER" style={styles.page}>
         <View wrap={false}>
           <View style={styles.header}>
-            <Text style={{ fontSize: 18, fontWeight: 'bold', fontFamily: formData.font }}>
+            <Text style={{ fontSize: 18, fontWeight: 'bold', fontFamily: formData?.font ?? "Helvetica" }}>
               {formData.firstName || "First Name"} {formData.middleName ? formData.middleName + " " : ""}{formData.lastName || "Last Name"}
             </Text>
-            <Text style={{ fontSize: 12, marginTop: 5, fontFamily: formData.font }}>
+            <Text style={{ fontSize: 12, marginTop: 5, fontFamily: formData?.font ?? "Helvetica" }}>
               {formData.address || "Address not provided | "}
               {formData.address && " | "}
               {formData.phone || "Phone not provided | "}
@@ -52,7 +54,7 @@ export default function BusinessTemplate({ formData }: TemplateProps) {
             </Text>
           </View>
 
-          <View style={{ marginTop: 10, fontFamily: formData.font }}>
+          <View style={{ marginTop: 10, fontFamily: formData?.font ?? "Helvetica" }}>
             <Text style={styles.title}>EDUCATION</Text>
             <Text style={styles.content}>
               {formData.educationSchool || "Education School"} — {formData.educationGraduation || "Graduation Date"}{"\n"}
@@ -62,7 +64,7 @@ export default function BusinessTemplate({ formData }: TemplateProps) {
             </Text>
           </View>
 
-          <View style={{ marginTop: 10, fontFamily: formData.font }}>
+          <View style={{ marginTop: 10, fontFamily: formData?.font ?? "Helvetica" }}>
             <Text style={styles.title}>EXPERIENCE</Text>
             {formData.experience && formData.experience.length > 0 ? (
               formData.experience.map((job: {
@@ -92,7 +94,7 @@ export default function BusinessTemplate({ formData }: TemplateProps) {
             )}
           </View>
 
-          <View style={{ marginTop: 10, fontFamily: formData.font }}>
+          <View style={{ marginTop: 10, fontFamily: formData?.font ?? "Helvetica" }}>
             <Text style={styles.title}>LEADERSHIP AND COMMUNITY ENGAGEMENT</Text>
             {formData.leadership ? (
               <Text style={styles.content}>
@@ -120,7 +122,7 @@ export default function BusinessTemplate({ formData }: TemplateProps) {
             )}
           </View>
 
-          <View style={{ marginTop: 10, fontFamily: formData.font }}>
+          <View style={{ marginTop: 10, fontFamily: formData?.font ?? "Helvetica" }}>
             <Text style={styles.job_header}>UBS Freshman Frenzy Program, New York, NY — June 2019</Text>
             {formData.ubsProgram ? (
               <Text style={styles.content}>
@@ -136,7 +138,7 @@ export default function BusinessTemplate({ formData }: TemplateProps) {
             )}
           </View>
 
-          <View style={{ marginTop: 10, fontFamily: formData.font }}>
+          <View style={{ marginTop: 10, fontFamily: formData?.font ?? "Helvetica" }}>
             <Text style={styles.title}>HONORS</Text>
             {formData.honors ? (
               <Text style={styles.content}>
@@ -150,7 +152,7 @@ export default function BusinessTemplate({ formData }: TemplateProps) {
             )}
           </View>
 
-          <View style={{ marginTop: 10, fontFamily: formData.font }}>
+          <View style={{ marginTop: 10, fontFamily: formData?.font ?? "Helvetica" }}>
             <Text style={styles.title}>ADDITIONAL SKILLS AND INTERESTS</Text>
             {formData.skillsInterests ? (
               <Text style={styles.content}>

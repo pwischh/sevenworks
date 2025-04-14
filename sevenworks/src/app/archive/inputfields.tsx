@@ -7,7 +7,8 @@ import { useFormContext } from "../editor/formcontext";
 import { Worker } from '@react-pdf-viewer/core';
 import { pdf } from '@react-pdf/renderer';
 import { useZoom } from "../editor/zoomcontext";
- 
+import type { ReactNode } from "react";
+
 const ViewerNoSSR = dynamic(() => import('@react-pdf-viewer/core').then(mod => mod.Viewer), { ssr: false });
 import '@react-pdf-viewer/core/lib/styles/index.css';
 import { FaSearch, FaLightbulb, FaEdit } from "react-icons/fa";
@@ -15,6 +16,8 @@ import { FaSearch, FaLightbulb, FaEdit } from "react-icons/fa";
 const InputFields = () => {
   const searchParams = useSearchParams();
   const { formData, setFormData } = useFormContext();
+  const formDataWithFont = { ...formData, font: typeof formData.font === 'string' && formData.font.trim() ? formData.font : 'Helvetica' };
+  const typedFormData = formData as { experience: ExperienceField[]; [key: string]: any };
   const { zoom } = useZoom();
   const initialTab = searchParams.get("tab") || "personal";
   const [activeTab, setActiveTab] = useState(initialTab);
@@ -32,10 +35,11 @@ const InputFields = () => {
   const transitionTimerRef = useRef<NodeJS.Timeout | null>(null);
   const previousFormDataRef = useRef(formData);
   const isFirstRender = useRef(true);
-
-
-  // New state for custom personal fields
   const [customPersonalFields, setCustomPersonalFields] = useState<{ id: number; label: string; value: string }[]>([]);
+  
+  // Define the structure for experience data
+  type ExperienceField = { title: string; company: string; years: string };
+  type EducationField = { degree: string; institution: string; years: string };
 
   // Function to add a new custom field
   const addCustomField = () => {
@@ -81,7 +85,7 @@ const InputFields = () => {
     
     setIsGenerating(true);
     try {
-      const blob = await pdf(<BusinessTemplate formData={formData} />).toBlob();
+      const blob = await pdf(<BusinessTemplate formData={formDataWithFont} />).toBlob();
       const newUrl = URL.createObjectURL(blob);
       
       // Store the new PDF in the inactive slot
@@ -210,7 +214,8 @@ const InputFields = () => {
                 value={typeof formData[field] === "string" ? formData[field] : ""}
                 placeholder={field.charAt(0).toUpperCase() + field.replace(/([A-Z])/g, ' $1').slice(1)}
                 onChange={handleInputChange}
-                className="border bg-[#E6E6E6] border-[#999999] shadow-md p-2 rounded-lg w-full text-[#848C8E]"
+                className={`border bg-[#E6E6E6] border-[#999999] shadow-md p-2 rounded-lg w-full text-[#848C8E] text-black ${["firstName", "middleName", "lastName"].includes(field) ? "font-bold" : ""}`}
+                style={["firstName", "middleName", "lastName"].includes(field) ? { fontWeight: 700 } : undefined}
               />
             </div>
           ))}
@@ -248,7 +253,7 @@ const InputFields = () => {
       return (
         <div className="bg-white rounded-lg shadow-lg hover:shadow-lg transition transform p-6 border border-gray-150 flex flex-col flex-1 min-h-full">
           <h1 className="text-black text-center">Experience</h1>
-          {(formData.experience || []).map((exp, index) => (
+          {Array.isArray(typedFormData.experience) && typedFormData.experience.map((exp, index) => (
             <div key={index} className="flex flex-col mt-2">
               <span className="text-xs font-bold text-[#848C8E]">Job Title</span>
               <input
@@ -282,31 +287,31 @@ const InputFields = () => {
       return (
         <div className="bg-white rounded-lg shadow-lg hover:shadow-lg transition transform p-6 border border-gray-150 flex flex-col flex-1 min-h-full">
           <h1 className="text-black text-center">Education</h1>
-          {(formData.education || []).map((edu, index) => (
+          {(typedFormData.education || []).map((edu: EducationField, index: number) => (
             <div key={index} className="flex flex-col mt-2">
               <span className="text-xs font-bold text-[#848C8E]">Degree</span>
               <input
-                type="text"
-                name={`education[${index}].degree`}
-                value={edu.degree}
-                onChange={handleInputChange}
-                className="border bg-[#E6E6E6] border-[#999999] shadow-md p-2 rounded-lg w-full text-[#848C8E]"
+          type="text"
+          name={`education[${index}].degree`}
+          value={edu.degree}
+          onChange={handleInputChange}
+          className="border bg-[#E6E6E6] border-[#999999] shadow-md p-2 rounded-lg w-full text-[#848C8E]"
               />
               <span className="text-xs font-bold text-[#848C8E] mt-2">Institution</span>
               <input
-                type="text"
-                name={`education[${index}].institution`}
-                value={edu.institution}
-                onChange={handleInputChange}
-                className="border bg-[#E6E6E6] border-[#999999] shadow-md p-2 rounded-lg w-full text-[#848C8E]"
+          type="text"
+          name={`education[${index}].institution`}
+          value={edu.institution}
+          onChange={handleInputChange}
+          className="border bg-[#E6E6E6] border-[#999999] shadow-md p-2 rounded-lg w-full text-[#848C8E]"
               />
               <span className="text-xs font-bold text-[#848C8E] mt-2">Years</span>
               <input
-                type="text"
-                name={`education[${index}].years`}
-                value={edu.years}
-                onChange={handleInputChange}
-                className="border bg-[#E6E6E6] border-[#999999] shadow-md p-2 rounded-lg w-full text-[#848C8E]"
+          type="text"
+          name={`education[${index}].years`}
+          value={edu.years}
+          onChange={handleInputChange}
+          className="border bg-[#E6E6E6] border-[#999999] shadow-md p-2 rounded-lg w-full text-[#848C8E]"
               />
             </div>
           ))}
@@ -318,7 +323,7 @@ const InputFields = () => {
           <h1 className="text-black text-center">Additional Information</h1>
           <textarea
             name="additionalInfo"
-            value={formData.additionalInfo}
+            value={typedFormData.additionalInfo}
             onChange={handleInputChange}
             className="border bg-[#E6E6E6] border-[#999999] shadow-md p-2 rounded-lg w-full text-[#848C8E] h-32"
             placeholder="Enter any additional information here..."
@@ -402,7 +407,7 @@ const RightView = ({
   setExpandedIndex: React.Dispatch<React.SetStateAction<number | null>>;
   exampleEdits: { experience: { role: string; company: string; duration: string; location: string; descriptions: string[] }[] };
 }) => {
-  const featureIcons: Record<string, JSX.Element> = {
+  const featureIcons: Record<string, ReactNode> = {
     "Resume Analysis": <FaSearch className="text-2xl text-[#435058] mb-2" />,
     "Content Suggestions": <FaLightbulb className="text-2xl text-[#435058] mb-2" />,
     "Formatting Tools": <FaEdit className="text-2xl text-[#435058] mb-2" />,

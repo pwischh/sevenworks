@@ -12,6 +12,7 @@ export default function Demo() {
         firstName: "",
         lastName: "",
         content: "",
+        font: "Arial", // Added default font property
     })
 
     return(

@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useState, useRef, useMemo } from "react";
+import type { JSX } from "react";
 import dynamic from "next/dynamic";
 import BusinessTemplate from "./business_template";
 import { useSearchParams } from "next/navigation";

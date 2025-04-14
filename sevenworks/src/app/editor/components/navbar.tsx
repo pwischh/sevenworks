@@ -6,21 +6,16 @@ import { signOut } from "firebase/auth";
 import { auth } from "../../lib/firebase";
 import Link from "next/link";
 import { useFormContext } from "./../formcontext";
-import { PDFDownloadLink } from "@react-pdf/renderer";
-import dynamic from "next/dynamic";
 import BusinessTemplate from "./../components/business_template";
-
+import ProfilePhoto from "../../../components/profilephoto";
 import { useZoom } from "../zoomcontext";
+import DownloadButton from "./DownloadButton";
 
-const NewPDFDownloadLink = dynamic(
-    () => import('@react-pdf/renderer').then((mod) => mod.PDFDownloadLink),
-    { ssr: false }
-  );
-  
 const markazi = Markazi_Text({
     subsets: ["latin"],
     variable: "--font-markazi",
 });
+
 
 async function handleSignOut(){
     try {
@@ -34,6 +29,7 @@ export default function Navbar() {
     const [fontSizeDropdownOpen, setFontSizeDropdownOpen] = useState(false);
     const [fontDropdownOpen, setFontDropdownOpen] = useState(false);
     const [showAutosave, setShowAutosave] = useState(false);
+    const [isClient, setIsClient] = useState(false);
     const navRef = useRef<HTMLDivElement>(null);
     const { formData, setFormData} = useFormContext();
     
@@ -57,7 +53,11 @@ export default function Navbar() {
         };
     }, [navRef]);
 
-    const { zoom, zoomIn, zoomOut, setZoom } = useZoom();
+    useEffect(() => {
+        setIsClient(true);
+    }, []);
+
+    const { zoom, zoomIn, zoomOut, setZoom } = useZoom() as { zoom: number; zoomIn: () => void; zoomOut: () => void; setZoom: (z: number) => void };
 
     function handleFontClick(value: string) {
         setFormData("font", value);
@@ -118,9 +118,6 @@ export default function Navbar() {
                         </span>
                     </div>
                     <div className="flex items-center gap-4">
-                        <Image src="/list.svg" alt="list" width={24} height={24} className="hover:scale-110 transition-transform duration-200 hover:opacity-65" />
-                        <Image src="/link.svg" alt="link" width={24} height={24} className="hover:scale-110 transition-transform duration-200 hover:opacity-65" />
-                        <div className="self-center h-6 border-r border-black"></div>
                         <div 
                             className="flex items-center gap-2 hover:scale-110 transition duration-200 cursor-pointer text-green-700" 
                             onClick={handleAutosaveClick}
@@ -138,19 +135,18 @@ export default function Navbar() {
                             className="hover:scale-110 transition-transform duration-200 hover:opacity-65" 
                             onClick={() => window.location.reload()} 
                         />
-                        {formData && (
-                            <NewPDFDownloadLink
-                                document={<BusinessTemplate formData={formData} />}
-                                fileName="exported_form.pdf"
-                                className="hover:opacity-65 transition-opacity duration-200"
-                            >
-                                <Image src="/download.svg" alt="download" width={24} height={24} className="hover:scale-110 transition-transform duration-200" />
-                            </NewPDFDownloadLink>
+                        {formData && isClient && (
+                            <DownloadButton formData={formData} />
                         )}
-                        <Image src="/settings.svg" alt="settings" width={24} height={24} className="hover:scale-110 transition-transform duration-200 hover:opacity-65" />
                         <button onClick={handleSignOut} className="hover:underline hover:opacity-65 transition-opacity duration-200">
                             <Image src="/log-out.svg" alt="logout" width={24} height={24} className="hover:scale-110 transition-transform duration-200" /> 
                         </button>
+                        <div className="relative group">
+                            <ProfilePhoto />
+                            <a href="/profile" className="absolute bottom-0 right-0 bg-lightRed text-white text-xs rounded-full px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                Edit
+                            </a>
+                        </div>
                     </div>
                 </nav>
             </div>
