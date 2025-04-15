@@ -66,3 +66,7 @@ MIT
 ---
 
 Made by Alex Lautin, Andy Blumberg, Parker Wischover, Lester Martin, Chris Kim, Tomas Lee, and Andrea Valentino
+
+<a href="https://github.com/alexlautin/sevenworks/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=alexlautin/sevenworks" />
+</a>
