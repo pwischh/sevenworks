@@ -3,12 +3,14 @@ import { Markazi_Text } from "next/font/google";
 import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import { signOut } from "firebase/auth";
-import { auth } from "../lib/firebase";
+import { auth, db } from "../lib/firebase";
 import Link from "next/link";
 import { useFormContext } from "./formcontext";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import dynamic from "next/dynamic";
 import { useResume } from "../resumeContext";
+import { doc, getDoc } from "firebase/firestore";
+import { onAuthStateChanged } from "firebase/auth";
 
 const NewPDFDownloadLink = dynamic(() => Promise.resolve(PDFDownloadLink), { ssr: false });
 
@@ -30,10 +32,12 @@ export default function Navbar() {
     const [fontDropdownOpen, setFontDropdownOpen] = useState(false);
     const [showAutosave, setShowAutosave] = useState(false);
     const navRef = useRef<HTMLDivElement>(null);
-    const { formData, setFormData} = useFormContext();
+    const { formData, setFormData } = useFormContext();
     const [hovering, setHovering] = useState("");
     const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
-    const {template, loading} = useResume();
+    const template = useResume();
+    const [templateID, setTemplateID] = useState<string | null>(null);
+    const [templateIdLoading, setTemplateIdLoading] = useState(true);
 
     const handleMouseEnter = (hoveredElement: string) => {
         const id = setTimeout(() => {
@@ -62,6 +66,28 @@ export default function Navbar() {
             document.removeEventListener("mousedown", handleClickOutside);
         };
     }, [navRef]);
+
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, async (user) => {
+            if (user){
+                try {
+                    const sessionData = (await getDoc(doc(db, "sessions", user.uid))).data();
+
+                    if (!sessionData){
+                        throw new Error("Error retrieving session data");
+                    }
+
+                    const sessionTemplateID = sessionData.templateID;
+                    setTemplateID(sessionTemplateID);
+                } catch(error) {
+                    console.error("Error fetching templateID:", error);
+                }
+            }
+            setTemplateIdLoading(false);
+        });
+
+        return () => unsubscribe();
+      }, []);
 
     function handleFontClick(value: string) {
         setFormData("font", value);
@@ -172,11 +198,11 @@ export default function Navbar() {
                             Swap Template
                         </span> 
                     </span>
-                    {loading ? (
-                        <p className="text-red-500 font-bold text-[22px]">!</p>
-                    ):(
+                    {(templateIdLoading) ? (
+                        <span className="text-red-500 text-[20px]">!</span>
+                    ) : (
                         <NewPDFDownloadLink
-                            document={template(formData)}
+                            document={template(templateID, formData)}
                             fileName="exported_form.pdf"
                             className="relative flex items-center gap-2 hover:opacity-65 transition-opacity duration-200"
                             onMouseEnter={() => {handleMouseEnter("download")}}

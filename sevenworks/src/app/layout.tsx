@@ -4,6 +4,7 @@ import "./globals.css";
 import classNames from 'classnames';
 import { AuthProvider } from "./authContext";
 import { ResumeProvider } from "./resumeContext";
+import { FormProvider } from "./editor/formcontext";
 
 // const markazi = Markazi_Text({
 //     subsets: ["latin"],
@@ -30,9 +31,11 @@ export default function RootLayout({
       <body
         className={classNames(inter.className, "antialiased bg-[#2b2d42]")}>
         <AuthProvider>
-          <ResumeProvider>
-            {children}
-          </ResumeProvider>
+          <FormProvider>
+            <ResumeProvider>
+              {children}
+            </ResumeProvider>
+          </FormProvider>
         </AuthProvider> 
       </body>
     </html>

@@ -19,7 +19,7 @@ export default function Login() {
 
     const updateSession = async (uid: string) => {
         try {
-            await setDoc(doc(db, "sessions", uid), {formData: {}}, {merge: true});
+            await setDoc(doc(db, "sessions", uid), {formData: {}, resumeID: null, templateID: null}, {merge: true});
             console.log("Session updated for UID: ", uid);
         } catch (error) {
             console.error("Error updating session", error);
@@ -33,8 +33,6 @@ export default function Login() {
         try {
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
             const idToken = await userCredential.user.getIdToken(true);
-            console.log("Token generated successfully, first 2 chars:", idToken.substring(0, 2) + "...");
-            console.log("Token format check:", idToken.startsWith("ey") ? "Looks like JWT format" : "Unexpected format");
 
             const response = await fetch("/api/auth/", {
                 method: "POST",

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { Markazi_Text } from "next/font/google";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, doc, getDocs, getDoc, setDoc } from "firebase/firestore";
 import { auth, db } from "../lib/firebase";
 import { signOut } from "firebase/auth";
 
@@ -71,43 +71,87 @@ const Sidebar = () => {
   )
 };
 
-interface Resume {
+interface InProgressResume {
   id: string;
-  title: string;
-  description: string;
-  image?: string;
+  templateID: string;
+  name: string;
+  image: string;
 }
 
 // ResumeCard Component using Next.js <Image>
-const ResumeCard = ({ resume }: { resume: Resume }) => (
-  <div className="flex flex-col items-center w-full max-w-xs">
-    {/* Document Thumbnail */}
-    <div className="relative w-full aspect-[8.5/11] bg-white rounded-md shadow hover:shadow-lg overflow-hidden">
-      {resume.image && (
+const ResumeCard = ({ resume }: { resume: InProgressResume }) => {
+  const router = useRouter();
+  const [resumeLoading, setResumeLoading] = useState(false);
+  
+  async function handleResumeClick() {
+    setResumeLoading(true);
+    const currentUser = auth.currentUser;
+  
+    if (currentUser) { 
+      try {
+        //Get fields from the resume being clicked
+        const clickedResume = await getDoc(doc(db, "user_resumes", currentUser.uid, "resumes", resume.id));
+        const clickedResumeData = clickedResume.data();
+
+        if (!clickedResumeData){
+          throw new Error("Unable to retrieve resume data");
+        }
+
+        //Get formData and templateID from the db
+        const clickedResumeFormData = clickedResumeData.formData;
+        const clickedResumeTemplateID = clickedResumeData.templateID;
+
+        //Update session with correct data
+        await setDoc(
+          doc(db, "sessions", currentUser.uid), 
+          {formData: clickedResumeFormData, resumeID: resume.id, templateID: clickedResumeTemplateID}, 
+          {merge: false});
+          
+      } catch(error) {
+        console.error("Error updating session data: ", error);
+      } finally {
+        setResumeLoading(false);
+        router.push("/editor")
+      }
+    }
+  }
+
+  return(
+    <div className="flex flex-col relative items-center w-full max-w-xs">
+      {/* Document Thumbnail */}
+      <div className="relative w-full aspect-[8.5/11] bg-white rounded-md shadow hover:shadow-lg overflow-hidden">
         <Image
           src={resume.image}
-          alt={resume.title}
+          alt={resume.templateID}
           fill
           className="object-cover"
         />
-      )}
+        <div 
+          className="flex flex-col justify-center items-center absolute top-0 rounded-md w-full h-full bg-black/40 
+              font-medium text-offWhite text-[18px] transition duration-150 opacity-0 hover:opacity-100"
+        >
+          <button className="px-3 py-0.5 bg-transparent border-2 border border-offWhite rounded-lg hover:border-lightRed hover:bg-lightRed" 
+            onClick={handleResumeClick}>
+              Edit
+          </button>
+        </div> 
     </div>
 
     {/* Title & Description */}
     <div className="mt-2 text-center">
-      <h3 className="text-sm font-semibold">{resume.title}</h3>
-      <p className="text-xs text-gray-600">{resume.description}</p>
+      <h3 className="text-sm font-semibold">{resume.name}</h3>
+      <p className="text-xs text-gray-600">{resume.templateID}</p>
     </div>
-  </div>
-);
+    </div>
+  );
+};
 
 const Dashboard = () => {
   const [user, loading] = useAuthState(auth);
   const router = useRouter();
 
   // Two separate state variables for each section
-  const [templateResumes, setTemplateResumes] = useState<Resume[]>([]);
-  const [editingResumes, setEditingResumes] = useState<Resume[]>([]);
+  const [templateResumes, setTemplateResumes] = useState<InProgressResume[]>([]);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -120,47 +164,30 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchTemplateResumes = async () => {
       try {
-        const querySnapshot = await getDocs(collection(db, "resume_templates"));
-        const templatesData = querySnapshot.docs.map((doc) => {
-          const data = doc.data();
-          return {
-            id: doc.id,
-            title: data.name,
-            description: data.category,
-            image: "/sample-business-resume.png",
-          };
-        });
-        setTemplateResumes(templatesData);
+        if (!loading) {
+          if (!user) throw new Error("User not authenticated");
+
+          const resumesCollectionRef = collection(db, "user_resumes", user.uid, "resumes");
+          const querySnapshot = await getDocs(resumesCollectionRef);
+
+          const templatesData = querySnapshot.docs.map((doc) => {
+            const data = doc.data();
+            return {
+              id: doc.id,
+              templateID: data.templateID,
+              name: data.name,
+              image: data.image,
+            };
+          });
+          setTemplateResumes(templatesData);
+        }
       } catch (error) {
         console.error("Error fetching resume templates:", error);
       }
     };
 
     fetchTemplateResumes();
-  }, []);
-
-  // Fetch resumes for "Editing Resumes" from Firestore collection "editing_resumes"
-  useEffect(() => {
-    const fetchEditingResumes = async () => {
-      try {
-        const querySnapshot = await getDocs(collection(db, "editing_resumes"));
-        const editingData = querySnapshot.docs.map((doc) => {
-          const data = doc.data();
-          return {
-            id: doc.id,
-            title: data.name,
-            description: data.category,
-            image: "/sample-business-resume.png",
-          };
-        });
-        setEditingResumes(editingData);
-      } catch (error) {
-        console.error("Error fetching editing resumes:", error);
-      }
-    };
-
-    fetchEditingResumes();
-  }, []);
+  }, [user, loading]);
 
   if (loading || !user) {
     return (
@@ -178,7 +205,7 @@ const Dashboard = () => {
       <Sidebar />
       <main className="flex-1 h-screen p-8 bg-gray-100 text-navy ml-64 overflow-y-auto">
         {/* Resume Templates Section (Horizontal Scrolling) */}
-        <h1 className="text-3xl font-bold mb-8">Resume Templates</h1>
+        <h1 className="text-3xl font-bold mb-8">My Templates</h1>
         <div className="flex space-x-4 overflow-x-auto pb-4">
           {templateResumes.map((resume) => (
             <div key={resume.id} className="flex-none w-full max-w-xs">
@@ -190,9 +217,7 @@ const Dashboard = () => {
         {/* Editing Resumes Section */}
         <h1 className="text-3xl font-bold my-8">Editing Resumes</h1>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {editingResumes.map((resume) => (
-            <ResumeCard key={resume.id} resume={resume} />
-          ))}
+          
         </div>
       </main>
     </div>

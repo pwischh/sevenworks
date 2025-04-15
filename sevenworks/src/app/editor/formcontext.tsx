@@ -1,6 +1,7 @@
+"use client";
 import { createContext, useState, ReactNode, useContext, useEffect } from "react";
 import { auth, db } from "../lib/firebase";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 
 interface FormContextType {
   formData: { [key: string]: string };
@@ -17,7 +18,6 @@ export const FormProvider = ({ children }: { children: ReactNode }) => {
       const res = await fetch("/api/session/");
       if (res.ok){
         const {sessionData} = await res.json();
-        console.log("Session data: ", sessionData);
         setFormDataState(sessionData?.formData || {});
       }
     }
@@ -26,12 +26,31 @@ export const FormProvider = ({ children }: { children: ReactNode }) => {
 
   const setFormData = async (key: string, value: string) => {
     const updatedFormData = { ...formData, [key]: value };
-    setFormDataState(updatedFormData);
+    if (key === "RESET") {
+      setFormDataState({});
+    }
+    else {
+      setFormDataState(updatedFormData);
+    }
+    
     const currentUser = auth.currentUser;
 
     if (currentUser){
       try {
-        await setDoc(doc(db, "sessions", currentUser.uid), {formData: updatedFormData}, {merge: true});
+        await setDoc(doc(db, "sessions", currentUser.uid), 
+          {formData: (key === "RESET" ? {} : updatedFormData),}, 
+          {merge: (key === "RESET" ? false : true)});
+
+        const userSessionRef = doc(db, "sessions", currentUser.uid);
+        const userSession = await getDoc(userSessionRef);
+        const userSessionData = userSession.data();
+
+        if (!userSessionData) {
+          throw new Error("Unable to retrieve user session data");
+        }
+        const resumeID = userSessionData.resumeID;
+
+        await setDoc(doc(db, "user_resumes", currentUser.uid, "resumes", resumeID), {formData: updatedFormData}, {merge: true});
       } catch (error) {
         console.log("Error updating session data: ", error);
       }

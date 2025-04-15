@@ -16,10 +16,10 @@ import {
     LuEarth,
     LuLandmark,
     LuChevronUp } from "react-icons/lu";
-import { collection, getDocs } from "firebase/firestore";
-import { db } from "../lib/firebase";
-import { useResume } from "../resumeContext";
+import { collection, doc, setDoc, getDocs, getDoc, addDoc } from "firebase/firestore";
+import { db, auth } from "../lib/firebase";
 import { useRouter } from "next/navigation";
+import { useFormContext } from "../editor/formcontext";
 
 const markazi = Markazi_Text({
     subsets: ["latin"],
@@ -30,12 +30,13 @@ export interface Resume {
     id: string;
     title: string;
     description: string;
-    image?: string;
+    image: string;
 }
 
 const ResumeCard = ({ resume }: { resume: Resume }) => {
     const [hoveredResume, setHoveredResume] = useState<string | null>(null);
-    const {setResume} = useResume();
+    const [resumeLoading, setResumeLoading] = useState(false);
+    const { formData, setFormData } = useFormContext();
     const router = useRouter();
     const {user, loading} = useAuth();
 
@@ -67,6 +68,67 @@ const ResumeCard = ({ resume }: { resume: Resume }) => {
         return;
     }
 
+    async function handleResumeClick() {
+        setResumeLoading(true);
+
+        //reset session formData state
+        setFormData("RESET", "");
+        const templateID = resume.title;
+
+        try {
+            const user = auth.currentUser
+            if (!user) {
+                throw new Error("User not authenticated");
+            }
+
+            const userDocsRef = doc(db, "user_resumes", user.uid);
+            const userDocsSnap = await getDoc(userDocsRef);
+
+            //If this is user's first resume, create a new doc in db
+            if (!userDocsSnap.exists()) {
+                const date = new Date();
+                const currentTime = date.toLocaleDateString();
+                await setDoc(userDocsRef, {createdAt: currentTime});
+            }
+
+            const userResumesRef = collection(userDocsRef, "resumes");
+
+            //Define data for in-progress resume to be stored in db
+            const inProgressResume = {
+                templateID,
+                formData,
+                name: "Untitled Resume",
+                image: resume.image,
+            }
+
+            //Add in-progress resume to db, making sure to save the DocumentReference to a variable
+            const newResume = await addDoc(userResumesRef, inProgressResume);
+            console.log("New resume stored successfully");
+
+            //Get the ID and fields of the newly created resume 
+            const userSessionRef = doc(db, "sessions", user.uid);
+            const userResumeID = newResume.id;
+            const userResumeData = (await getDoc(doc(db, "user_resumes", user.uid, "resumes", userResumeID))).data();
+
+            if (!userResumeData) {
+                throw new Error("Error retrieving resume data");
+            }
+
+            //Get name of the template being used
+            const userTemplateID = userResumeData.templateID;
+
+            //Set session data to the correct resumeID and templateID
+            await setDoc(userSessionRef, {resumeID: userResumeID, templateID: userTemplateID}, {merge: true});
+            console.log("Session data updated successfully");
+        } catch (error) {
+            console.error("Error adding resume: ", error);
+        } finally {
+            setResumeLoading(false)
+            router.push("/editor");
+        }
+
+    }
+
     return(
         <div className="relative z-0 flex flex-col items-center w-full p-4 bg-gray-100 rounded-lg border-[1px] border-gray-200 cursor-pointer hover:shadow-md"
             onMouseEnter={() => {setHoveredResume(resume.title)}}
@@ -84,6 +146,7 @@ const ResumeCard = ({ resume }: { resume: Resume }) => {
                         src={resume.image}
                         alt={resume.title}
                         fill
+                        sizes="100vw"
                         className="object-cover"
                     />
                 )}
@@ -99,10 +162,7 @@ const ResumeCard = ({ resume }: { resume: Resume }) => {
                         </Link>
                     ) : (
                         <button className="px-3 py-2 bg-lightRed rounded-xl hover:bg-darkRed" 
-                            onClick={() => {
-                                setResume(resume);
-                                router.push("/editor")
-                            }}
+                            onClick={handleResumeClick}
                         >
                             Use Template
                         </button>
@@ -135,7 +195,7 @@ export default function Templates() {
                 id: doc.id,
                 title: data.name,
                 description: data.category,
-                image: "/sample-business-resume.png",
+                image: data.image,
               };
             });
             setResumeList(templatesData);

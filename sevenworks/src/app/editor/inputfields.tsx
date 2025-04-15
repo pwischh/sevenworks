@@ -5,6 +5,9 @@ import dynamic from "next/dynamic";
 import { useSearchParams } from "next/navigation";
 import { useFormContext } from "./formcontext";
 import { useResume } from "../resumeContext";
+import { doc, getDoc } from "firebase/firestore";
+import { auth, db } from "../lib/firebase";
+import { onAuthStateChanged } from "firebase/auth";
 
 const NewBlobProvider = dynamic(() => Promise.resolve(BlobProvider), { ssr: false });
 
@@ -13,7 +16,31 @@ const InputFields = () => {
   const { formData, setFormData } = useFormContext();
   const initialTab = searchParams.get("tab") || "personal";
   const [activeTab, setActiveTab] = useState(initialTab);
-  const {template} = useResume();
+  const template  = useResume();
+  const [templateID, setTemplateID] = useState<string | null>(null);
+  const [templateIdLoading, setTemplateIdLoading] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+        if (user){
+            try {
+                const sessionData = (await getDoc(doc(db, "sessions", user.uid))).data();
+
+                if (!sessionData){
+                    throw new Error("Error retrieving session data");
+                }
+
+                const sessionTemplateID = sessionData.templateID;
+                setTemplateID(sessionTemplateID);
+            } catch(error) {
+                console.error("Error fetching templateID:", error);
+            }
+        }
+        setTemplateIdLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     const tab = searchParams.get("tab") || "personal";
@@ -80,28 +107,30 @@ const InputFields = () => {
     }
   };
 
-  
-
   return (
     <div className="flex flex-row gap-2 w-[62.5%]">
       <div className="flex-[1.5] flex-row bg-[#E6E6E6] p-2 rounded-lg">
         {renderFields()}
       </div>
       <div className="flex-[2] p-2 rounded-lg bg-[#E6E6E6]" style={{ height: "100%" }}>
-        <NewBlobProvider document={template(formData)}>
-          {({ url, loading, error }) => {
-                if (loading) return 'Loading document...';
-                if (error) return 'Error generating PDF';
-            // Append #toolbar=0 to try to hide browser toolbar (supported in some browsers)
-                return (
-                    <iframe
-                    src={`${url}#toolbar=0`}
-                    style={{ width: "100%", height: "100%", backgroundColor: "white"}}
-                    title="PDF Preview"
-                    />
-                );
+        {(templateIdLoading) ? (
+          <div></div>
+        ) : (
+          <NewBlobProvider document={template(templateID, formData)} key={JSON.stringify(formData)}>
+            {({ url, loading, error }) => {
+                  if (loading) return 'Loading document...';
+                  if (error) return 'Error generating PDF';
+              // Append #toolbar=0 to try to hide browser toolbar (supported in some browsers)
+                  return (
+                      <iframe
+                      src={`${url}#toolbar=0`}
+                      style={{ width: "100%", height: "100%", backgroundColor: "white"}}
+                      title="PDF Preview"
+                      />
+                  );
             }}
-        </NewBlobProvider>
+          </NewBlobProvider>
+        )}
       </div>
     </div>
   );
