@@ -1,5 +1,4 @@
 import React from "react";
-import { TemplateProps } from "../types";
 import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
 
 const styles = StyleSheet.create({
@@ -28,6 +27,33 @@ const styles = StyleSheet.create({
     lineHeight: 1.5,
   },
 });
+
+// Define TemplateProps and TemplateFormData here
+interface TemplateFormData {
+  font?: string;
+  firstName?: string;
+  middleName?: string;
+  lastName?: string;
+  address?: string;
+  phone?: string;
+  email?: string;
+  education?: { degree: string; institution: string; years: string }[];
+  experience?: { title: string; company: string; years: string }[];
+  educationSchool?: string;
+  educationGraduation?: string;
+  educationDegree?: string;
+  educationDescription?: string;
+  educationGPA?: string;
+  leadership?: { title: string; description: string }[];
+  ubsProgram?: string;
+  honors?: string;
+  honorsList?: { honor: string }[];
+  skillsInterests?: string;
+  [key: string]: any;
+}
+interface TemplateProps {
+  formData: TemplateFormData;
+}
 
 export default function BusinessTemplate({ formData }: TemplateProps) {
   return (

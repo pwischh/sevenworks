@@ -50,60 +50,50 @@ const IconBar = () => {
       {/* vertical stack */}
       <div className="flex flex-col gap-3 h-full">
       {sections}
-        <div className="p-1 aspect-square rounded-lg flex items-center justify-center hover:bg-[#BFB7B6]/60">
-          <Link href="/editor?tab=personal#personal-section">
-            <Image
-              src="/user.svg"
-              alt="user"
-              width={32} height={32}
-              className="w-8 h-8"
-            />
-          </Link>
-        </div>
-        <div className="p-1 aspect-square rounded-lg flex items-center justify-center hover:bg-[#BFB7B6]/60">
-          <Link href="/editor?tab=contact">
-            <Image
-              src="/phone.svg"
-              alt="phone"
-              width={32} height={32}
-              className="w-8 h-8"
-            />
-          </Link>
-        </div>
-        <div className="p-1 aspect-square rounded-lg flex items-center justify-center hover:bg-[#BFB7B6]/60">
-          <Link href="/editor?tab=education">
-            <Image
-              src="/book-open.svg"
-              alt="open book"
-              width={32} height={32}
-              className="w-8 h-8"
-            />
-          </Link>
-        </div>
-        <div className="p-1 aspect-square rounded-lg flex items-center justify-center hover:bg-[#BFB7B6]/60">
-          <Link href="/editor?tab=experience">
-            <Image
-              src="/briefcase.svg"
-              alt="briefcase"
-              width={32} height={32}
-              className="w-8 h-8"
-            />
-          </Link>
-        </div>
-        <div className="p-1 aspect-square rounded-lg flex items-center justify-center hover:bg-[#BFB7B6]/60">
-          <Link href="/editor?tab=additional">
-            <Image
-              src="/award.svg"
-              alt="award"
-              width={32} height={32}
-              className="w-8 h-8"
-            />
-          </Link>
-        </div>
-        <div ref={newSectionOverlayRef} className="relative p-0.5 flex items-center justify-center">
+      {/* Main icon buttons */}
+      <div className="p-1 aspect-square rounded-lg flex items-center justify-center hover:bg-[#BFB7B6]/60 group relative">
+        <Link href="/editor?tab=personal#personal-section">
+          <Image src="/user.svg" alt="user" width={32} height={32} className="w-8 h-8" />
+          <span className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2 py-1 rounded bg-black text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20">Personal</span>
+        </Link>
+      </div>
+      <div className="p-1 aspect-square rounded-lg flex items-center justify-center hover:bg-[#BFB7B6]/60 group relative">
+        <Link href="/editor?tab=education">
+          <Image src="/book-open.svg" alt="open book" width={32} height={32} className="w-8 h-8" />
+          <span className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2 py-1 rounded bg-black text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20">Education</span>
+        </Link>
+      </div>
+      <div className="p-1 aspect-square rounded-lg flex items-center justify-center hover:bg-[#BFB7B6]/60 group relative">
+        <Link href="/editor?tab=experience">
+          <Image src="/briefcase.svg" alt="briefcase" width={32} height={32} className="w-8 h-8" />
+          <span className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2 py-1 rounded bg-black text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20">Experience</span>
+        </Link>
+      </div>
+      <div className="p-1 aspect-square rounded-lg flex items-center justify-center hover:bg-[#BFB7B6]/60 group relative">
+        <Link href="/editor?tab=leadership">
+          <Image src="/leadership.svg" alt="award" width={32} height={32} className="w-8 h-8" />
+          <span className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2 py-1 rounded bg-black text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20">Leadership & Community Development</span>
+        </Link>
+      </div>
+      {/* Extra icons */}
+      <div className="p-1 aspect-square rounded-lg flex items-center justify-center hover:bg-[#BFB7B6]/60 group relative">
+        <Link href="/editor?tab=honors">
+          <Image src="/honors.svg" alt="settings" width={32} height={32} className="w-8 h-8" />
+          <span className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2 py-1 rounded bg-black text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20">Honors</span>
+        </Link>
+      </div>
+      <div className="p-1 aspect-square rounded-lg flex items-center justify-center hover:bg-[#BFB7B6]/60 group relative">
+        <Link href="/editor?tab=additional">
+          <Image src="/additional.svg" alt="help" width={32} height={32} className="w-8 h-8" />
+          <span className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2 py-1 rounded bg-black text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20">Additional Skills and Interests</span>
+        </Link>
+      </div>
+      {/* Add Section Button and Overlay */}
+      <div ref={newSectionOverlayRef} className="relative p-0.5 flex items-center justify-center group">
          {overlay}
-         <button className="p-0.5 aspect-square flex items-center justify-center bg-black rounded-lg hover:bg-gray-700" onClick={() => displayCreateNewSectionOverlay()}>
+         <button className="p-0.5 aspect-square flex items-center justify-center bg-black rounded-lg hover:bg-gray-700 relative" onClick={() => displayCreateNewSectionOverlay()}>
            <Image src="/plus-square.svg" alt="plus square" width={32} height={32} className="w-8 h-8" style={{filter: "invert(100%)"}}/>
+           <span className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2 py-1 rounded bg-black text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20">Add Section</span>
            </button>
           {isCreateNewSectionOverlayVisible &&
           <div className="absolute top-0 left-full p-3 ml-2 w-80 gap-4 bg-[#BFB7B6] text-black rounded-lg shadow-lg z-10">
@@ -139,7 +129,7 @@ const IconBar = () => {
           }
         </div>
         
-        <div className="mt-auto p-0.5 flex items-center justify-center">
+        <div className="mt-auto p-0.5 flex items-center justify-center group">
           <Link href="/dashboard">
             <Image
               src="/chevron-left.svg"
@@ -147,6 +137,7 @@ const IconBar = () => {
               width={32} height={32}
               className="w-8 h-8"
             />
+            <span className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2 py-1 rounded bg-black text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20">Back to Dashboard</span>
           </Link>
         </div>
       </div>

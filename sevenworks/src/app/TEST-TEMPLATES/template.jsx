@@ -33,7 +33,7 @@ const ResumeTemplate = () => {
 
       {/* Repeat similar structure for other work experiences */}
 
-      <h2>LEADERSHIP & COMMUNITY ENGAEMENT</h2>
+      <h2>LEADERSHIP & COMMUNITY ENGAGEMENT</h2>
       <h3>Volunteer Emory, Atlanta, GA (Aug 2018 – Present)</h3>
       <p>Student Co-Director</p>
       <ul>

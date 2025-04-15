@@ -43,6 +43,10 @@ interface ExperienceEntry {
   company: string;
   years: string;
 }
+interface LeadershipEntry {
+  title: string;
+  description: string;
+}
 interface TemplateFormData {
   font?: string;
   firstName?: string;
@@ -58,9 +62,10 @@ interface TemplateFormData {
   educationDegree?: string;
   educationDescription?: string;
   educationGPA?: string;
-  leadership?: string;
+  leadership?: LeadershipEntry[];
   ubsProgram?: string;
   honors?: string;
+  honorsList?: { honor: string }[];
   skillsInterests?: string;
   [key: string]: any;
 }
@@ -131,66 +136,56 @@ export default function BusinessTemplate({ formData }: TemplateProps) {
           </View>
 
           <View style={{ marginTop: 10, fontFamily: formData?.font ?? "Helvetica" }}>
-            <Text style={styles.title}>LEADERSHIP AND COMMUNITY ENGAGEMENT</Text>
-            {formData.leadership ? (
-              <Text style={styles.content}>
-                {formData.leadership}
-              </Text>
+            <Text style={styles.title}>LEADERSHIP & COMMUNITY ENGAGEMENT</Text>
+            {Array.isArray(formData.leadership) && formData.leadership.some(l => l.title.trim() || l.description.trim()) ? (
+              <View style={{ marginBottom: 16 }}>
+                {formData.leadership.filter(l => l.title.trim() || l.description.trim()).map((lead, idx) => (
+                  <View key={idx} style={{ marginBottom: 6 }}>
+                    <Text style={{ fontSize: 12, fontWeight: 'bold' }}>{lead.title}</Text>
+                    <Text style={{ fontSize: 12 }}>{lead.description}</Text>
+                  </View>
+                ))}
+              </View>
             ) : (
-              <>
-                <Text style={styles.job_header}>
-                  Undergraduate Finance Association — November 2020 – Present
-                </Text>
+              <View>
                 <Text style={styles.content}>
-                  Events and Sports Coordinator{"\n"}
-                  • Help coordinate events such as keynote presentations to develop interest in finance{"\n"}
-                  • Increased membership by planning events targeted at athletes
+                  • Volunteer Emory, Atlanta, GA (Aug 2018 – Present): Student Co-Director{"\n"}
+                  • Established and led weekly service trip to refurbish computers for low-income families{"\n"}
+                  • Co-led Gandhi/Be the Change Day event
                 </Text>
-                <Text style={styles.job_header}>
-                  Emory University Solutions High School Conversion Project — September 2019 – Present
-                </Text>
+                <Text style={styles.job_header}>UBS Freshman Frenzy Program, New York, NY — June 2019</Text>
                 <Text style={styles.content}>
-                  Finance Committee Member{"\n"}
-                  • Assist in launching a $21 million project to convert a high school into a neighborhood center{"\n"}
-                  • Research criteria and restrictions for low income tax credits
-                </Text>
-              </>
-            )}
-          </View>
-
-          <View style={{ marginTop: 10, fontFamily: formData?.font ?? "Helvetica" }}>
-            <Text style={styles.job_header}>UBS Freshman Frenzy Program, New York, NY — June 2019</Text>
-            {formData.ubsProgram ? (
-              <Text style={styles.content}>
-                {formData.ubsProgram}
-              </Text>
-            ) : (
-              <Text style={styles.content}>
                 Participant{"\n"}
                 • Selected among 25 freshmen for a four-day UBS program{"\n"}
                 • Explored equities, fixed income, rates and currencies, municipal securities, operations, and private banking{"\n"}
                 • Engaged in trading simulations and pitch book preparations
-              </Text>
+                </Text>
+              </View>
             )}
           </View>
 
           <View style={{ marginTop: 10, fontFamily: formData?.font ?? "Helvetica" }}>
             <Text style={styles.title}>HONORS</Text>
-            {formData.honors ? (
-              <Text style={styles.content}>
-                {formData.honors}
-              </Text>
+            {Array.isArray(formData.honorsList) && formData.honorsList.length > 0 ? (
+              <View style={{ marginBottom: 16 }}>
+                {formData.honorsList.filter(h => h.honor && h.honor.trim() !== '').map((h, idx) => (
+                  <View key={idx} style={{ marginBottom: 6 }}>
+                    <Text style={{ fontSize: 12 }}>• {h.honor}</Text>
+                  </View>
+                ))}
+              </View>
             ) : (
               <Text style={styles.content}>
-                • Marine Corps Outstanding Achievement Award{"\n"}
-                • Co-Captain and 2020 MVP, Emory Women’s Varsity Soccer
+                • 2020 Deborah Jackson Award Recipient{"\n"}
+                • Dean’s Achievement Scholar{"\n"}
+                • International Baccalaureate Diploma Recipient
               </Text>
             )}
           </View>
 
           <View style={{ marginTop: 10, fontFamily: formData?.font ?? "Helvetica" }}>
             <Text style={styles.title}>ADDITIONAL SKILLS AND INTERESTS</Text>
-            {formData.skillsInterests ? (
+            {formData.skillsInterests && formData.skillsInterests.trim() !== '' ? (
               <Text style={styles.content}>
                 {formData.skillsInterests}
               </Text>
