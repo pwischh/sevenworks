@@ -319,7 +319,7 @@ const InputFields = () => {
   const renderFields = () => {
     if (activeTab === "personal") {
       return (
-        <div className="bg-white rounded-lg shadow-lg hover:shadow-lg transition transform p-6 border border-gray-300 flex flex-col flex-1 min-h-full">
+        <div className="bg-white rounded-lg shadow-lg hover:shadow-lg transition transform p-6 border border-gray-300 flex flex-col flex-1 min-h-0 max-h-screen overflow-y-auto">
           <h1 className="text-black text-center">Personal Information</h1>
           {["firstName", "middleName", "lastName", "email", "phone", "address"].map((field) => (
             <div key={field} className="flex flex-col mt-2">
@@ -537,7 +537,7 @@ const InputFields = () => {
 
   return (
     <div className="bg-[#F8F8F8] flex w-full h-screen overflow-hidden">
-      <div className="w-[38%] flex flex-col bg-[#F8F8F8] h-full overflow-auto">
+      <div className="w-[38%] flex flex-col bg-[#F8F8F8] h-full min-h-0 max-h-full flex-1 overflow-y-auto">
         {renderFields()}
       </div>
       <div className="flex-1 overflow-auto bg-[#F8F8F8] h-full">

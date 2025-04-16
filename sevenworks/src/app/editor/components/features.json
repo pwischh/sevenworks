@@ -10,8 +10,8 @@
     "buttonText": "Suggest Content"
   },
   {
-    "title": "Formatting Tools",
-    "description": "Customize your resume layout and design for a professional, modern look.",
-    "buttonText": "Format Resume"
+    "title": "Chat with Resume",
+    "description": "Ask questions about your resume or get suggestions. Powered by Gemini.",
+    "buttonText": "Open Chat"
   }
 ]

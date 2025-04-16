@@ -410,7 +410,7 @@ const RightView = ({
   const featureIcons: Record<string, ReactNode> = {
     "Resume Analysis": <FaSearch className="text-2xl text-[#435058] mb-2" />,
     "Content Suggestions": <FaLightbulb className="text-2xl text-[#435058] mb-2" />,
-    "Formatting Tools": <FaEdit className="text-2xl text-[#435058] mb-2" />,
+    // "Formatting Tools": <FaEdit className="text-2xl text-[#435058] mb-2" />, // commented out
   };
 
   return (
@@ -420,8 +420,8 @@ const RightView = ({
           key={index}
           className="bg-white w-full min-h-[220px] rounded-lg flex flex-col items-center justify-between shadow-sm hover:shadow-md hover:scale-[1.01] transition transform p-6 border border-gray-100"
         >
-          {featureIcons[feature.title]}
-          <h2 className="text-base font-semibold text-gray-800 text-center">{feature.title}</h2>
+          {/* {feature.title !== "Formatting Tools" && featureIcons[feature.title]} commented out for Formatting Tools */}
+          {/* <h2 className="text-base font-semibold text-gray-800 text-center">{feature.title}</h2> */}
           <p className="text-sm text-gray-600 mt-2 text-center">{feature.description}</p>
           <button
             onClick={() => setExpandedIndex(expandedIndex === index ? null : index)}
