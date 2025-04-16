@@ -109,6 +109,39 @@ const InputFields = () => {
     setFormData('education', updated);
   };
 
+  // Add new leadership entry
+  const addLeadership = () => {
+    const updated = [...(formData.leadership || []), { title: '', description: '' }];
+    setFormData('leadership', updated);
+  };
+
+  // Handle leadership field change
+  const handleLeadershipChange = (idx: number, key: 'title' | 'description', value: string) => {
+    let updated = Array.isArray(formData.leadership) ? [...formData.leadership] : [];
+    // If editing a placeholder row, expand the array
+    while (updated.length <= idx) {
+      updated.push({ title: '', description: '' });
+    }
+    updated[idx][key] = value;
+    setFormData('leadership', updated);
+  };
+
+  // Add new honor entry
+  const addHonor = () => {
+    const updated = [...(formData.honorsList || []), { honor: '' }];
+    setFormData('honorsList', updated);
+  };
+
+  // Handle honor field change
+  const handleHonorsChange = (idx: number, value: string) => {
+    let updated = Array.isArray(formData.honorsList) ? [...formData.honorsList] : [];
+    while (updated.length <= idx) {
+      updated.push({ honor: '' });
+    }
+    updated[idx] = { honor: value };
+    setFormData('honorsList', updated);
+  };
+
   useEffect(() => {
     const tab = searchParams.get("tab") || "personal";
     if (tab !== activeTab) {
@@ -189,6 +222,16 @@ const InputFields = () => {
       }, 100);
     }
   }, [templateID]);
+
+  // Ensure at least 2 leadership and 2 honors entries to start (but not in render!)
+  useEffect(() => {
+    if (activeTab === "leadership" && (!Array.isArray(formData.leadership) || formData.leadership.length === 0)) {
+      setFormData('leadership', [{ title: '', description: '' }, { title: '', description: '' }]);
+    }
+    if (activeTab === "honors" && (!Array.isArray(formData.honorsList) || formData.honorsList.length === 0)) {
+      setFormData('honorsList', [{ honor: '' }, { honor: '' }]);
+    }
+  }, [activeTab]);
 
   // Function to generate a PDF without directly updating state
   const generatePdf = async () => {
@@ -311,7 +354,7 @@ const InputFields = () => {
   const renderFields = () => {
     if (activeTab === "personal") {
       return (
-        <div className="bg-white rounded-lg shadow-lg hover:shadow-lg transition transform p-6 border border-gray-300 flex flex-col flex-1 min-h-full">
+        <div className="bg-white rounded-lg shadow-lg hover:shadow-lg transition transform p-6 border border-gray-300 flex flex-col flex-1 max-h-screen overflow-auto pb-20">
           <h1 className="text-black text-center">Personal Information</h1>
           {["firstName", "middleName", "lastName", "email", "phone", "address"].map((field) => (
             <div key={field} className="flex flex-col mt-2">
@@ -442,21 +485,93 @@ const InputFields = () => {
     } else if (activeTab === "additional") {
       return (
         <div className="bg-white rounded-lg shadow-lg hover:shadow-lg transition transform p-6 border border-gray-300 flex flex-col flex-1 min-h-full">
-          <h1 className="text-black text-center">Additional Information</h1>
-          <textarea
-            name="additionalInfo"
-            value={formData.additionalInfo}
-            onChange={handleInputChange}
-            className="border bg-[#E6E6E6] border-[#999999] shadow-md p-2 rounded-lg w-full text-[#848C8E] h-32"
-            placeholder="Enter any additional information here..."
-          />
+          <h1 className="text-black text-center">Additional Skills & Interests</h1>
+          <div className="mt-4">
+          <span className="text-xs font-bold text-[#848C8E]">Additional Skills & Interests</span>
+            <textarea
+              name="skillsInterests"
+              value={formData.skillsInterests || ''}
+              onChange={handleInputChange}
+              className="border bg-[#E6E6E6] border-[#999999] shadow-md p-2 rounded-lg w-full text-[#848C8E] h-20"
+              placeholder="List your skills, languages, interests, etc..."
+            />
+          </div>
+        </div>
+      );
+    } else if (activeTab === "leadership") {
+      const leadershipEntries = Array.isArray(formData.leadership) ? formData.leadership : [];
+      const showEmpty = leadershipEntries.length === 0 || leadershipEntries.every(l => !l.title && !l.description);
+      const displayLeadership = showEmpty ? [{ title: '', description: '' }, { title: '', description: '' }] : leadershipEntries;
+      const leadershipFields = [
+        { key: 'title', label: 'Title' },
+        { key: 'description', label: 'Description' }
+      ];
+      return (
+        <div className="bg-white rounded-lg shadow-lg hover:shadow-lg transition transform p-6 border border-gray-300 flex flex-col flex-1 min-h-full">
+          <h1 className="text-black text-center">Leadership & Community Engagement</h1>
+          {displayLeadership.map((lead, idx) => (
+            <div key={idx} className="flex flex-col mt-2 border-b pb-2">
+              {leadershipFields.map(field => (
+                <React.Fragment key={field.key}>
+                  <span className={`text-xs font-bold text-[#848C8E]${field.key === 'description' ? ' mt-2' : ''}`}>{field.label}</span>
+                  <input
+                    type="text"
+                    value={lead[field.key] || ''}
+                    onChange={e => handleLeadershipChange(idx, field.key as 'title' | 'description', e.target.value)}
+                    className="border bg-[#E6E6E6] border-[#999999] shadow-md p-2 rounded-lg w-full text-[#848C8E]"
+                    placeholder={field.label}
+                  />
+                </React.Fragment>
+              ))}
+            </div>
+          ))}
+          <button
+            onClick={addLeadership}
+            className="border bg-[#435058] border-[#999999] shadow-md p-2 rounded-lg w-full hover:bg-[#1c2428] transition text-white mt-4"
+          >
+            + Add Leadership
+          </button>
+        </div>
+      );
+    } else if (activeTab === "honors") {
+      const honorsEntries = Array.isArray(formData.honorsList) ? formData.honorsList : [];
+      const showEmpty = honorsEntries.length === 0 || honorsEntries.every(h => !h.honor);
+      const displayHonors = showEmpty ? [{ honor: '' }, { honor: '' }] : honorsEntries;
+      const honorsFields = [
+        { key: 'honor', label: 'Honor' }
+      ];
+      return (
+        <div className="bg-white rounded-lg shadow-lg hover:shadow-lg transition transform p-6 border border-gray-300 flex flex-col flex-1 min-h-full">
+          <h1 className="text-black text-center">Honors</h1>
+          {displayHonors.map((honorObj, idx) => (
+            <div key={idx} className="flex flex-col mt-2 border-b pb-2">
+              {honorsFields.map(field => (
+                <React.Fragment key={field.key}>
+                  <span className="text-xs font-bold text-[#848C8E]">{field.label}</span>
+                  <input
+                    type="text"
+                    value={honorObj.honor || ''}
+                    onChange={e => handleHonorsChange(idx, e.target.value)}
+                    className="border bg-[#E6E6E6] border-[#999999] shadow-md p-2 rounded-lg w-full text-[#848C8E]"
+                    placeholder="Honor, Award, or Recognition"
+                  />
+                </React.Fragment>
+              ))}
+            </div>
+          ))}
+          <button
+            onClick={addHonor}
+            className="border bg-[#435058] border-[#999999] shadow-md p-2 rounded-lg w-full hover:bg-[#1c2428] transition text-white mt-4"
+          >
+            + Add Honor
+          </button>
         </div>
       );
     }
   };
 
   return (
-    <div className="bg-[#F8F8F8] flex w-full h-screen overflow-hidden">
+    <div className="bg-[#F8F8F8] flex w-full h-full overflow-hidden">
       <div className="w-[38%] flex flex-col bg-[#F8F8F8] h-full overflow-auto">
         {renderFields()}
       </div>
