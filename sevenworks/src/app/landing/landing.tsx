@@ -1,10 +1,10 @@
 import { FaRegCircleCheck } from "react-icons/fa6";
-import "./landing.css";
-import ImageGrid from "./imagegrid.js";
+import "./components/landing.css";
+import ImageGrid from "./components/imagegrid.js";
 
 export default function Landing() {
     return (
-        <div className="flex flex-row w-full min-h-screen justify-center items-center bg-gradient-to-b from-navy to-darkRed overflow-y-auto">
+        <div className="flex flex-row w-full min-h-screen justify-center items-center bg-gradient-to-b from-navy to-[darkRed] overflow-y-auto">
             <div className="flex flex-col w-full h-full justify-center items-start gap-[32px] px-[100px] pb-[75px] text-offWhite">
                 <h1 className="max-w-[700px] text-[60px] font-extrabold leading-tight tracking-wide">
                     Focus on your future, not formatting.
@@ -37,7 +37,7 @@ export default function Landing() {
                 </div>
             </div>
             <div className="flex flex-col w-[1000px] h-full justify-center items-center p-[50px] pr-[100px] mt-[-80px]"> {/* Adjusted margin-top to raise the images */}
-                <div className="min-h-screen flex items-center justify-center id=">
+                <div className="min-h-screen flex items-center justify-center pt-20">
                     <ImageGrid />
                 </div>
             </div>

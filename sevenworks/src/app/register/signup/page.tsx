@@ -1,8 +1,9 @@
 "use client";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { auth, googleProvider, githubProvider } from "../../lib/firebase";
-import { createUserWithEmailAndPassword, signInWithPopup } from "firebase/auth";
+import { createUserWithEmailAndPassword, signInWithPopup, sendEmailVerification } from "firebase/auth";
 import { IoIosArrowBack } from "react-icons/io";
 import { FaGithub, FaGoogle } from "react-icons/fa";
 
@@ -15,11 +16,14 @@ export default function Signup() {
     });
     const [pending, setPending] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [success, setSuccess] = useState<string | null>(null); // ✅ new
     const router = useRouter();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setPending(true);
+        setError(null);
+        setSuccess(null);
 
         if (form.password !== form.confirmPassword) {
             setError("Passwords do not match");
@@ -33,15 +37,19 @@ export default function Signup() {
                 form.email,
                 form.password
             );
-            console.log("User signed up:", userCredential.user);
+
+            await sendEmailVerification(userCredential.user);
+            console.log("Verification email sent ✅");
+
+            setSuccess("A verification email has been sent. Please check your inbox before logging in.");
             setPending(false);
-            router.push("/register/login");
+
+            // Optional: redirect after 3 seconds
+            setTimeout(() => {
+                router.push("/register/login");
+            }, 3000);
         } catch (error: unknown) {
-            if (error instanceof Error) {
-                setError(error.message);
-            } else {
-                setError("An unknown error occurred");
-            }
+            setError(error instanceof Error ? error.message : "An unknown error occurred");
             setPending(false);
         }
     };
@@ -49,7 +57,6 @@ export default function Signup() {
     const handleGithubSignUp = async () => {
         setPending(true);
         setError(null);
-
         try {
             const result = await signInWithPopup(auth, githubProvider);
             console.log("GitHub user signed up:", result.user);
@@ -64,7 +71,6 @@ export default function Signup() {
     const handleGoogleSignUp = async () => {
         setPending(true);
         setError(null);
-
         try {
             const result = await signInWithPopup(auth, googleProvider);
             console.log("Google user signed up:", result.user);
@@ -94,6 +100,7 @@ export default function Signup() {
                 </div>
 
                 {error && <p className="text-red-500 text-center">{error}</p>}
+                {success && <p className="text-green-500 text-center">{success}</p>} {/* ✅ */}
 
                 <div className="flex flex-col h-fit gap-1">
                     <p className="text-black/60 text-[16px] font-medium pl-1">Email</p>

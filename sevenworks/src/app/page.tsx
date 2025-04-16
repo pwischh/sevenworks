@@ -1,6 +1,6 @@
-import Navbar from "./landing/navbar";
+import Navbar from "./landing/components/navbar";
 import Landing from "./landing/landing";
-import TemplatePreview from "./landing/templatePrev";
+import TemplatePreview from "./landing/components/templatePrev";
 import Head from "next/head";
 
 export default function Home() {

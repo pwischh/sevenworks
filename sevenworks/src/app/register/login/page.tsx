@@ -29,7 +29,8 @@ export default function Login() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setPending(true);
-
+        setError(null); // clears previous errors
+    
         try {
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
             const idToken = await userCredential.user.getIdToken(true);
@@ -49,21 +50,29 @@ export default function Login() {
                 });
                 throw new Error(`Server error: ${response.status} - ${JSON.stringify(errorData)}`);
             }
-
-            console.log("User logged in:", userCredential.user);
             await updateSession(userCredential.user.uid);
+
+            const user = userCredential.user;
+            if (!user.emailVerified) {
+                setError("Please verify your email before logging in.");
+                await auth.signOut(); // signs them out immediately
+                setPending(false);
+                return;
+            }
+    
+            console.log("User logged in:", user);
             setPending(false);
-            router.push("/dashboard");
+            router.push("/dashboard"); // take them to dashboard if verified
         } catch (error: unknown) {
+            setPending(false);
             if (error instanceof Error) {
                 setError(error.message);
             } else {
                 setError("An unknown error occurred");
             }
-            setPending(false);
         }
     };
-
+    
     const handlePasswordReset = async () => {
         try {
             await sendPasswordResetEmail(auth, email);

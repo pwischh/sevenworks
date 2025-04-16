@@ -24,3 +24,12 @@ html, body {
   height: 100%;
   margin: 0;
 }
+
+/* Override default white background in PDF viewer pages */
+.rpv-core__inner-page {
+  background-color: #F8F8F8 !important;
+}
+
+.rpv-core__page-layer {
+  background-color: #F8F8F8 !important;
+}

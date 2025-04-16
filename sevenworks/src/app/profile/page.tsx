@@ -2,8 +2,17 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getAuth, onAuthStateChanged, updateProfile, updateEmail, User } from "firebase/auth";
-import { app } from "../lib/firebase"; // adjust the import to your Firebase initialization file
+import {
+  getAuth,
+  onAuthStateChanged,
+  updateProfile,
+  updateEmail,
+  updatePassword,
+  reauthenticateWithCredential,
+  EmailAuthProvider,
+  User
+} from "firebase/auth";
+import { app } from "../lib/firebase"; // adjust as needed
 
 const ProfilePage = () => {
   const auth = getAuth(app);
@@ -12,6 +21,8 @@ const ProfilePage = () => {
   const [user, setUser] = useState<User | null>(null);
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
@@ -23,7 +34,6 @@ const ProfilePage = () => {
         setDisplayName(currentUser.displayName || "");
         setEmail(currentUser.email || "");
       } else {
-        // Redirect to login if not authenticated
         router.push("/login");
       }
       setLoading(false);
@@ -58,6 +68,36 @@ const ProfilePage = () => {
     }
   };
 
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setMessage("");
+
+    if (!currentPassword || !newPassword) {
+      setError("Please fill out both password fields.");
+      return;
+    }
+
+    try {
+      if (!user || !user.email) throw new Error("User not found");
+
+      const credential = EmailAuthProvider.credential(user.email, currentPassword);
+      await reauthenticateWithCredential(user, credential);
+      await updatePassword(user, newPassword);
+
+      setMessage("Password updated successfully.");
+      setCurrentPassword("");
+      setNewPassword("");
+    } catch (err: unknown) {
+      console.error(err);
+      if (err instanceof Error) {
+        setError(err.message || "Failed to change password.");
+      } else {
+        setError("Failed to change password.");
+      }
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-900 text-gray-100">
@@ -69,7 +109,6 @@ const ProfilePage = () => {
   return (
     <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
       <div className="max-w-2xl w-full mx-auto py-10 px-6 bg-gray-800 rounded-lg shadow-md">
-        {/* Back Arrow */}
         <button
           onClick={() => router.back()}
           className="flex items-center text-blue-400 hover:text-blue-300 mb-4"
@@ -89,6 +128,8 @@ const ProfilePage = () => {
         <h1 className="text-3xl font-bold mb-6 text-gray-100">Manage Your Profile</h1>
         {error && <p className="mb-4 text-red-500">{error}</p>}
         {message && <p className="mb-4 text-green-500">{message}</p>}
+
+        {/* Profile Update Form */}
         <form onSubmit={handleUpdateProfile} className="space-y-4">
           <div>
             <label className="block mb-1 font-semibold text-gray-300">Display Name</label>
@@ -96,7 +137,7 @@ const ProfilePage = () => {
               type="text"
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
-              className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-gray-200"
               placeholder="Enter your display name"
             />
           </div>
@@ -106,7 +147,7 @@ const ProfilePage = () => {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-gray-200"
               placeholder="Enter your email address"
             />
           </div>
@@ -115,6 +156,42 @@ const ProfilePage = () => {
             className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded transition"
           >
             Update Profile
+          </button>
+        </form>
+
+        {/* Divider */}
+        <hr className="border-gray-600 my-6" />
+
+        {/* Password Update Form */}
+        <form onSubmit={handleChangePassword}>
+          <h2 className="text-xl font-semibold text-gray-200 mb-2">Change Password</h2>
+          <div>
+            <label className="block mb-1 font-semibold text-gray-300">Current Password</label>
+            <input
+              type="password"
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
+              className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-gray-200"
+              placeholder="Enter current password"
+            />
+          </div>
+
+          <div className="mt-4">
+            <label className="block mb-1 font-semibold text-gray-300">New Password</label>
+            <input
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-gray-200"
+              placeholder="Enter new password"
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded mt-4 transition"
+          >
+            Change Password
           </button>
         </form>
       </div>

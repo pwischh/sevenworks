@@ -10,6 +10,7 @@ type Props = (
     templateID: string | null,
     formData: { [key: string]: string }
 ) => React.ReactElement<DocumentProps>;
+
 const ResumeContext = createContext<Props>((templateID) => {
     return (
         <Document>
