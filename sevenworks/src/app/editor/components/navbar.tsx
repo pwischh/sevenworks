@@ -62,13 +62,12 @@ export default function Navbar() {
 
     function handleFontClick(value: string) {
         setFormData("font", value);
-        console.log(formData);
     }
 
     return (
         <div className="bg-[#F8F8F8] px-4">
             <div className="max-w-7xl mx-auto pt-4 pb-4">
-                <nav ref={navRef} className="text-black relative pt-2 pb-2 w-full text-nowrap font-semibold bg-white shadow-lg rounded-lg px-4 border border-gray-300 flex items-center justify-between">
+                <nav ref={navRef} className="text-black relative pt-2 pb-2 w-full text-nowrap font-semibold bg-white shadow-md rounded-lg px-4 border border-gray-300 flex items-center justify-between">
                     <div className="flex items-center gap-6">
                         <Link href="/" className={`${markazi.className} text-3xl`}>SevenWorks</Link>
                     </div>

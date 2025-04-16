@@ -34,7 +34,6 @@ export default function Editor() {
               <InputFields />
             </Suspense>
             <Suspense fallback={<div>Loading Editor...</div>}>
-              {/* <EditorWindow /> */}
             </Suspense>
             <RightView />
           </div>

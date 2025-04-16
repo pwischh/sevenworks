@@ -1,12 +1,11 @@
 "use client";
-
 import React, { useEffect, useState } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { Markazi_Text } from "next/font/google";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, doc, getDocs, getDoc, setDoc } from "firebase/firestore";
 import { auth, db } from "../lib/firebase";
 import { signOut } from "firebase/auth";
 
@@ -29,7 +28,7 @@ const Sidebar = () => {
     <aside className="w-64 h-screen bg-navy text-offWhite p-6 fixed shadow-lg">
       <div className="flex flex-row w-full items-center mb-2">
         <div className={markazi.className}>
-          <Link href="/" className="text-3xl font-bold text-offWhite hover:underline">
+          <Link href="/" className="text-3xl font-bold text-offWhite cursor-pointer">
             SevenWorks
           </Link>
         </div>
@@ -37,15 +36,7 @@ const Sidebar = () => {
       <nav className="mt-6">
         <ul className="space-y-4">
           <li>
-            <Link href="/dashboard" className="flex items-center space-x-2 hover:text-cyan-300 transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7m-9 2v8m4-8h5a2 2 0 012 2v7a2 2 0 01-2 2h-5m-4 0H6a2 2 0 01-2-2v-7a2 2 0 012-2h5" />
-              </svg>
-              <span>Home</span>
-            </Link>
-          </li>
-          <li>
-            <Link href="/templates" className="flex items-center space-x-2 hover:text-cyan-300 transition-colors">
+            <Link href="/templates" className="flex items-center space-x-2 hover:text-lightRed transition-colors">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m-6-8h6m2-2H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V6a2 2 0 00-2-2z" />
               </svg>
@@ -53,7 +44,7 @@ const Sidebar = () => {
             </Link>
           </li>
           <li>
-            <Link href="/editor" className="flex items-center space-x-2 hover:text-cyan-300 transition-colors">
+            <Link href="/editor" className="flex items-center space-x-2 hover:text-lightRed transition-colors">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5h2m-1 0v14m-7-7h14" />
               </svg>
@@ -61,7 +52,7 @@ const Sidebar = () => {
             </Link>
           </li>
           <li>
-            <Link href="/settings" className="flex items-center space-x-2 hover:text-cyan-300 transition-colors">
+            <Link href="/settings" className="flex items-center space-x-2 hover:text-lightRed transition-colors">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 3a1.5 1.5 0 00-1.5 1.5V5.25h7.5V4.5a1.5 1.5 0 00-1.5-1.5h-4.5zM6 8.25h12v12H6v-12z" />
               </svg>
@@ -69,7 +60,7 @@ const Sidebar = () => {
             </Link>
           </li>
           <li>
-            <Link href="/profile" className="flex items-center space-x-2 hover:text-cyan-300 transition-colors">
+            <Link href="/profile" className="flex items-center space-x-2 hover:text-lightRed transition-colors">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.121 17.804A13.937 13.937 0 0112 15c2.338 0 4.503.634 6.379 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
@@ -77,7 +68,7 @@ const Sidebar = () => {
             </Link>
           </li>
           <li>
-            <button onClick={handleSignOut} className="flex items-center space-x-2 hover:text-red-400 transition-colors">
+            <button onClick={handleSignOut} className="flex items-center space-x-2 hover:text-lightRed transition-colors">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1m0-10v1" />
               </svg>
@@ -90,39 +81,80 @@ const Sidebar = () => {
   );
 };
 
-interface Resume {
+interface InProgressResume {
   id: string;
-  title: string;
-  description: string;
-  image?: string;
+  templateID: string;
+  name: string;
+  image: string;
 }
 
 // ResumeCard Component using Next.js <Image>
-const ResumeCard = ({ resume }: { resume: Resume }) => (
-  <div className="flex flex-col bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden">
-    {/* Document Thumbnail */}
-    <div className="relative w-full aspect-[8.5/11] bg-gray-50">
-      {resume.image ? (
+const ResumeCard = ({ resume }: { resume: InProgressResume }) => {
+  const router = useRouter();
+  const [resumeLoading, setResumeLoading] = useState(false);
+  
+  async function handleResumeClick() {
+    setResumeLoading(true);
+    const currentUser = auth.currentUser;
+  
+    if (currentUser) { 
+      try {
+        //Get fields from the resume being clicked
+        const clickedResume = await getDoc(doc(db, "user_resumes", currentUser.uid, "resumes", resume.id));
+        const clickedResumeData = clickedResume.data();
+
+        if (!clickedResumeData){
+          throw new Error("Unable to retrieve resume data");
+        }
+
+        //Get formData and templateID from the db
+        const clickedResumeFormData = clickedResumeData.formData;
+        const clickedResumeTemplateID = clickedResumeData.templateID;
+
+        //Update session with correct data
+        await setDoc(
+          doc(db, "sessions", currentUser.uid), 
+          {formData: clickedResumeFormData, resumeID: resume.id, templateID: clickedResumeTemplateID}, 
+          {merge: false});
+          
+      } catch(error) {
+        console.error("Error updating session data: ", error);
+      } finally {
+        setResumeLoading(false);
+        router.push("/editor")
+      }
+    }
+  }
+
+  return(
+    <div className="flex flex-col relative items-center w-full max-w-xs">
+      {/* Document Thumbnail */}
+      <div className="relative w-full aspect-[8.5/11] bg-white rounded-md shadow hover:shadow-lg overflow-hidden">
         <Image
           src={resume.image}
-          alt={resume.title}
+          alt={resume.templateID}
           fill
           className="object-cover"
         />
-      ) : (
-        <div className="absolute inset-0 flex items-center justify-center text-gray-300 text-6xl font-light">
-          [A]
-        </div>
-      )}
-    </div>
+        <div 
+          className="flex flex-col justify-center items-center absolute top-0 rounded-md w-full h-full bg-black/40 
+              font-medium text-offWhite text-[18px] transition duration-150 opacity-0 hover:opacity-100"
+        >
+          <button className="px-3 py-0.5 bg-transparent border-2 border border-offWhite rounded-lg hover:border-lightRed hover:bg-lightRed" 
+            onClick={handleResumeClick}>
+              Edit
+          </button>
+        </div> 
+      </div>
 
-    {/* Title & Description */}
-    <div className="p-4">
-      <h3 className="text-sm font-semibold truncate">{resume.title}</h3>
-      <p className="text-xs text-gray-500 mt-1">{resume.description}</p>
+      {/* Title & Description */}
+      <div className="mt-2 text-center">
+        <h3 className="text-sm font-semibold">{resume.name}</h3>
+        <p className="text-xs text-gray-600">{resume.templateID}</p>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 // Create New Button Component
 const CreateNewButton = ({ type }: { type: string }) => (
@@ -139,8 +171,7 @@ const Dashboard = () => {
   const router = useRouter();
 
   // Two separate state variables for each section
-  const [templateResumes, setTemplateResumes] = useState<Resume[]>([]);
-  const [editingResumes, setEditingResumes] = useState<Resume[]>([]);
+  const [templateResumes, setTemplateResumes] = useState<InProgressResume[]>([]);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -153,47 +184,30 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchTemplateResumes = async () => {
       try {
-        const querySnapshot = await getDocs(collection(db, "resume_templates"));
-        const templatesData = querySnapshot.docs.map((doc) => {
-          const data = doc.data();
-          return {
-            id: doc.id,
-            title: data.name,
-            description: data.category,
-            image: "/sample-business-resume.png",
-          };
-        });
-        setTemplateResumes(templatesData);
+        if (!loading) {
+          if (!user) throw new Error("User not authenticated");
+
+          const resumesCollectionRef = collection(db, "user_resumes", user.uid, "resumes");
+          const querySnapshot = await getDocs(resumesCollectionRef);
+
+          const templatesData = querySnapshot.docs.map((doc) => {
+            const data = doc.data();
+            return {
+              id: doc.id,
+              templateID: data.templateID,
+              name: data.name,
+              image: data.image,
+            };
+          });
+          setTemplateResumes(templatesData);
+        }
       } catch (error) {
         console.error("Error fetching resume templates:", error);
       }
     };
 
     fetchTemplateResumes();
-  }, []);
-
-  // Fetch resumes for "Editing Resumes" from Firestore collection "editing_resumes"
-  useEffect(() => {
-    const fetchEditingResumes = async () => {
-      try {
-        const querySnapshot = await getDocs(collection(db, "editing_resumes"));
-        const editingData = querySnapshot.docs.map((doc) => {
-          const data = doc.data();
-          return {
-            id: doc.id,
-            title: data.name,
-            description: data.category,
-            image: "/sample-business-resume.png",
-          };
-        });
-        setEditingResumes(editingData);
-      } catch (error) {
-        console.error("Error fetching editing resumes:", error);
-      }
-    };
-
-    fetchEditingResumes();
-  }, []);
+  }, [user, loading]);
 
   if (loading || !user) {
     return (
@@ -216,7 +230,7 @@ const Dashboard = () => {
         </header>
 
         {/* Resume Templates Section */}
-        <section className="mb-12">
+        {/*<section className="mb-12">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold text-gray-800">Resume Templates</h2>
             <Link href="/templates" className="text-blue-600 hover:text-blue-800 text-sm font-medium">
@@ -231,19 +245,19 @@ const Dashboard = () => {
             ))}
             <CreateNewButton type="Template" />
           </div>
-        </section>
+        </section>*/}
 
         {/* Editing Resumes Section */}
         <section>
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-gray-800">Your Resumes</h2>
+            <h2 className="text-2xl font-bold text-gray-800">My Resumes</h2>
             <Link href="/editor" className="text-blue-600 hover:text-blue-800 text-sm font-medium">
               View all
             </Link>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             <CreateNewButton type="Resume" />
-            {editingResumes.map((resume) => (
+            {templateResumes.map((resume) => (
               <div key={resume.id}>
                 <ResumeCard resume={resume} />
               </div>
