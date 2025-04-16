@@ -1,6 +1,8 @@
 const GEMINI_API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY!;
 
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp-image-generation:generateContent?key=' + GEMINI_API_KEY;
+// Define separate URLs for image and text generation
+const GEMINI_IMAGE_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp-image-generation:generateContent?key=' + GEMINI_API_KEY;
+const GEMINI_TEXT_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + GEMINI_API_KEY;
 
 /**
  * Generate an event image using the Gemini API.
@@ -18,7 +20,7 @@ interface GeminiResponseData {
 
 export async function generateEventImage(prompt: string): Promise<string> {
   try {
-    const response = await fetch(GEMINI_API_URL, {
+    const response = await fetch(GEMINI_IMAGE_API_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -59,7 +61,7 @@ export async function generateEventImage(prompt: string): Promise<string> {
  */
 export async function generateResumeText(prompt: string): Promise<string> {
   try {
-    const response = await fetch(GEMINI_API_URL, {
+    const response = await fetch(GEMINI_TEXT_API_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -68,7 +70,7 @@ export async function generateResumeText(prompt: string): Promise<string> {
         contents: [
           {
             parts: [
-              { text: prompt },
+              { text: `You are a professional resume advisor. Provide concise advice on improving this resume content: ${prompt}` },
             ],
           },
         ],
