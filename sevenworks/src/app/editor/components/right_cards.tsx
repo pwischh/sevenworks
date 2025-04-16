@@ -130,7 +130,7 @@ const RightView = () => {
               <div className="flex-1 overflow-y-auto mb-2" style={{ maxHeight: "calc(100vh - 300px)" }}>
                 {chatMessages.map((msg, i) => (
                   <div key={i} className={`mb-2 text-sm ${msg.sender === "user" ? "text-right" : "text-left"}`}>
-                    <span className={`inline-block px-2 py-1 rounded ${msg.sender === "user" ? "bg-blue-200" : "bg-green-100"}`}>{msg.text}</span>
+                    <span className={`inline-block px-3 py-2 rounded-lg ${msg.sender === "user" ? "bg-[#10a37f] text-white" : "bg-[#3b5d54] text-white"}`}>{msg.text}</span>
                   </div>
                 ))}
                 <div ref={chatEndRef} />
