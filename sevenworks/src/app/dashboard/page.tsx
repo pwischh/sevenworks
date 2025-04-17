@@ -109,10 +109,17 @@ const ResumeCard = ({ resume }: { resume: InProgressResume }) => {
         const clickedResumeFormData = clickedResumeData.formData;
         const clickedResumeTemplateID = clickedResumeData.templateID;
 
+        // Store resumeID in localStorage to persist through refreshes
+        localStorage.setItem('currentResumeID', resume.id);
+
         //Update session with correct data
         await setDoc(
           doc(db, "sessions", currentUser.uid), 
-          {formData: clickedResumeFormData, resumeID: resume.id, templateID: clickedResumeTemplateID}, 
+          {
+            formData: clickedResumeFormData, 
+            resumeID: resume.id, 
+            templateID: clickedResumeTemplateID
+          }, 
           {merge: false});
           
       } catch(error) {

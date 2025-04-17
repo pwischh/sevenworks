@@ -11,7 +11,7 @@ import { onAuthStateChanged } from "firebase/auth";
 
 const ViewerNoSSR = dynamic(() => import('@react-pdf-viewer/core').then(mod => mod.Viewer), { ssr: false });
 import '@react-pdf-viewer/core/lib/styles/index.css';
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import { auth, db } from "@/app/lib/firebase";
 import { useResume } from "@/app/resumeContext";
 
@@ -91,7 +91,7 @@ const InputFields = () => {
     updated[idx][key] = value;
     setFormData('experience', updated);
   };
-
+  
   // Handle education field change
   const handleEducationChange = (idx: number, key: keyof EducationEntry, value: string) => {
     const updated = Array.isArray(formData.education) ? [...formData.education] : [];
@@ -126,13 +126,13 @@ const InputFields = () => {
 
   // Handle honor field change
   const handleHonorsChange = (idx: number, value: string) => {
-      const updated = Array.isArray(formData.honorsList) ? [...formData.honorsList] : [];
-      while (updated.length <= idx) {
-        updated.push({ honor: '' });
-      }
-      updated[idx] = { honor: value as string };
-      setFormData('honorsList', updated);
-    };
+    const updated = Array.isArray(formData.honorsList) ? [...formData.honorsList] : [];
+    while (updated.length <= idx) {
+      updated.push({ honor: '' });
+    }
+    updated[idx] = { honor: value };
+    setFormData('honorsList', updated);
+  };
 
   useEffect(() => {
     const tab = searchParams?.get("tab") || "personal";
@@ -145,16 +145,67 @@ const InputFields = () => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
         if (user){
             try {
+                // Try to get the resumeID from localStorage first (set when clicking from dashboard)
+                const savedResumeID = localStorage.getItem('currentResumeID');
+                
+                // Get the session data to check if we need to update it
                 const sessionData = (await getDoc(doc(db, "sessions", user.uid))).data();
 
                 if (!sessionData){
                     throw new Error("Error retrieving session data");
                 }
 
-                const sessionTemplateID = sessionData.templateID;
-                setTemplateID(sessionTemplateID);
+                // If there's a saved resumeID that doesn't match the session, we need to load the correct resume
+                if (savedResumeID && sessionData.resumeID !== savedResumeID) {
+                    console.log("Loading resume from saved ID:", savedResumeID);
+                    
+                    // Get the specific resume data
+                    const resumeData = (await getDoc(doc(db, "user_resumes", user.uid, "resumes", savedResumeID))).data();
+                    
+                    if (resumeData) {
+                        // Update the session with the correct resumeID and data
+                        await setDoc(doc(db, "sessions", user.uid), {
+                            formData: resumeData.formData,
+                            resumeID: savedResumeID,
+                            templateID: resumeData.templateID
+                        }, { merge: false });
+                        
+                        // Reload the session data
+                        const updatedSessionData = (await getDoc(doc(db, "sessions", user.uid))).data();
+                        if (updatedSessionData && updatedSessionData.formData) {
+                            // Set form data from the correct resume
+                            Object.entries(updatedSessionData.formData).forEach(([key, value]) => {
+                                setFormData(key, value);
+                            });
+                            
+                            // Initialize customPersonalFields if they exist
+                            if (updatedSessionData.formData.customPersonal && Array.isArray(updatedSessionData.formData.customPersonal)) {
+                                setCustomPersonalFields(updatedSessionData.formData.customPersonal);
+                            }
+                            
+                            setTemplateID(updatedSessionData.templateID);
+                            return; // Exit early as we've already set the data
+                        }
+                    }
+                }
+                
+                // If we didn't need to update the session or couldn't find the resume,
+                // just load the current session data
+                if (sessionData.formData) {
+                    // Set the entire formData object at once through context
+                    Object.entries(sessionData.formData).forEach(([key, value]) => {
+                        setFormData(key, value);
+                    });
+                    
+                    // Initialize customPersonalFields if they exist in the loaded data
+                    if (sessionData.formData.customPersonal && Array.isArray(sessionData.formData.customPersonal)) {
+                        setCustomPersonalFields(sessionData.formData.customPersonal);
+                    }
+                }
+                
+                setTemplateID(sessionData.templateID);
             } catch(error) {
-                console.error("Error fetching templateID:", error);
+                console.error("Error fetching session data:", error);
             }
         }
     });
@@ -474,7 +525,7 @@ const InputFields = () => {
                   <span className={`text-xs font-bold text-[#848C8E]${field.key === 'description' ? ' mt-2' : ''}`}>{field.label}</span>
                   <input
                     type="text"
-                    value={typeof lead[field.key] === 'string' ? (lead[field.key] as string) : ''}
+                    value={typeof lead[field.key] === 'string' ? lead[field.key] : ''}
                     onChange={e => handleLeadershipChange(idx, field.key as 'title' | 'description', e.target.value)}
                     className="border bg-[#E6E6E6] border-[#999999] shadow-md p-2 rounded-lg w-full text-[#848C8E]"
                     placeholder={field.label}
@@ -508,7 +559,7 @@ const InputFields = () => {
                   <span className="text-xs font-bold text-[#848C8E]">{field.label}</span>
                   <input
                     type="text"
-                    value={typeof honorObj.honor === 'string' ? honorObj.honor : ''}
+                    value={honorObj.honor || ''}
                     onChange={e => handleHonorsChange(idx, e.target.value)}
                     className="border bg-[#E6E6E6] border-[#999999] shadow-md p-2 rounded-lg w-full text-[#848C8E]"
                     placeholder="Honor, Award, or Recognition"
