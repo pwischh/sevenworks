@@ -28,6 +28,10 @@ interface EducationEntry {
   institution: string;
   years: string;
 }
+interface LeadershipEntry {
+  title: string;
+  description: string;
+}
 
 const InputFields = () => {
   const searchParams = useSearchParams();
@@ -239,7 +243,10 @@ const InputFields = () => {
 
     setIsGenerating(true);
     try {
-      const blob = await pdf(template(templateID, formData)).toBlob();
+      const stringifiedFormData = Object.fromEntries(
+        Object.entries(formData).map(([key, value]) => [key, Array.isArray(value) ? JSON.stringify(value) : String(value)])
+      );
+      const blob = await pdf(template(templateID, stringifiedFormData)).toBlob();
       const newUrl = URL.createObjectURL(blob);
 
       // Store the new PDF in the inactive slot
@@ -406,7 +413,7 @@ const InputFields = () => {
       return (
         <div className="bg-white rounded-lg shadow-lg hover:shadow-lg transition transform p-6 border border-gray-300 flex flex-col flex-1 min-h-full">
           <h1 className="text-black text-center">Experience</h1>
-          {(formData.experience || []).map((exp, idx) => (
+          {(Array.isArray(formData.experience) ? formData.experience : []).map((exp, idx) => (
             <div key={idx} className="flex flex-col mt-2 border-b pb-2">
               <span className="text-xs font-bold text-[#848C8E]">Job Title</span>
               <input

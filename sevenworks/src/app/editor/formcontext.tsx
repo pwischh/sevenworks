@@ -3,15 +3,17 @@ import { createContext, useState, ReactNode, useContext, useEffect } from "react
 import { auth, db } from "../lib/firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 
+type FormData = { [key: string]: string | any[] };
+
 interface FormContextType {
-  formData: { [key: string]: string };
-  setFormData: (key: string, value: string) => void;
+  formData: FormData;
+  setFormData: (key: string, value: string | any[]) => void;
 }
 
 const FormContext = createContext<FormContextType | undefined>(undefined);
 
 export const FormProvider = ({ children }: { children: ReactNode }) => {
-  const [formData, setFormDataState] = useState<{ [key: string]: string }>({});
+  const [formData, setFormDataState] = useState<FormData>({});
 
   useEffect(() => {
     async function loadSessionData(){
@@ -24,7 +26,7 @@ export const FormProvider = ({ children }: { children: ReactNode }) => {
     loadSessionData();
   }, [])
 
-  const setFormData = async (key: string, value: string) => {
+  const setFormData = async (key: string, value: string | any[]) => {
     const updatedFormData = { ...formData, [key]: value };
     if (key === "RESET") {
       setFormDataState({});

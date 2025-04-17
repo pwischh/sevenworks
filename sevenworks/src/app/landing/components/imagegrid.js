@@ -5,9 +5,9 @@ import { motion } from "framer-motion";
 import "./landing.css";
 
 const images = [
-  "/Thumbnails/Business-Resume.png",
-  "/Thumbnails/Data-Analytics-Resume.png",
-  "/Thumbnails/Data-Science-Resume.png",,
+  "/sample-business-resume.png",
+  "/sample-business-resume.png",
+  "/sample-business-resume.png",
 ];
 
 export default function AutoScrollImagesDown() {

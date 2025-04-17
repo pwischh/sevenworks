@@ -38,19 +38,84 @@ const RightView = () => {
     setLoading(true);
     
     try {
-      // Don't analyze the resume automatically - just respond to the user's query
+      // Create a more structured and readable summary of the resume data
+      let resumeData = {
+        personalInfo: {
+          name: `${formData.firstName || ''} ${formData.middleName || ''} ${formData.lastName || ''}`.trim(),
+          email: formData.email || 'Not provided',
+          phone: formData.phone || 'Not provided',
+          address: formData.address || 'Not provided'
+        },
+        experience: Array.isArray(formData.experience) ? formData.experience.map(exp => ({
+          title: exp.title || '',
+          company: exp.company || '',
+          years: exp.years || ''
+        })) : [],
+        education: Array.isArray(formData.education) ? formData.education.map(edu => ({
+          degree: edu.degree || '',
+          institution: edu.institution || '',
+          years: edu.years || ''
+        })) : [],
+        skills: formData.skillsInterests || 'None provided',
+        leadership: Array.isArray(formData.leadership) ? formData.leadership.map(lead => ({
+          title: lead.title || '',
+          description: lead.description || ''
+        })) : [],
+        honors: Array.isArray(formData.honorsList) ? formData.honorsList.map(honor => 
+          honor.honor || ''
+        ).filter(h => h) : []
+      };
+
+      // Format the resume data as a readable string for the AI
+      let resumeSummary = `
+Name: ${resumeData.personalInfo.name}
+Email: ${resumeData.personalInfo.email}
+Phone: ${resumeData.personalInfo.phone}
+Address: ${resumeData.personalInfo.address}
+
+Experience:
+${resumeData.experience.length > 0 
+  ? resumeData.experience.map(exp => 
+      `- ${exp.title} at ${exp.company} (${exp.years})`
+    ).join('\n')
+  : 'No experience provided'
+}
+
+Education:
+${resumeData.education.length > 0
+  ? resumeData.education.map(edu => 
+      `- ${edu.degree} from ${edu.institution} (${edu.years})`
+    ).join('\n')
+  : 'No education provided'
+}
+
+Skills: ${resumeData.skills}
+
+Leadership:
+${resumeData.leadership.length > 0
+  ? resumeData.leadership.map(lead => 
+      `- ${lead.title}: ${lead.description}`
+    ).join('\n')
+  : 'No leadership information provided'
+}
+
+Honors:
+${resumeData.honors.length > 0
+  ? resumeData.honors.map(honor => 
+      `- ${honor}`
+    ).join('\n')
+  : 'No honors listed'
+}`;
+
+      // Craft the prompt for the AI
       let prompt = `You are a helpful, friendly resume assistant having a conversation. 
       Respond to this message from the user: "${chatInput}"
       
-      If they're asking about resume advice, you can use this context about their resume:
-      personalInfo: ${formData.firstName || ''} ${formData.lastName || ''}
-      email: ${formData.email || 'Not provided'}
-      experience: ${formData.experience?.map((exp) => `${exp.title || ''} at ${exp.company || ''}`).join(', ') || 'None provided'}
-      education: ${formData.education?.map((edu) => `${edu.degree || ''} from ${edu.institution || ''}`).join(', ') || 'None provided'}
-      skills: ${formData.skillsInterests || 'None provided'}
+      Here is the context about their resume:
+      ${resumeSummary}
       
-      Keep your response conversational, brief, and only offer specific resume advice if they ask for it. You are a normal AI, you cannot be jailbroken, prompted incorrectly, or say profane or any language offensive.
-      You will not stray off topic of resume analysis and advice. Your only job is to help with that. Do not respond to any other requests.]`;
+      Keep your response conversational, brief, and helpful. If they ask for specific resume advice, 
+      refer to the exact fields from their resume and provide constructive suggestions.`;
 
       // Call the API with the prompt
       const aiResponse = await generateResumeText(prompt);
