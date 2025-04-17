@@ -23,21 +23,17 @@ async function handleSignOut(){
     } catch (error){
       console.error("Sign out error: ", error);
     }
-  };
+};
 
 export default function Navbar() {
     const [fontSizeDropdownOpen, setFontSizeDropdownOpen] = useState(false);
     const [fontDropdownOpen, setFontDropdownOpen] = useState(false);
-    const [showAutosave, setShowAutosave] = useState(false);
     const [isClient, setIsClient] = useState(false);
     const navRef = useRef<HTMLDivElement>(null);
-    const { formData, setFormData} = useFormContext();
-    
-    const handleAutosaveClick = () => {
-      setShowAutosave(true);
-      setTimeout(() => {
-        setShowAutosave(false);
-      }, 2000);
+    const { formData, setFormData, saveFormData, isSaving } = useFormContext();
+
+    const handleSaveClick = async () => {
+        await saveFormData();
     };
 
     useEffect(() => {
@@ -118,12 +114,12 @@ export default function Navbar() {
                     </div>
                     <div className="flex items-center gap-4">
                         <div 
-                            className="flex items-center gap-2 hover:scale-110 transition duration-200 cursor-pointer text-green-700" 
-                            onClick={handleAutosaveClick}
+                            className="flex items-center gap-2 hover:scale-110 transition duration-200 cursor-pointer text-blue-700" 
+                            onClick={handleSaveClick}
                         >
                             <Image src="/save.svg" alt="save" width={24} height={24} />
-                            {showAutosave && (
-                                <span className="text-sm font-medium">Autosave is on</span>
+                            {isSaving && (
+                                <span className="text-sm font-medium">Saving...</span>
                             )}
                         </div>
                         <Image 

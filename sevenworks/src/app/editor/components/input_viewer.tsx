@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState, useRef, useMemo } from "react";
+import React, { useEffect, useState, useRef, useMemo, useCallback } from "react";
 // import type { JSX } from "react";
 import dynamic from "next/dynamic";
 import { useSearchParams } from "next/navigation";
@@ -29,7 +29,7 @@ interface EducationEntry {
 
 const InputFields = () => {
   const searchParams = useSearchParams();
-  const { formData, setFormData } = useFormContext();
+  const { formData, setFormData, isSaving, saveFormData } = useFormContext();
   const { zoom } = useZoom();
   const initialTab = searchParams?.get("tab") || "personal";
   const [activeTab, setActiveTab] = useState(initialTab);
@@ -175,7 +175,7 @@ const InputFields = () => {
                         if (updatedSessionData && updatedSessionData.formData) {
                             // Set form data from the correct resume
                             Object.entries(updatedSessionData.formData).forEach(([key, value]) => {
-                                setFormData(key, value);
+                                setFormData(key as any, value as any);
                             });
                             
                             // Initialize customPersonalFields if they exist
@@ -194,7 +194,7 @@ const InputFields = () => {
                 if (sessionData.formData) {
                     // Set the entire formData object at once through context
                     Object.entries(sessionData.formData).forEach(([key, value]) => {
-                        setFormData(key, value);
+                        setFormData(key as any, value as any);
                     });
                     
                     // Initialize customPersonalFields if they exist in the loaded data
@@ -240,28 +240,58 @@ const InputFields = () => {
   }, [activeTab]);
 
   // Function to generate a PDF without directly updating state
-  const generatePdf = async () => {
+  const generatePdf = useCallback(async () => {
     if (isGenerating && !isFirstRender.current) return;
 
     setIsGenerating(true);
     try {
+      // Create a copy of form data with proper string conversion for PDF generation
       const stringifiedFormData = Object.fromEntries(
-        Object.entries(formData).map(([key, value]) => [key, Array.isArray(value) ? JSON.stringify(value) : String(value)])
+        Object.entries(formData).map(([key, value]) => {
+          if (value === null || value === undefined) return [key, ''];
+          return [key, Array.isArray(value) ? JSON.stringify(value) : String(value)];
+        })
       );
-      const blob = await pdf(template(templateID, stringifiedFormData)).toBlob();
-      const newUrl = URL.createObjectURL(blob);
+      
+      // Generate the PDF blob with error handling
+      let blob;
+      try {
+        blob = await pdf(template(templateID, stringifiedFormData)).toBlob();
+      } catch (pdfError) {
+        console.error("Error generating PDF blob:", pdfError);
+        setIsGenerating(false);
+        return;
+      }
+      
+      // Create the URL with additional error handling
+      let newUrl;
+      try {
+        newUrl = URL.createObjectURL(blob);
+      } catch (urlError) {
+        console.error("Error creating blob URL:", urlError);
+        setIsGenerating(false);
+        return;
+      }
 
-      // Store the new PDF in the inactive slot
+      // Store the new PDF in the inactive slot with proper cleanup
       if (isPrimaryActive) {
-        // Clean up any existing secondary URL
+        // Clean up secondary URL before setting new one
         if (secondaryPdfUrl) {
-          URL.revokeObjectURL(secondaryPdfUrl);
+          try {
+            URL.revokeObjectURL(secondaryPdfUrl);
+          } catch (e) {
+            console.warn("Error revoking secondary URL:", e);
+          }
         }
         setSecondaryPdfUrl(newUrl);
       } else {
-        // Clean up any existing primary URL
+        // Clean up primary URL before setting new one
         if (primaryPdfUrl) {
-          URL.revokeObjectURL(primaryPdfUrl);
+          try {
+            URL.revokeObjectURL(primaryPdfUrl);
+          } catch (e) {
+            console.warn("Error revoking primary URL:", e);
+          }
         }
         setPrimaryPdfUrl(newUrl);
       }
@@ -288,11 +318,11 @@ const InputFields = () => {
       previousFormDataRef.current = { ...formData };
 
     } catch (error) {
-      console.error("Error generating PDF:", error);
+      console.error("Error in PDF generation process:", error);
     } finally {
       setIsGenerating(false);
     }
-  };
+  }, [formData, isPrimaryActive, isGenerating, primaryPdfUrl, secondaryPdfUrl, template, templateID]);
 
   // Check if form data has actually changed
   const hasFormDataChanged = useMemo(() => {
@@ -583,6 +613,19 @@ const InputFields = () => {
     <div className="bg-[#F8F8F8] flex w-full h-full overflow-hidden">
       <div className="w-[38%] flex flex-col bg-[#F8F8F8] h-full overflow-auto">
         {renderFields()}
+        
+        {/* Save button at the bottom of the form */}
+        {/* <div className="sticky bottom-0 left-0 w-full bg-white border-t border-gray-200 p-3 shadow-md">
+          <button 
+            onClick={saveFormData}
+            disabled={isSaving}
+            className={`w-full py-2 px-4 rounded-lg text-white font-semibold transition-colors ${
+              isSaving ? 'bg-gray-500 cursor-not-allowed' : 'bg-navy hover:bg-blue-800'
+            }`}
+          >
+            {isSaving ? 'Saving...' : 'Save Changes'}
+          </button>
+        </div> */}
       </div>
       <div className="flex-1 overflow-auto bg-[#F8F8F8] h-full">
         <div className="w-full h-full flex flex-col">
@@ -633,6 +676,12 @@ const InputFields = () => {
           </Worker>
         </div>
       </div>
+      {isSaving && (
+        <div className="fixed bottom-4 right-4 flex items-center bg-navy text-white border border-gray-300 shadow-md px-4 py-2 rounded-lg z-50">
+          <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></span>
+          <span className="text-white text-sm font-semibold">Saving...</span>
+        </div>
+      )}
     </div>
   );
 };

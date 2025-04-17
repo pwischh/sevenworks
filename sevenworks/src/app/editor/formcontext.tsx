@@ -11,12 +11,15 @@ type FormData = { [key: string]: FormDataValue };
 interface FormContextType {
   formData: FormData;
   setFormData: (key: string, value: FormDataValue) => void;
+  isSaving: boolean;
+  saveFormData: () => Promise<void>;
 }
 
 const FormContext = createContext<FormContextType | undefined>(undefined);
 
 export const FormProvider = ({ children }: { children: ReactNode }) => {
   const [formData, setFormDataState] = useState<FormData>({});
+  const [isSaving, setIsSaving] = useState(false);
 
   // Function to load session data from Firestore
   const loadSessionData = async () => {
@@ -86,41 +89,70 @@ export const FormProvider = ({ children }: { children: ReactNode }) => {
     return () => unsubscribe();
   }, []);
 
-  const setFormData = async (key: string, value: FormDataValue) => {
-    const updatedFormData = { ...formData, [key]: value };
+  const setFormData = (key: string, value: FormDataValue) => {
+    // Only update the local state without saving to Firebase
     if (key === "RESET") {
       setFormDataState({});
-    }
-    else {
+    } else {
+      const updatedFormData = { ...formData, [key]: value };
       setFormDataState(updatedFormData);
     }
-    
-    const currentUser = auth.currentUser;
+  };
 
-    if (currentUser){
+  const saveFormData = async () => {
+    try {
+      setIsSaving(true); // Show saving indicator
+      console.log("Manually saving data to Firebase...");
+      
       try {
-        await setDoc(doc(db, "sessions", currentUser.uid), 
-          {formData: (key === "RESET" ? {} : updatedFormData),}, 
-          {merge: (key === "RESET" ? false : true)});
-
-        const userSessionRef = doc(db, "sessions", currentUser.uid);
-        const userSession = await getDoc(userSessionRef);
-        const userSessionData = userSession.data();
-
-        if (!userSessionData) {
-          throw new Error("Unable to retrieve user session data");
+        // Update the session document
+        await setDoc(
+          doc(db, "sessions", auth.currentUser?.uid || ""), 
+          { formData }, 
+          { merge: true }
+        );
+      } catch (sessionError) {
+        console.error("Error saving to session document:", sessionError);
+        if (sessionError.toString().includes('resource-exhausted') || 
+            sessionError.toString().includes('Quota exceeded')) {
+          console.warn("Firebase quota exceeded. Data saved locally but not to Firebase.");
+        } else {
+          throw sessionError; // Rethrow if not a quota error
         }
-        const resumeID = userSessionData.resumeID;
-
-        await setDoc(doc(db, "user_resumes", currentUser.uid, "resumes", resumeID), {formData: updatedFormData}, {merge: true});
-      } catch (error) {
-        console.log("Error updating session data: ", error);
       }
+
+      try {
+        // Get the current resumeID from the session or localStorage
+        const resumeID = localStorage.getItem('currentResumeID');
+        
+        // Update the actual resume document if we have a resumeID
+        if (resumeID) {
+          await setDoc(
+            doc(db, "user_resumes", auth.currentUser?.uid || "", "resumes", resumeID), 
+            { formData }, 
+            { merge: true }
+          );
+        }
+      } catch (resumeError) {
+        console.error("Error saving to resume document:", resumeError);
+        if (resumeError.toString().includes('resource-exhausted') || 
+            resumeError.toString().includes('Quota exceeded')) {
+          console.warn("Firebase quota exceeded. Data saved locally but not to Firebase.");
+        } else {
+          throw resumeError; // Rethrow if not a quota error
+        }
+      }
+      
+      console.log("Manual data save attempt completed");
+    } catch (error) {
+      console.error("Error in manual save process:", error);
+    } finally {
+      setIsSaving(false); // Always hide the saving indicator
     }
   };
 
   return (
-    <FormContext.Provider value={{ formData, setFormData }}>
+    <FormContext.Provider value={{ formData, setFormData, isSaving, saveFormData }}>
       {children}
     </FormContext.Provider>
   );
