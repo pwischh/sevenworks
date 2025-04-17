@@ -37,7 +37,7 @@ const InputFields = () => {
   const searchParams = useSearchParams();
   const { formData, setFormData } = useFormContext();
   const { zoom } = useZoom();
-  const initialTab = searchParams.get("tab") || "personal";
+  const initialTab = searchParams?.get("tab") || "personal";
   const [activeTab, setActiveTab] = useState(initialTab);
 
   // References for PDF URLs and transitions
@@ -147,7 +147,7 @@ const InputFields = () => {
   };
 
   useEffect(() => {
-    const tab = searchParams.get("tab") || "personal";
+    const tab = searchParams?.get("tab") || "personal";
     if (tab !== activeTab) {
       setActiveTab(tab);
     }

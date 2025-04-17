@@ -67,7 +67,7 @@ interface TemplateFormData {
   honors?: string;
   honorsList?: { honor: string }[];
   skillsInterests?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 interface TemplateProps {
   formData: TemplateFormData;

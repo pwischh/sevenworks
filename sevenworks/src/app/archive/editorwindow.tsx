@@ -15,7 +15,7 @@ const EditorWindow = () => {
     const searchParams = useSearchParams();
     const router = useRouter();
     const { formData, setFormData } = useFormContext();
-    const initialTab = searchParams.get("tab") || "personal";
+    const initialTab = searchParams?.get("tab") || "personal";
     const [activeTab, setActiveTab] = useState(initialTab);
 
     // useEffect(() => {

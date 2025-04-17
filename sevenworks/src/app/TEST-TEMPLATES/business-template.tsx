@@ -49,7 +49,7 @@ interface TemplateFormData {
   honors?: string;
   honorsList?: { honor: string }[];
   skillsInterests?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 interface TemplateProps {
   formData: TemplateFormData;
@@ -70,7 +70,7 @@ export default function BusinessTemplate({ formData }: TemplateProps) {
         </View>
         <View style={styles.content}>
           <Text>
-            {formData?.content || "No content provided."}
+            {String(formData?.content) || "No content provided."}
           </Text>
         </View>
       </Page>

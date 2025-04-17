@@ -29,7 +29,7 @@ export interface Resume {
 
 const ResumeCard = ({ resume }: { resume: Resume }) => {
     const [hoveredResume, setHoveredResume] = useState<string | null>(null);
-    const [resumeLoading, setResumeLoading] = useState(false);
+    const [setResumeLoading] = useState(false);
     const { formData, setFormData } = useFormContext();
     const router = useRouter();
     const {user, loading} = useAuth();
