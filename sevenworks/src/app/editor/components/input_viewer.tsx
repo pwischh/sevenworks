@@ -4,7 +4,7 @@ import type { JSX } from "react";
 import dynamic from "next/dynamic";
 import BusinessTemplate from "./business_template";
 import { useSearchParams } from "next/navigation";
-import { useFormContext, saveFormDataToFirestore, loadFormDataFromFirestore } from "../formcontext";
+import { useFormContext } from "../formcontext";
 import { Worker } from '@react-pdf-viewer/core';
 import { pdf } from '@react-pdf/renderer';
 import { useZoom } from "../zoomcontext";
@@ -13,6 +13,9 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 const ViewerNoSSR = dynamic(() => import('@react-pdf-viewer/core').then(mod => mod.Viewer), { ssr: false });
 import '@react-pdf-viewer/core/lib/styles/index.css';
 import { FaSearch, FaLightbulb, FaEdit } from "react-icons/fa";
+import { doc, getDoc } from "firebase/firestore";
+import { auth, db } from "@/app/lib/firebase";
+import { useResume } from "@/app/resumeContext";
 
 // Add these types at the top of the file
 interface ExperienceEntry {
@@ -40,6 +43,11 @@ const InputFields = () => {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
+
+  // TemplateID from user session and template function to retrieve templates
+  const template = useResume();
+  const [templateID, setTemplateID] = useState<string | null>(null);
+  const [templateIdLoading, setTemplateIdLoading] = useState(true);
 
   // Refs for tracking and cleanup
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -150,6 +158,30 @@ const InputFields = () => {
     return () => unsubscribe();
   }, []);
 
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+        if (user){
+            try {
+                const sessionData = (await getDoc(doc(db, "sessions", user.uid))).data();
+
+                if (!sessionData){
+                    throw new Error("Error retrieving session data");
+                }
+
+                const sessionTemplateID = sessionData.templateID;
+                setTemplateID(sessionTemplateID);
+            } catch(error) {
+                console.error("Error fetching templateID:", error);
+            }
+        }
+        setTemplateIdLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  //THESE HOOKS NO LONGER NEEDED NOW THAT COOKIES ARE IN PLACE
+  /*
   // Automatically load form data on mount (after user is ready, with delay)
   useEffect(() => {
     if (!isUserReady) return;
@@ -173,9 +205,12 @@ const InputFields = () => {
     }, 1000); // 1 second debounce
     return () => clearTimeout(handler);
   }, [formData]);
+  */
 
   // Generate initial PDF on first load
   useEffect(() => {
+    if (!templateID) return;
+
     if (isFirstRender.current) {
       setIsGenerating(true); // Set generating state immediately
       // Small timeout to ensure UI renders before heavy PDF generation
@@ -186,7 +221,7 @@ const InputFields = () => {
         isFirstRender.current = false;
       }, 100);
     }
-  }, []);
+  }, [templateID]);
 
   // Ensure at least 2 leadership and 2 honors entries to start (but not in render!)
   useEffect(() => {
@@ -204,7 +239,7 @@ const InputFields = () => {
 
     setIsGenerating(true);
     try {
-      const blob = await pdf(<BusinessTemplate formData={formData} />).toBlob();
+      const blob = await pdf(template(templateID, formData)).toBlob();
       const newUrl = URL.createObjectURL(blob);
 
       // Store the new PDF in the inactive slot

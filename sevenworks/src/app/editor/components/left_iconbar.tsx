@@ -6,9 +6,7 @@ import Image from 'next/image';
 import { useState, useRef, useEffect } from "react";
 
 const IconBar = () => {
-
   const [sections, setSections] = useState<React.JSX.Element[]>([]);
-
 
   const addSection = () => {
     const newSection = (
@@ -46,7 +44,7 @@ const IconBar = () => {
   }, []);
 
   return (
-    <div className="flex-none w-[60] h-full p-2 rounded-lg bg-white shadow-lg border border-gray-300">
+    <div className="flex-none w-[60] h-full p-2 rounded-lg bg-white shadow-lg border border-gray-300 z-10">
       {/* vertical stack */}
       <div className="flex flex-col gap-3 h-full">
       {sections}

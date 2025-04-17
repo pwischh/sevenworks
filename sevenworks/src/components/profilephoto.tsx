@@ -7,7 +7,7 @@ export default function ProfilePhoto() {
   const { user } = useAuth();
 
   // gets first letter of email (fallback: "U" for user)
-  const initial = user?.email?.charAt(0).toUpperCase() || "U";
+  const initial = (user?.displayName) ?  user?.displayName?.charAt(0).toUpperCase() || "U" : user?.email?.charAt(0).toUpperCase() || "U";
 
   return (
     <div className="relative w-10 h-10 rounded-full bg-white overflow-hidden flex items-center justify-center text-sm font-bold text-white">

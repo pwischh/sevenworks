@@ -1,38 +1,60 @@
-import { createContext, useState, ReactNode, useContext } from "react";
-import { getAuth } from "firebase/auth";
-import { doc, setDoc, getDoc } from "firebase/firestore";
-import { db } from "../lib/firebase";
-
-type ExperienceEntry = { title: string; company: string; years: string };
-type EducationEntry = { degree: string; institution: string; years: string };
-type CustomPersonalField = { id: number; label: string; value: string };
-
-interface FormData {
-  firstName?: string;
-  middleName?: string;
-  lastName?: string;
-  email?: string;
-  phone?: string;
-  address?: string;
-  customPersonal?: CustomPersonalField[];
-  experience?: ExperienceEntry[];
-  education?: EducationEntry[];
-  additionalInfo?: string;
-  [key: string]: any;
-}
+"use client";
+import { createContext, useState, ReactNode, useContext, useEffect } from "react";
+import { auth, db } from "../lib/firebase";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 
 interface FormContextType {
-  formData: FormData;
-  setFormData: (key: keyof FormData, value: any) => void;
+  formData: { [key: string]: string };
+  setFormData: (key: string, value: string) => void;
 }
 
 const FormContext = createContext<FormContextType | undefined>(undefined);
 
 export const FormProvider = ({ children }: { children: ReactNode }) => {
-  const [formData, setFormDataState] = useState<FormData>({});
+  const [formData, setFormDataState] = useState<{ [key: string]: string }>({});
 
-  const setFormData = (key: keyof FormData, value: any) => {
-    setFormDataState((prev) => ({ ...prev, [key]: value }));
+  useEffect(() => {
+    async function loadSessionData(){
+      const res = await fetch("/api/session/");
+      if (res.ok){
+        const {sessionData} = await res.json();
+        setFormDataState(sessionData?.formData || {});
+      }
+    }
+    loadSessionData();
+  }, [])
+
+  const setFormData = async (key: string, value: string) => {
+    const updatedFormData = { ...formData, [key]: value };
+    if (key === "RESET") {
+      setFormDataState({});
+    }
+    else {
+      setFormDataState(updatedFormData);
+    }
+    
+    const currentUser = auth.currentUser;
+
+    if (currentUser){
+      try {
+        await setDoc(doc(db, "sessions", currentUser.uid), 
+          {formData: (key === "RESET" ? {} : updatedFormData),}, 
+          {merge: (key === "RESET" ? false : true)});
+
+        const userSessionRef = doc(db, "sessions", currentUser.uid);
+        const userSession = await getDoc(userSessionRef);
+        const userSessionData = userSession.data();
+
+        if (!userSessionData) {
+          throw new Error("Unable to retrieve user session data");
+        }
+        const resumeID = userSessionData.resumeID;
+
+        await setDoc(doc(db, "user_resumes", currentUser.uid, "resumes", resumeID), {formData: updatedFormData}, {merge: true});
+      } catch (error) {
+        console.log("Error updating session data: ", error);
+      }
+    }
   };
 
   return (
@@ -48,24 +70,4 @@ export const useFormContext = () => {
     throw new Error("useFormContext must be used within a FormProvider");
   }
   return context;
-};
-
-export const saveFormDataToFirestore = async (formData: FormData) => {
-  const auth = getAuth();
-  const user = auth.currentUser;
-  if (!user) throw new Error("User not authenticated");
-  const userDoc = doc(db, "sessions", user.uid);
-  await setDoc(userDoc, formData, { merge: true });
-};
-
-export const loadFormDataFromFirestore = async (): Promise<FormData | null> => {
-  const auth = getAuth();
-  const user = auth.currentUser;
-  if (!user) throw new Error("User not authenticated");
-  const userDoc = doc(db, "sessions", user.uid);
-  const docSnap = await getDoc(userDoc);
-  if (docSnap.exists()) {
-    return docSnap.data() as FormData;
-  }
-  return null;
 };

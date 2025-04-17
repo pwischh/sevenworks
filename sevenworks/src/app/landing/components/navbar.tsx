@@ -36,12 +36,12 @@ export default function Navbar() {
                 scrolled ? "bg-navy/95 backdrop-blur-md shadow-lg py-3" : "bg-transparent py-5"
             }`}
         >
-            <div className="w-full px-4 sm:px-6 lg:px-8">
+            <div className="w-full px-4 sm:px-6 lg:px-5">
                 <div className="flex items-center justify-between">
                     {/* Left: Logo */}
                     <div className="flex-1">
                         <div className={`${markazi.className} flex items-center`}>
-                            <Link href="/" className="text-3xl font-bold text-offWhite hover:text-lightRed transition-colors duration-300">
+                            <Link href="/" className="text-3xl font-bold text-offWhite cursor-pointer">
                                 SevenWorks
                             </Link>
                         </div>
@@ -49,7 +49,7 @@ export default function Navbar() {
 
                     {/* Right: Navigation, Auth Buttons, and Mobile Menu Toggle */}
                     <div className="flex items-center gap-4 justify-end">
-                        <div className="hidden md:flex items-center gap-12">
+                        <div className="hidden md:flex items-center gap-8">
                             <nav className="flex items-center gap-8">
                                 <Link href="/templates" className="text-offWhite hover:text-lightRed font-medium tracking-wide transition-all duration-300 ease-in-out">
                                     Templates
@@ -82,7 +82,7 @@ export default function Navbar() {
                                 ) : (
                                     <Link 
                                         href="/dashboard" 
-                                        className="group flex items-center gap-2 p-1 rounded-full hover:bg-white/10 transition-all duration-300"
+                                        className="group flex items-center gap-2 p-1 pr-2 rounded-full hover:bg-white/10 transition-all duration-300"
                                     >
                                         <ProfilePhoto />
                                         <span className="text-offWhite group-hover:text-lightRed transition-colors duration-300">Dashboard</span>

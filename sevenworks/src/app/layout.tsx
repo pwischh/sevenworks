@@ -2,7 +2,9 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import classNames from "classnames";
+import classNames from 'classnames';
+import { ResumeProvider } from "./resumeContext";
+import { FormProvider } from "./editor/formcontext";
 import ClientProviders from "../components/ClientProviders";
 
 const inter = Inter({
@@ -23,7 +25,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={classNames(inter.className, "antialiased bg-[#2b2d42]")}>
-        <ClientProviders>{children}</ClientProviders>
+        <FormProvider>
+          <ResumeProvider>
+            <ClientProviders>
+              {children}
+            </ClientProviders>
+          </ResumeProvider>
+        </FormProvider>
       </body>
     </html>
   );
