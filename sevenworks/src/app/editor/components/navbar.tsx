@@ -6,7 +6,6 @@ import { signOut } from "firebase/auth";
 import { auth } from "../../lib/firebase";
 import Link from "next/link";
 import { useFormContext } from "./../formcontext";
-import BusinessTemplate from "./../components/business_template";
 import ProfilePhoto from "../../../components/profilephoto";
 import { useZoom } from "../zoomcontext";
 import dynamic from "next/dynamic";

@@ -39,7 +39,7 @@ const RightView = () => {
     
     try {
       // Create a more structured and readable summary of the resume data
-      let resumeData = {
+      const resumeData = {
         personalInfo: {
           name: `${formData.firstName || ''} ${formData.middleName || ''} ${formData.lastName || ''}`.trim(),
           email: formData.email || 'Not provided',
@@ -67,7 +67,7 @@ const RightView = () => {
       };
 
       // Format the resume data as a readable string for the AI
-      let resumeSummary = `
+      const resumeSummary = `
 Name: ${resumeData.personalInfo.name}
 Email: ${resumeData.personalInfo.email}
 Phone: ${resumeData.personalInfo.phone}
@@ -108,7 +108,7 @@ ${resumeData.honors.length > 0
 }`;
 
       // Craft the prompt for the AI
-      let prompt = `You are a helpful, friendly resume assistant having a conversation. 
+      const prompt = `You are a helpful, friendly resume assistant having a conversation. 
       Respond to this message from the user: "${chatInput}"
       
       Here is the context about their resume:

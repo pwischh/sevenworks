@@ -91,10 +91,8 @@ interface InProgressResume {
 // ResumeCard Component using Next.js <Image>
 const ResumeCard = ({ resume }: { resume: InProgressResume }) => {
   const router = useRouter();
-  const [resumeLoading, setResumeLoading] = useState(false);
   
   async function handleResumeClick() {
-    setResumeLoading(true);
     const currentUser = auth.currentUser;
   
     if (currentUser) { 
@@ -120,7 +118,6 @@ const ResumeCard = ({ resume }: { resume: InProgressResume }) => {
       } catch(error) {
         console.error("Error updating session data: ", error);
       } finally {
-        setResumeLoading(false);
         router.push("/editor")
       }
     }

@@ -3,11 +3,13 @@ import { createContext, useState, ReactNode, useContext, useEffect } from "react
 import { auth, db } from "../lib/firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 
-type FormData = { [key: string]: string | any[] };
+// Define a more specific type for array values to replace any[]
+type FormDataValue = string | number | boolean | null | undefined | Record<string, unknown>[] | Record<string, unknown>;
+type FormData = { [key: string]: FormDataValue };
 
 interface FormContextType {
   formData: FormData;
-  setFormData: (key: string, value: string | any[]) => void;
+  setFormData: (key: string, value: FormDataValue) => void;
 }
 
 const FormContext = createContext<FormContextType | undefined>(undefined);
@@ -26,7 +28,7 @@ export const FormProvider = ({ children }: { children: ReactNode }) => {
     loadSessionData();
   }, [])
 
-  const setFormData = async (key: string, value: string | any[]) => {
+  const setFormData = async (key: string, value: FormDataValue) => {
     const updatedFormData = { ...formData, [key]: value };
     if (key === "RESET") {
       setFormDataState({});
