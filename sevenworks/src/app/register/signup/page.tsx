@@ -169,6 +169,18 @@ export default function Signup() {
                         Sign Up with Google
                     </button>
                 </div>
+
+
+
+                <p className="text-[12px] text-gray-500 text-center mt-4 px-6">
+                    By signing up, you agree to our{" "}
+                    <a href="/terms" className="text-sky-600 hover:underline">Terms of Service</a>{" "}
+                    and{" "}
+                    <a href="/privacy" className="text-sky-600 hover:underline">Privacy Policy</a>.
+                </p>
+
+
+
                 <p className="text-[14px] text-gray-500 text-center mt-2">
                     Already have an account?&nbsp;
                     <a href="./login" className="text-sky-600 hover:underline">
