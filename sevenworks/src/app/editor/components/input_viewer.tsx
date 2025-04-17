@@ -29,7 +29,7 @@ interface EducationEntry {
 
 const InputFields = () => {
   const searchParams = useSearchParams();
-  const { formData, setFormData, isSaving, saveFormData } = useFormContext();
+  const { formData, setFormData, isSaving, saveFormData, isQuotaExceeded, forceLocalMode, toggleSaveMode } = useFormContext();
   const { zoom } = useZoom();
   const initialTab = searchParams?.get("tab") || "personal";
   const [activeTab, setActiveTab] = useState(initialTab);
@@ -611,6 +611,8 @@ const InputFields = () => {
 
   return (
     <div className="bg-[#F8F8F8] flex w-full h-full overflow-hidden">
+      {/* Remove the top banner and keep only the improved bottom right notification */}
+      
       <div className="w-[38%] flex flex-col bg-[#F8F8F8] h-full overflow-auto">
         {renderFields()}
         
@@ -676,12 +678,54 @@ const InputFields = () => {
           </Worker>
         </div>
       </div>
+      {/* Save indicator with mode text */}
       {isSaving && (
-        <div className="fixed bottom-4 right-4 flex items-center bg-navy text-white border border-gray-300 shadow-md px-4 py-2 rounded-lg z-50">
+        <div className="fixed top-4 right-4 flex items-center bg-navy text-white border border-gray-300 shadow-md px-2 py-2 rounded-lg z-50">
           <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></span>
-          <span className="text-white text-sm font-semibold">Saving...</span>
+          <span className="text-white text-sm font-semibold">
+            {isQuotaExceeded ? "Local Save..." : "Save..."}
+          </span>
         </div>
       )}
+      
+      {/* Quota exceeded notification */}
+      {isQuotaExceeded && !isSaving && (
+        <div className="fixed bottom-4 right-4 flex items-center bg-red-600 text-white border border-red-700 shadow-lg px-4 py-3 rounded-lg z-50">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+          </svg>
+          <div>
+            <span className="text-white text-base font-bold block">LOCAL STORAGE MODE</span>
+            <span className="text-white text-sm">Changes saved to this browser only</span>
+          </div>
+        </div>
+      )}
+
+      {/* Combined storage mode indicator with integrated toggle */}
+      <div className={`fixed bottom-4 right-4 flex items-center px-3 py-1 rounded-lg z-40 
+                      ${forceLocalMode || isQuotaExceeded ? 'bg-yellow-400 text-gray-900' : 'bg-blue-600 text-white'}`}>
+        {/* Toggle switch integrated on the left */}
+        <button 
+          onClick={toggleSaveMode}
+          className="relative inline-flex items-center h-4 rounded-full w-8 mr-2 transition-colors focus:outline-none"
+          role="switch"
+          aria-checked={!(forceLocalMode || isQuotaExceeded)}
+        >
+          <span 
+            className={`${
+              forceLocalMode || isQuotaExceeded ? 'bg-yellow-600' : 'bg-blue-800'
+            } absolute h-4 w-8 mx-auto rounded-full transition-colors`} 
+          />
+          <span 
+            className={`${
+              forceLocalMode || isQuotaExceeded ? 'translate-x-0.5' : 'translate-x-4'
+            } inline-block h-3 w-3 transform rounded-full bg-white transition-transform`} 
+          />
+        </button>
+        <span className="text-xs font-semibold">
+          {forceLocalMode || isQuotaExceeded ? "Local (Offline)" : "Cloud"}
+        </span>
+      </div>
     </div>
   );
 };
