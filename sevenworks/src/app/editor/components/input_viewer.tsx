@@ -2,22 +2,20 @@
 import React, { useEffect, useState, useRef, useMemo } from "react";
 import type { JSX } from "react";
 import dynamic from "next/dynamic";
-import BusinessTemplate from "./business_template";
 import { useSearchParams } from "next/navigation";
 import { useFormContext } from "../formcontext";
 import { Worker } from '@react-pdf-viewer/core';
 import { pdf } from '@react-pdf/renderer';
 import { useZoom } from "../zoomcontext";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { onAuthStateChanged } from "firebase/auth";
 
 const ViewerNoSSR = dynamic(() => import('@react-pdf-viewer/core').then(mod => mod.Viewer), { ssr: false });
 import '@react-pdf-viewer/core/lib/styles/index.css';
-import { FaSearch, FaLightbulb, FaEdit } from "react-icons/fa";
 import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "@/app/lib/firebase";
 import { useResume } from "@/app/resumeContext";
 
-// Add these types at the top of the file
+// Define interfaces for form data
 interface ExperienceEntry {
   title: string;
   company: string;
@@ -27,10 +25,6 @@ interface EducationEntry {
   degree: string;
   institution: string;
   years: string;
-}
-interface LeadershipEntry {
-  title: string;
-  description: string;
 }
 
 const InputFields = () => {
@@ -44,31 +38,21 @@ const InputFields = () => {
   const [primaryPdfUrl, setPrimaryPdfUrl] = useState<string | null>(null);
   const [secondaryPdfUrl, setSecondaryPdfUrl] = useState<string | null>(null);
   const [isPrimaryActive, setIsPrimaryActive] = useState(true);
-  const [isTransitioning, setIsTransitioning] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
 
   // TemplateID from user session and template function to retrieve templates
   const template = useResume();
   const [templateID, setTemplateID] = useState<string | null>(null);
-  const [templateIdLoading, setTemplateIdLoading] = useState(true);
 
   // Refs for tracking and cleanup
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const transitionTimerRef = useRef<NodeJS.Timeout | null>(null);
   const previousFormDataRef = useRef(formData);
   const isFirstRender = useRef(true);
-  const isFirstLoad = useRef(true);
 
   // New state for custom personal fields
   const [customPersonalFields, setCustomPersonalFields] = useState<{ id: number; label: string; value: string }[]>([]);
-
-  // Add state for save/load status
-  const [saveStatus, setSaveStatus] = useState<string>("");
-  const [loadStatus, setLoadStatus] = useState<string>("");
-
-  // State for user authentication readiness
-  const [isUserReady, setIsUserReady] = useState(false);
 
   // Function to add a new custom field
   const addCustomField = () => {
@@ -121,7 +105,7 @@ const InputFields = () => {
 
   // Handle leadership field change
   const handleLeadershipChange = (idx: number, key: 'title' | 'description', value: string) => {
-    let updated = Array.isArray(formData.leadership) ? [...formData.leadership] : [];
+    const updated = Array.isArray(formData.leadership) ? [...formData.leadership] : [];
     // If editing a placeholder row, expand the array
     while (updated.length <= idx) {
       updated.push({ title: '', description: '' });
@@ -138,7 +122,7 @@ const InputFields = () => {
 
   // Handle honor field change
   const handleHonorsChange = (idx: number, value: string) => {
-    let updated = Array.isArray(formData.honorsList) ? [...formData.honorsList] : [];
+    const updated = Array.isArray(formData.honorsList) ? [...formData.honorsList] : [];
     while (updated.length <= idx) {
       updated.push({ honor: '' });
     }
@@ -152,15 +136,6 @@ const InputFields = () => {
       setActiveTab(tab);
     }
   }, [activeTab, searchParams]);
-
-  // Check user authentication state
-  useEffect(() => {
-    const auth = getAuth();
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setIsUserReady(!!user);
-    });
-    return () => unsubscribe();
-  }, []);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -178,38 +153,10 @@ const InputFields = () => {
                 console.error("Error fetching templateID:", error);
             }
         }
-        setTemplateIdLoading(false);
     });
 
     return () => unsubscribe();
   }, []);
-
-  //THESE HOOKS NO LONGER NEEDED NOW THAT COOKIES ARE IN PLACE
-  /*
-  // Automatically load form data on mount (after user is ready, with delay)
-  useEffect(() => {
-    if (!isUserReady) return;
-    const timer = setTimeout(async () => {
-      const loaded = await loadFormDataFromFirestore();
-      if (loaded) {
-        Object.entries(loaded).forEach(([key, value]) => {
-          setFormData(key, value);
-        });
-      }
-      isFirstLoad.current = false;
-    }, 500); // 500ms delay
-    return () => clearTimeout(timer);
-  }, [isUserReady]);
-
-  // Automatically save form data when it changes (debounced)
-  useEffect(() => {
-    if (isFirstLoad.current) return;
-    const handler = setTimeout(() => {
-      saveFormDataToFirestore(formData);
-    }, 1000); // 1 second debounce
-    return () => clearTimeout(handler);
-  }, [formData]);
-  */
 
   // Generate initial PDF on first load
   useEffect(() => {
@@ -266,8 +213,6 @@ const InputFields = () => {
 
       // Start transition if we have a PDF already displayed
       if ((primaryPdfUrl || secondaryPdfUrl) && !isFirstRender.current) {
-        setIsTransitioning(true);
-
         // Wait for the new PDF to fully load before switching
         if (transitionTimerRef.current) {
           clearTimeout(transitionTimerRef.current);
@@ -275,7 +220,6 @@ const InputFields = () => {
 
         transitionTimerRef.current = setTimeout(() => {
           setIsPrimaryActive(!isPrimaryActive);
-          setIsTransitioning(false);
         }, 300); // Transition duration
       } else {
         // First load - no transition needed
@@ -331,6 +275,9 @@ const InputFields = () => {
     return () => {
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
+      }
+      if (transitionTimerRef.current) {
+        clearTimeout(transitionTimerRef.current);
       }
     };
   }, [formData, hasFormDataChanged]);
@@ -636,61 +583,3 @@ const InputFields = () => {
 };
 
 export default InputFields;
-
-const RightView = ({
-  features,
-  expandedIndex,
-  setExpandedIndex,
-  exampleEdits,
-}: {
-  features: { title: string; description: string; buttonText: string }[];
-  expandedIndex: number | null;
-  setExpandedIndex: React.Dispatch<React.SetStateAction<number | null>>;
-  exampleEdits: { experience: { role: string; company: string; duration: string; location: string; descriptions: string[] }[] };
-}) => {
-  const featureIcons: Record<string, JSX.Element> = {
-    "Resume Analysis": <FaSearch className="text-2xl text-[#435058] mb-2" />,
-    "Content Suggestions": <FaLightbulb className="text-2xl text-[#435058] mb-2" />,
-    "Formatting Tools": <FaEdit className="text-2xl text-[#435058] mb-2" />,
-  };
-
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      {features.map((feature, index) => (
-        <div
-          key={index}
-          className="bg-[#F8F8F8] w-full min-h-[220px] rounded-lg flex flex-col items-center justify-between shadow-sm hover:shadow-md hover:scale-[1.01] transition transform p-6 border border-gray-100"
-        >
-          {featureIcons[feature.title]}
-          <h2 className="text-base font-semibold text-gray-800 text-center">{feature.title}</h2>
-          <p className="text-sm text-gray-600 mt-2 text-center">{feature.description}</p>
-          <button
-            onClick={() => setExpandedIndex(expandedIndex === index ? null : index)}
-            className="mt-4 px-4 py-2 bg-[#435058] text-white rounded-lg hover:bg-[#1c2428] transition"
-          >
-            {feature.buttonText}
-          </button>
-          {expandedIndex === index && feature.title === "Content Suggestions" && (
-            <div className="mt-4 w-full text-xs text-left bg-gray-100 text-black p-4 rounded space-y-4 overflow-y-auto max-h-60">
-              {exampleEdits.experience.map((exp, idx) => (
-                <div key={idx} className="border-b pb-2">
-                  <div className="font-semibold text-sm">
-                    {exp.role} — {exp.company}
-                  </div>
-                  <div className="text-gray-600 text-xs italic">
-                    {exp.duration} | {exp.location}
-                  </div>
-                  <ul className="list-disc list-inside mt-1 space-y-1">
-                    {exp.descriptions.map((desc, i) => (
-                      <li key={i}>{desc}</li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      ))}
-    </div>
-  );
-};
