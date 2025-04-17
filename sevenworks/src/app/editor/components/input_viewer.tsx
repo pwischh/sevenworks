@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState, useRef, useMemo } from "react";
-import type { JSX } from "react";
+// import type { JSX } from "react";
 import dynamic from "next/dynamic";
 import { useSearchParams } from "next/navigation";
 import { useFormContext } from "../formcontext";
@@ -23,7 +23,7 @@ interface ExperienceEntry {
 }
 interface EducationEntry {
   degree: string;
-  institution: string;
+  institution: string | undefined;
   years: string;
 }
 
@@ -73,33 +73,37 @@ const InputFields = () => {
 
   // Add new experience entry
   const addExperience = () => {
-    const updated = [...(formData.experience || []), { title: '', company: '', years: '' }];
+    const updated = [...(Array.isArray(formData.experience) ? formData.experience : []), { title: '', company: '', years: '' }];
     setFormData('experience', updated);
   };
 
   // Add new education entry
   const addEducation = () => {
-    const updated = [...(formData.education || []), { degree: '', institution: '', years: '' }];
+    const updated = Array.isArray(formData.education) 
+      ? [...formData.education, { degree: '', institution: '', years: '' }] 
+      : [{ degree: '', institution: '', years: '' }];
     setFormData('education', updated);
   };
 
   // Handle experience field change
   const handleExperienceChange = (idx: number, key: keyof ExperienceEntry, value: string) => {
-    const updated = [...(formData.experience || [])];
+    const updated = Array.isArray(formData.experience) ? [...formData.experience] : [];
     updated[idx][key] = value;
     setFormData('experience', updated);
   };
 
   // Handle education field change
   const handleEducationChange = (idx: number, key: keyof EducationEntry, value: string) => {
-    const updated = [...(formData.education || [])];
+    const updated = Array.isArray(formData.education) ? [...formData.education] : [];
     updated[idx][key] = value;
     setFormData('education', updated);
   };
 
   // Add new leadership entry
   const addLeadership = () => {
-    const updated = [...(formData.leadership || []), { title: '', description: '' }];
+    const updated = Array.isArray(formData.leadership) 
+      ? [...formData.leadership, { title: '', description: '' }] 
+      : [{ title: '', description: '' }];
     setFormData('leadership', updated);
   };
 
@@ -116,19 +120,19 @@ const InputFields = () => {
 
   // Add new honor entry
   const addHonor = () => {
-    const updated = [...(formData.honorsList || []), { honor: '' }];
+    const updated = Array.isArray(formData.honorsList) ? [...formData.honorsList, { honor: '' }] : [{ honor: '' }];
     setFormData('honorsList', updated);
   };
 
   // Handle honor field change
   const handleHonorsChange = (idx: number, value: string) => {
-    const updated = Array.isArray(formData.honorsList) ? [...formData.honorsList] : [];
-    while (updated.length <= idx) {
-      updated.push({ honor: '' });
-    }
-    updated[idx] = { honor: value };
-    setFormData('honorsList', updated);
-  };
+      const updated = Array.isArray(formData.honorsList) ? [...formData.honorsList] : [];
+      while (updated.length <= idx) {
+        updated.push({ honor: '' });
+      }
+      updated[idx] = { honor: value as string };
+      setFormData('honorsList', updated);
+    };
 
   useEffect(() => {
     const tab = searchParams?.get("tab") || "personal";
@@ -365,7 +369,7 @@ const InputFields = () => {
               <span className="text-xs font-bold text-[#848C8E]">Job Title</span>
               <input
                 type="text"
-                value={exp.title}
+                value={typeof exp.title === "string" ? exp.title : ""}
                 onChange={e => handleExperienceChange(idx, 'title', e.target.value)}
                 className="border bg-[#E6E6E6] border-[#999999] shadow-md p-2 rounded-lg w-full text-[#848C8E]"
                 placeholder="Job Title"
@@ -373,7 +377,7 @@ const InputFields = () => {
               <span className="text-xs font-bold text-[#848C8E] mt-2">Company</span>
               <input
                 type="text"
-                value={exp.company}
+                value={typeof exp.company === "string" ? exp.company : ""}
                 onChange={e => handleExperienceChange(idx, 'company', e.target.value)}
                 className="border bg-[#E6E6E6] border-[#999999] shadow-md p-2 rounded-lg w-full text-[#848C8E]"
                 placeholder="Company"
@@ -381,7 +385,7 @@ const InputFields = () => {
               <span className="text-xs font-bold text-[#848C8E] mt-2">Years</span>
               <input
                 type="text"
-                value={exp.years}
+                value={typeof exp.years === "string" ? exp.years : ""}
                 onChange={e => handleExperienceChange(idx, 'years', e.target.value)}
                 className="border bg-[#E6E6E6] border-[#999999] shadow-md p-2 rounded-lg w-full text-[#848C8E]"
                 placeholder="Years"
@@ -405,7 +409,7 @@ const InputFields = () => {
               <span className="text-xs font-bold text-[#848C8E]">Degree</span>
               <input
                 type="text"
-                value={edu.degree || ''}
+                value={typeof edu.degree === "string" ? edu.degree : ''}
                 onChange={e => handleEducationChange(idx, 'degree', e.target.value)}
                 className="border bg-[#E6E6E6] border-[#999999] shadow-md p-2 rounded-lg w-full text-[#848C8E]"
                 placeholder="Degree"
@@ -413,7 +417,7 @@ const InputFields = () => {
               <span className="text-xs font-bold text-[#848C8E] mt-2">Institution</span>
               <input
                 type="text"
-                value={edu.institution || ''}
+                value={typeof edu.institution === "string" ? edu.institution : ''}
                 onChange={e => handleEducationChange(idx, 'institution', e.target.value)}
                 className="border bg-[#E6E6E6] border-[#999999] shadow-md p-2 rounded-lg w-full text-[#848C8E]"
                 placeholder="Institution"
@@ -421,7 +425,7 @@ const InputFields = () => {
               <span className="text-xs font-bold text-[#848C8E] mt-2">Years</span>
               <input
                 type="text"
-                value={edu.years || ''}
+                value={typeof edu.years === 'string' ? edu.years : ''}
                 onChange={e => handleEducationChange(idx, 'years', e.target.value)}
                 className="border bg-[#E6E6E6] border-[#999999] shadow-md p-2 rounded-lg w-full text-[#848C8E]"
                 placeholder="Years"
@@ -444,7 +448,7 @@ const InputFields = () => {
           <span className="text-xs font-bold text-[#848C8E]">Additional Skills & Interests</span>
             <textarea
               name="skillsInterests"
-              value={formData.skillsInterests || ''}
+              value={typeof formData.skillsInterests === 'string' ? formData.skillsInterests : ''}
               onChange={handleInputChange}
               className="border bg-[#E6E6E6] border-[#999999] shadow-md p-2 rounded-lg w-full text-[#848C8E] h-20"
               placeholder="List your skills, languages, interests, etc..."
@@ -470,7 +474,7 @@ const InputFields = () => {
                   <span className={`text-xs font-bold text-[#848C8E]${field.key === 'description' ? ' mt-2' : ''}`}>{field.label}</span>
                   <input
                     type="text"
-                    value={lead[field.key] || ''}
+                    value={typeof lead[field.key] === 'string' ? (lead[field.key] as string) : ''}
                     onChange={e => handleLeadershipChange(idx, field.key as 'title' | 'description', e.target.value)}
                     className="border bg-[#E6E6E6] border-[#999999] shadow-md p-2 rounded-lg w-full text-[#848C8E]"
                     placeholder={field.label}
@@ -504,7 +508,7 @@ const InputFields = () => {
                   <span className="text-xs font-bold text-[#848C8E]">{field.label}</span>
                   <input
                     type="text"
-                    value={honorObj.honor || ''}
+                    value={typeof honorObj.honor === 'string' ? honorObj.honor : ''}
                     onChange={e => handleHonorsChange(idx, e.target.value)}
                     className="border bg-[#E6E6E6] border-[#999999] shadow-md p-2 rounded-lg w-full text-[#848C8E]"
                     placeholder="Honor, Award, or Recognition"
