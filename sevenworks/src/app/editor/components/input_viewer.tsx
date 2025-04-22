@@ -27,6 +27,9 @@ interface EducationEntry {
   years: string;
 }
 
+// Define FormDataValue type to match expected types
+type FormDataValue = string | string[] | object | any[] | undefined | null;
+
 const InputFields = () => {
   const searchParams = useSearchParams();
   const { formData, setFormData, isSaving } = useFormContext();
@@ -328,7 +331,7 @@ const InputFields = () => {
     if (activeTab === "honors" && (!Array.isArray(formData.honorsList) || formData.honorsList.length === 0)) {
       setFormData('honorsList', [{ honor: '' }, { honor: '' }]);
     }
-  }, [activeTab]);
+  }, [activeTab, formData.leadership, formData.honorsList, setFormData]);
 
   // Check if form data has actually changed
   const hasFormDataChanged = useMemo(() => {
@@ -376,7 +379,7 @@ const InputFields = () => {
   useEffect(() => {
     if (!primaryPdfUrl && !secondaryPdfUrl) return;
     previousFormDataRef.current = { ...formData };
-  }, [primaryPdfUrl, secondaryPdfUrl]);
+  }, [primaryPdfUrl, secondaryPdfUrl, formData]);
 
   // Clean up URLs on component unmount
   useEffect(() => {
