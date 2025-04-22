@@ -5,8 +5,8 @@ import { doc, getDoc, setDoc } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 
 // Define a more specific type for array values to replace any[]
-type FormDataValue = string | number | boolean | null | undefined | Record<string, unknown>[] | Record<string, unknown>;
-type FormData = { [key: string]: FormDataValue };
+export type FormDataValue = string | number | boolean | null | undefined | Record<string, unknown>[] | Record<string, unknown>;
+export type FormData = { [key: string]: FormDataValue };
 
 interface FormContextType {
   formData: FormData;
@@ -113,25 +113,25 @@ export const FormProvider = ({ children }: { children: ReactNode }) => {
         console.error("Error loading session data from Firebase:", error);
         
         // If quota exceeded, try to load from localStorage
-        if (error.toString().includes('resource-exhausted') || 
-            error.toString().includes('Quota exceeded')) {
-          setIsQuotaExceeded(true);
-          console.log("Firebase quota exceeded. Attempting to load data from localStorage...");
+        // // if (error.toString().includes('resource-exhausted') || 
+        // //     error.toString().includes('Quota exceeded')) {
+        // //   setIsQuotaExceeded(true);
+        // //   console.log("Firebase quota exceeded. Attempting to load data from localStorage...");
           
-          // Try to load data from localStorage
-          const localKey = `${localStorageKey}_${savedResumeID}`;
-          const localData = localStorage.getItem(localKey);
+        // //   // Try to load data from localStorage
+        // //   const localKey = `${localStorageKey}_${savedResumeID}`;
+        // //   const localData = localStorage.getItem(localKey);
           
-          if (localData) {
-            try {
-              const parsedData = JSON.parse(localData);
-              setFormDataState(parsedData);
-              console.log("Successfully loaded data from localStorage");
-            } catch (parseError) {
-              console.error("Error parsing local data:", parseError);
-            }
-          }
-        }
+        // //   if (localData) {
+        // //     try {
+        // //       const parsedData = JSON.parse(localData);
+        // //       setFormDataState(parsedData);
+        // //       console.log("Successfully loaded data from localStorage");
+        // //     } catch (parseError) {
+        // //       console.error("Error parsing local data:", parseError);
+        // //     }
+        // //   }
+        // }
       }
     } catch (outerError) {
       console.error("Error in loadSessionData:", outerError);
@@ -217,8 +217,8 @@ export const FormProvider = ({ children }: { children: ReactNode }) => {
         console.error("Error saving to Firebase:", firebaseError);
         
         // Check if error is due to quota exceeded
-        if (firebaseError.toString().includes('resource-exhausted') || 
-            firebaseError.toString().includes('Quota exceeded')) {
+        if ((firebaseError as any).toString().includes('resource-exhausted') || 
+            (firebaseError as any).toString().includes('Quota exceeded')) {
           console.warn("Firebase quota exceeded, falling back to local storage");
           // Force set the quota exceeded flag to ensure notification shows
           setIsQuotaExceeded(true);

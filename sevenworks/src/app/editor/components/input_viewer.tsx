@@ -3,7 +3,7 @@ import React, { useEffect, useState, useRef, useMemo, useCallback } from "react"
 // import type { JSX } from "react";
 import dynamic from "next/dynamic";
 import { useSearchParams } from "next/navigation";
-import { useFormContext } from "../formcontext";
+import { useFormContext, FormDataValue } from "../formcontext";
 import { Worker } from '@react-pdf-viewer/core';
 import { pdf } from '@react-pdf/renderer';
 import { useZoom } from "../zoomcontext";
@@ -575,7 +575,7 @@ const InputFields = () => {
                   <span className={`text-xs font-bold text-[#848C8E]${field.key === 'description' ? ' mt-2' : ''}`}>{field.label}</span>
                   <input
                     type="text"
-                    value={typeof lead[field.key] === 'string' ? lead[field.key] : ''}
+                    value={((lead as any)[field.key] as string) || ''}
                     onChange={e => handleLeadershipChange(idx, field.key as 'title' | 'description', e.target.value)}
                     className="border bg-[#E6E6E6] border-[#999999] shadow-md p-2 rounded-lg w-full text-[#848C8E]"
                     placeholder={field.label}
@@ -609,7 +609,7 @@ const InputFields = () => {
                   <span className="text-xs font-bold text-[#848C8E]">{field.label}</span>
                   <input
                     type="text"
-                    value={honorObj.honor || ''}
+                    value={((honorObj as any).honor as string) || ''}
                     onChange={e => handleHonorsChange(idx, e.target.value)}
                     className="border bg-[#E6E6E6] border-[#999999] shadow-md p-2 rounded-lg w-full text-[#848C8E]"
                     placeholder="Honor, Award, or Recognition"
