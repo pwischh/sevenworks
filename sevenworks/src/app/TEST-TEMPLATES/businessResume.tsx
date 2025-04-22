@@ -45,15 +45,22 @@ const styles = StyleSheet.create({
 });
 
 const BusinessResume = ({formData}: TemplateProps) => {
+  // Helper to check if an array field has actual content
+  const hasContent = (arr: Record<string, unknown>[] | undefined, fields: string[]) => {
+    return Array.isArray(arr) && arr.some(item => fields.some(field => item[field] && String(item[field]).trim() !== ''));
+  };
+
   return (
     <Document>
-      <Page size="A4" style={{fontSize: 10, padding: 10}}>
+      <Page size="A4" style={{fontSize: 10, padding: 10, fontFamily: formData.font || 'Arial'}}>
         {/* Header */}
         <View style={styles.header}>
-          <Text style={{fontFamily: formData.font, fontSize: 14, fontWeight: "bold",}}>{formData.firstName} {formData.lastName}</Text>
+          <Text style={{fontFamily: formData.font || 'Arial', fontSize: 14, fontWeight: "bold"}}>
+            {formData.firstName || "First"} {formData.middleName ? formData.middleName + " " : ""}{formData.lastName || "Last"}
+          </Text>
           <View style={styles.contactContainer}>
-            <Text>5032 Forbes Avenue, Atlanta, GA 30322</Text>
-            <Text>{formData.phone} | {formData.email}</Text>
+            <Text>{formData.address || "Address"}</Text>
+            <Text>{formData.phone || "Phone"} | {formData.email || "Email"}</Text>
           </View>
           <View style={styles.hr} />
         </View>
@@ -61,58 +68,133 @@ const BusinessResume = ({formData}: TemplateProps) => {
         {/* Education Section */}
         <View style={styles.section}>
           <Text style={styles.sectionHeader}>EDUCATION</Text>
-          <View style={styles.flexRow}>
-            <View>
-              <Text>Emory University, Atlanta, GA</Text>
-              <Text style={styles.role}>Bachelor of Arts in Economics</Text>
-              <Text>Relevant Coursework: Accounting, Regression, Microeconomics</Text>
-              <Text>GPA: 3.7/4.0</Text>
+          {hasContent(formData.education, ['degree', 'institution', 'years']) ? (
+            formData.education?.map((edu, idx) => (
+              <View key={idx} style={styles.flexRow}>
+                <View>
+                  <Text style={{fontWeight: 'bold'}}>{edu.institution}</Text>
+                  <Text style={styles.role}>{edu.degree}</Text>
+                  {/* Add other education details if available in your data structure */}
+                </View>
+                <Text>{edu.years}</Text>
+              </View>
+            ))
+          ) : (
+            <View style={styles.flexRow}>
+              <View>
+                <Text>Default University, City, ST</Text>
+                <Text style={styles.role}>Default Degree</Text>
+                <Text>Relevant Coursework: Placeholder</Text>
+                <Text>GPA: N/A</Text>
+              </View>
+              <Text>Default Date</Text>
             </View>
-            <Text>May 2022</Text>
-          </View>
+          )}
         </View>
 
         {/* Experience Section */}
         <View style={styles.section}>
           <Text style={styles.sectionHeader}>EXPERIENCE</Text>
-          <View style={styles.flexRow}>
-            <View>
-              <Text>Morgan Stanley, Private Wealth Management - Boise, ID</Text>
-              <Text style={styles.role}>Financial Advising Intern</Text>
+          {hasContent(formData.experience, ['title', 'company', 'years']) ? (
+            formData.experience?.map((exp, idx) => (
+              <View key={idx} style={{ marginBottom: 8 }}>
+                <View style={styles.flexRow}>
+                  <View>
+                    <Text style={{fontWeight: 'bold'}}>{exp.company}</Text>
+                    <Text style={styles.role}>{exp.title}</Text>
+                  </View>
+                  <Text>{exp.years}</Text>
+                </View>
+                {/* Add bullet points/description if available */}
+                {/* <Text style={styles.listItem}>• Placeholder description point.</Text> */}
+              </View>
+            ))
+          ) : (
+            <View style={{ marginBottom: 8 }}>
+              <View style={styles.flexRow}>
+                <View>
+                  <Text>Default Company - City, ST</Text>
+                  <Text style={styles.role}>Default Role</Text>
+                </View>
+                <Text>Default Dates</Text>
+              </View>
+              <Text style={styles.listItem}>• Default experience detail.</Text>
             </View>
-            <Text>May – August 2020</Text>
-          </View>
-          <Text style={styles.listItem}>• Researched equities and investment products</Text>
-          <Text style={styles.listItem}>• Utilized Morgan Stanley resources for financial analysis</Text>
+          )}
         </View>
 
         {/* Leadership Section */}
         <View style={styles.section}>
           <Text style={styles.sectionHeader}>LEADERSHIP AND COMMUNITY ENGAGEMENT</Text>
-          <View style={styles.flexRow}>
-            <View>
-              <Text>Undergraduate Finance Association</Text>
-              <Text style={styles.role}>Events and Sports Coordinator</Text>
+          {hasContent(formData.leadership, ['title', 'description']) ? (
+            formData.leadership?.map((lead, idx) => (
+              <View key={idx} style={{ marginBottom: 8 }}>
+                <View style={styles.flexRow}>
+                  <View>
+                    <Text style={{fontWeight: 'bold'}}>{lead.title}</Text>
+                    {/* <Text style={styles.role}>Optional Role/Subtitle</Text> */}
+                  </View>
+                  {/* <Text>Optional Dates</Text> */}
+                </View>
+                <Text style={styles.listItem}>• {lead.description}</Text>
+              </View>
+            ))
+          ) : (
+            <View style={{ marginBottom: 8 }}>
+              <View style={styles.flexRow}>
+                <View>
+                  <Text>Default Organization</Text>
+                  <Text style={styles.role}>Default Role</Text>
+                </View>
+                <Text>Default Dates</Text>
+              </View>
+              <Text style={styles.listItem}>• Default leadership detail.</Text>
             </View>
-            <Text>Nov 2020 – Present</Text>
-          </View>
-          <Text style={styles.listItem}>• Help coordinate events and expand membership</Text>
+          )}
         </View>
 
         {/* Honors Section */}
         <View style={styles.section}>
           <Text style={styles.sectionHeader}>HONORS</Text>
-          <Text style={styles.listItem}>• Marine Corps Outstanding Achievement Award</Text>
-          <Text style={styles.listItem}>• Co-Captain and 2020 MVP, Emory Womens Varsity Soccer</Text>
+          {Array.isArray(formData.honorsList) && formData.honorsList.some(h => h.honor && h.honor.trim() !== '') ? (
+            formData.honorsList.filter(h => h.honor && h.honor.trim() !== '').map((honor, idx) => (
+              <Text key={idx} style={styles.listItem}>• {honor.honor}</Text>
+            ))
+          ) : (
+            <>
+              <Text style={styles.listItem}>• Default Honor 1</Text>
+              <Text style={styles.listItem}>• Default Honor 2</Text>
+            </>
+          )}
         </View>
 
         {/* Skills Section */}
         <View style={styles.section}>
           <Text style={styles.sectionHeader}>ADDITIONAL SKILLS AND INTERESTS</Text>
-          <Text><Text style={styles.role}>Languages:</Text> Intermediate in Spanish</Text>
-          <Text><Text style={styles.role}>Computing:</Text> Microsoft Office, Adobe Acrobat, Minitab</Text>
-          <Text><Text style={styles.role}>Interests:</Text> Photography, Travel, Soccer</Text>
+          {formData.skillsInterests && formData.skillsInterests.trim() !== '' ? (
+            <Text>{formData.skillsInterests}</Text>
+          ) : (
+            <>
+              <Text><Text style={styles.role}>Languages:</Text> Default Language</Text>
+              <Text><Text style={styles.role}>Computing:</Text> Default Software</Text>
+              <Text><Text style={styles.role}>Interests:</Text> Default Interest</Text>
+            </>
+          )}
         </View>
+
+        {/* Custom Personal Fields Section */}
+        {Array.isArray(formData.customPersonal) && formData.customPersonal.length > 0 && (
+          <View style={styles.section}>
+            <Text style={styles.sectionHeader}>ADDITIONAL INFORMATION</Text>
+            {formData.customPersonal.map((field) => (
+              field.label && field.value && (
+                <Text key={field.id} style={{ marginBottom: 2 }}>
+                  <Text style={{ fontWeight: 'bold' }}>{field.label}:</Text> {field.value}
+                </Text>
+              )
+            ))}
+          </View>
+        )}
       </Page>
     </Document>
   );

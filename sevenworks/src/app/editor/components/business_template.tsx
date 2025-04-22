@@ -67,6 +67,7 @@ interface TemplateFormData {
   honors?: string;
   honorsList?: { honor: string }[];
   skillsInterests?: string;
+  customPersonal?: { id: number; label: string; value: string }[]; // Add customPersonal field
   [key: string]: unknown;
 }
 interface TemplateProps {
@@ -95,7 +96,7 @@ export default function BusinessTemplate({ formData }: TemplateProps) {
 
           <View style={{ marginTop: 10, fontFamily: formData?.font ?? "Helvetica" }}>
             <Text style={styles.title}>EDUCATION</Text>
-            {formData.education && formData.education.length > 0 ? (
+            {Array.isArray(formData.education) && formData.education.length > 0 ? (
               <View style={{ marginBottom: 16 }}>
                 {formData.education.map((edu, idx) => (
                   <View key={idx} style={{ marginBottom: 6 }}>
@@ -116,7 +117,7 @@ export default function BusinessTemplate({ formData }: TemplateProps) {
 
           <View style={{ marginTop: 10, fontFamily: formData?.font ?? "Helvetica" }}>
             <Text style={styles.title}>EXPERIENCE</Text>
-            {formData.experience && formData.experience.length > 0 ? (
+            {Array.isArray(formData.experience) && formData.experience.length > 0 ? (
               <View style={{ marginBottom: 16 }}>
                 {formData.experience.map((exp, idx) => (
                   <View key={idx} style={{ marginBottom: 6 }}>
@@ -197,6 +198,22 @@ export default function BusinessTemplate({ formData }: TemplateProps) {
               </Text>
             )}
           </View>
+
+          {/* Render Custom Personal Fields */}
+          {Array.isArray(formData.customPersonal) && formData.customPersonal.length > 0 && (
+            <View style={{ marginTop: 10, fontFamily: formData?.font ?? "Helvetica" }}>
+              <Text style={styles.title}>ADDITIONAL INFORMATION</Text>
+              {formData.customPersonal.map((field) => (
+                field.label && field.value && (
+                  <View key={field.id} style={{ marginBottom: 4 }}>
+                    <Text style={{ fontSize: 10 }}>
+                      <Text style={{ fontWeight: 'bold' }}>{field.label}:</Text> {field.value}
+                    </Text>
+                  </View>
+                )
+              ))}
+            </View>
+          )}
         </View>
       </Page>
     </Document>

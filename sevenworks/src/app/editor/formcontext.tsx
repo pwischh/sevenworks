@@ -25,7 +25,24 @@ export const FormProvider = ({ children }: { children: ReactNode }) => {
   const [isSaving, setIsSaving] = useState(false);
   const [isQuotaExceeded, setIsQuotaExceeded] = useState(false);
   const [forceLocalMode, setForceLocalMode] = useState(false);
+  const [isClientReady, setIsClientReady] = useState(false);
+  const [templateID] = useState<string | null>(null);
   const localStorageKey = 'sevenworks_local_form_data';
+
+  // Use useEffect to handle localStorage after hydration is complete
+  useEffect(() => {
+    // Only access localStorage client-side after component is mounted
+    const savedMode = localStorage.getItem('sevenworks_local_storage_mode');
+    setForceLocalMode(savedMode === 'true');
+    setIsClientReady(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isClientReady || !forceLocalMode) return;
+    const resumeID = localStorage.getItem('currentResumeID') || 'default';
+    const key = `${localStorageKey}_${resumeID}`;
+    localStorage.setItem(key, JSON.stringify(formData));
+  }, [formData, isClientReady, forceLocalMode]);
 
   // Function to save data locally when Firebase quota is exceeded
   const saveDataLocally = (data: FormData) => {
@@ -156,11 +173,19 @@ export const FormProvider = ({ children }: { children: ReactNode }) => {
       // If user has forced local mode or quota is exceeded, save locally only
       if (forceLocalMode || isQuotaExceeded) {
         console.log("Saving locally due to " + (forceLocalMode ? "user preference" : "quota limitations"));
-        const localSaveSuccess = saveDataLocally(formData);
         
-        if (localSaveSuccess) {
-          console.log("Data saved locally successfully");
-        }
+        // Make sure to save to localStorage properly
+        const resumeID = localStorage.getItem('currentResumeID') || 'default';
+        const key = `${localStorageKey}_${resumeID}`;
+        localStorage.setItem(key, JSON.stringify(formData));
+        
+        // Also save the resumeID and templateID for future reference
+        localStorage.setItem('currentTemplateID', templateID || 'default');
+        
+        console.log("Data saved locally successfully to key:", key);
+        
+        // Add a small delay to make the saving indicator visible
+        await new Promise(resolve => setTimeout(resolve, 500));
         return;
       }
       
@@ -222,7 +247,31 @@ export const FormProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const toggleSaveMode = () => {
-    setForceLocalMode((prevMode) => !prevMode);
+    setForceLocalMode((prevMode) => {
+      const newMode = !prevMode;
+      console.log(`Switching save mode to ${newMode ? 'local' : 'cloud'} storage`);
+      
+      // If switching to local mode, verify we can access localStorage
+      if (newMode) {
+        try {
+          // Test localStorage access
+          const testKey = `${localStorageKey}_test`;
+          localStorage.setItem(testKey, 'test');
+          localStorage.removeItem(testKey);
+          
+          // If we get here, localStorage is working
+        } catch (error) {
+          console.error('Cannot access localStorage for local saving mode:', error);
+          alert('Unable to enable local storage mode. Your browser may have restrictions on localStorage.');
+          return prevMode; // Keep previous mode if localStorage isn't available
+        }
+      }
+      
+      // Save the mode to localStorage so it persists across page refreshes
+      localStorage.setItem('sevenworks_local_storage_mode', newMode.toString());
+      
+      return newMode;
+    });
   };
 
   return (

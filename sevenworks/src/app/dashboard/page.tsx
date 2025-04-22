@@ -162,7 +162,7 @@ const ResumeCard = ({ resume }: { resume: InProgressResume }) => {
 
 // Create New Button Component
 const CreateNewButton = ({ type }: { type: string }) => (
-  <Link href={`/editor/new?type=${type}`}>
+  <Link href={`/templates`}>
     <div className="flex flex-col items-center justify-center bg-white rounded-lg border-2 border-dashed border-gray-300 h-full min-h-[260px] hover:border-blue-400 hover:bg-blue-50 transition-colors duration-200">
       <div className="text-5xl font-light text-gray-400">+</div>
       <span className="mt-2 text-sm font-medium text-gray-600">Create New {type}</span>

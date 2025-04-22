@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState, useRef, useMemo, useCallback } from "react";
+import React, { useEffect, useState, useRef, useMemo, useCallback, Suspense } from "react";
 // import type { JSX } from "react";
 import dynamic from "next/dynamic";
 import { useSearchParams } from "next/navigation";
@@ -15,6 +15,47 @@ import { doc, getDoc, setDoc } from "firebase/firestore";
 import { auth, db } from "@/app/lib/firebase";
 import { useResume } from "@/app/resumeContext";
 
+// Create a separate component for the toggle to use with dynamic import
+const StorageModeToggle = ({ cloudModeEnabled, toggleSaveMode }) => (
+  <div className={`fixed bottom-4 right-6 flex items-center px-3 py-1 rounded-lg z-40 
+                  ${cloudModeEnabled ? 'bg-blue-600 text-white' : 'bg-gray-400 text-gray-900'}`}>
+    {/* Toggle switch integrated on the left */}
+    <button 
+      onClick={toggleSaveMode}
+      className="relative inline-flex items-center h-4 rounded-full w-8 mr-2 transition-colors focus:outline-none"
+      role="switch"
+      aria-checked={cloudModeEnabled}
+    >
+      <span 
+        className={`${
+          cloudModeEnabled ? 'bg-blue-800' : 'bg-gray-600'
+        } absolute h-4 w-8 mx-auto rounded-full transition-colors`} 
+      />
+      <span 
+        className={`${
+          cloudModeEnabled ? 'translate-x-4' : 'translate-x-0.5'
+        } inline-block h-3 w-3 transform rounded-full bg-white transition-transform`} 
+      />
+    </button>
+    {/* Cloud icon instead of text */}
+    {cloudModeEnabled ? (
+      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+        <path d="M5.5 16a3.5 3.5 0 01-.369-6.98 4 4 0 117.753-1.977A4.5 4.5 0 1113.5 16h-8z" />
+      </svg>
+    ) : (
+      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="none" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5.5 16a3.5 3.5 0 01-.369-6.98 4 4 0 117.753-1.977A4.5 4.5 0 1113.5 16h-8z" />
+      </svg>
+    )}
+  </div>
+);
+
+// Use dynamic import with ssr disabled
+const DynamicStorageModeToggle = dynamic(
+  () => Promise.resolve(StorageModeToggle),
+  { ssr: false }
+);
+
 // Define interfaces for form data
 interface ExperienceEntry {
   title: string;
@@ -29,7 +70,7 @@ interface EducationEntry {
 
 const InputFields = () => {
   const searchParams = useSearchParams();
-  const { formData, setFormData, isSaving, saveFormData, isQuotaExceeded, forceLocalMode, toggleSaveMode } = useFormContext();
+  const { formData, setFormData, isSaving, isQuotaExceeded, forceLocalMode, toggleSaveMode } = useFormContext();
   const { zoom } = useZoom();
   const initialTab = searchParams?.get("tab") || "personal";
   const [activeTab, setActiveTab] = useState(initialTab);
@@ -88,6 +129,9 @@ const InputFields = () => {
   // Handle experience field change
   const handleExperienceChange = (idx: number, key: keyof ExperienceEntry, value: string) => {
     const updated = Array.isArray(formData.experience) ? [...formData.experience] : [];
+    while (updated.length <= idx) {
+      updated.push({ title: '', company: '', years: '' });
+    }
     updated[idx][key] = value;
     setFormData('experience', updated);
   };
@@ -95,7 +139,13 @@ const InputFields = () => {
   // Handle education field change
   const handleEducationChange = (idx: number, key: keyof EducationEntry, value: string) => {
     const updated = Array.isArray(formData.education) ? [...formData.education] : [];
-    updated[idx][key] = value;
+    while (updated.length <= idx) {
+      updated.push({ degree: '', institution: '', years: '' });
+    }
+    updated[idx] = {
+      ...updated[idx],
+      [key]: value ?? ''
+    };
     setFormData('education', updated);
   };
 
@@ -134,129 +184,20 @@ const InputFields = () => {
     setFormData('honorsList', updated);
   };
 
-  useEffect(() => {
-    const tab = searchParams?.get("tab") || "personal";
-    if (tab !== activeTab) {
-      setActiveTab(tab);
-    }
-  }, [activeTab, searchParams]);
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-        if (user){
-            try {
-                // Try to get the resumeID from localStorage first (set when clicking from dashboard)
-                const savedResumeID = localStorage.getItem('currentResumeID');
-                
-                // Get the session data to check if we need to update it
-                const sessionData = (await getDoc(doc(db, "sessions", user.uid))).data();
-
-                if (!sessionData){
-                    throw new Error("Error retrieving session data");
-                }
-
-                // If there's a saved resumeID that doesn't match the session, we need to load the correct resume
-                if (savedResumeID && sessionData.resumeID !== savedResumeID) {
-                    console.log("Loading resume from saved ID:", savedResumeID);
-                    
-                    // Get the specific resume data
-                    const resumeData = (await getDoc(doc(db, "user_resumes", user.uid, "resumes", savedResumeID))).data();
-                    
-                    if (resumeData) {
-                        // Update the session with the correct resumeID and data
-                        await setDoc(doc(db, "sessions", user.uid), {
-                            formData: resumeData.formData,
-                            resumeID: savedResumeID,
-                            templateID: resumeData.templateID
-                        }, { merge: false });
-                        
-                        // Reload the session data
-                        const updatedSessionData = (await getDoc(doc(db, "sessions", user.uid))).data();
-                        if (updatedSessionData && updatedSessionData.formData) {
-                            // Set form data from the correct resume
-                            Object.entries(updatedSessionData.formData).forEach(([key, value]) => {
-                                setFormData(key as any, value as any);
-                            });
-                            
-                            // Initialize customPersonalFields if they exist
-                            if (updatedSessionData.formData.customPersonal && Array.isArray(updatedSessionData.formData.customPersonal)) {
-                                setCustomPersonalFields(updatedSessionData.formData.customPersonal);
-                            }
-                            
-                            setTemplateID(updatedSessionData.templateID);
-                            return; // Exit early as we've already set the data
-                        }
-                    }
-                }
-                
-                // If we didn't need to update the session or couldn't find the resume,
-                // just load the current session data
-                if (sessionData.formData) {
-                    // Set the entire formData object at once through context
-                    Object.entries(sessionData.formData).forEach(([key, value]) => {
-                        setFormData(key as any, value as any);
-                    });
-                    
-                    // Initialize customPersonalFields if they exist in the loaded data
-                    if (sessionData.formData.customPersonal && Array.isArray(sessionData.formData.customPersonal)) {
-                        setCustomPersonalFields(sessionData.formData.customPersonal);
-                    }
-                }
-                
-                setTemplateID(sessionData.templateID);
-            } catch(error) {
-                console.error("Error fetching session data:", error);
-            }
-        }
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  // Generate initial PDF on first load
-  useEffect(() => {
-    if (!templateID) return;
-
-    if (isFirstRender.current) {
-      setIsGenerating(true); // Set generating state immediately
-      // Small timeout to ensure UI renders before heavy PDF generation
-      setTimeout(() => {
-        generatePdf().then(() => {
-          setInitialLoadComplete(true);
-        });
-        isFirstRender.current = false;
-      }, 100);
-    }
-  }, [templateID]);
-
-  // Ensure at least 2 leadership and 2 honors entries to start (but not in render!)
-  useEffect(() => {
-    if (activeTab === "leadership" && (!Array.isArray(formData.leadership) || formData.leadership.length === 0)) {
-      setFormData('leadership', [{ title: '', description: '' }, { title: '', description: '' }]);
-    }
-    if (activeTab === "honors" && (!Array.isArray(formData.honorsList) || formData.honorsList.length === 0)) {
-      setFormData('honorsList', [{ honor: '' }, { honor: '' }]);
-    }
-  }, [activeTab]);
-
-  // Function to generate a PDF without directly updating state
+  // Define generatePdf with useCallback before any useEffects that use it
   const generatePdf = useCallback(async () => {
     if (isGenerating && !isFirstRender.current) return;
 
     setIsGenerating(true);
     try {
-      // Create a copy of form data with proper string conversion for PDF generation
-      const stringifiedFormData = Object.fromEntries(
-        Object.entries(formData).map(([key, value]) => {
-          if (value === null || value === undefined) return [key, ''];
-          return [key, Array.isArray(value) ? JSON.stringify(value) : String(value)];
-        })
-      );
+      // Pass formData directly, templates expect arrays/objects
+      const dataForPdf = { ...formData };
       
       // Generate the PDF blob with error handling
       let blob;
       try {
-        blob = await pdf(template(templateID, stringifiedFormData)).toBlob();
+        // Pass the dataForPdf directly to the template function
+        blob = await pdf(template(templateID, dataForPdf)).toBlob();
       } catch (pdfError) {
         console.error("Error generating PDF blob:", pdfError);
         setIsGenerating(false);
@@ -324,6 +265,142 @@ const InputFields = () => {
     }
   }, [formData, isPrimaryActive, isGenerating, primaryPdfUrl, secondaryPdfUrl, template, templateID]);
 
+  useEffect(() => {
+    const tab = searchParams?.get("tab") || "personal";
+    if (tab !== activeTab) {
+      setActiveTab(tab);
+    }
+  }, [activeTab, searchParams]);
+
+  useEffect(() => {
+    if (!forceLocalMode) return;
+    const resumeID = localStorage.getItem('currentResumeID') || 'default';
+    const key = `sevenworks_form_data_${resumeID}`;
+    const savedData = localStorage.getItem(key);
+    if (savedData) {
+      try {
+        const parsed = JSON.parse(savedData);
+        Object.entries(parsed).forEach(([key, value]) => {
+          // Check if the value in formData is different before setting
+          if (JSON.stringify(formData[key]) !== JSON.stringify(value)) {
+            setFormData(key, value);
+          }
+        });
+        if (parsed.customPersonal && Array.isArray(parsed.customPersonal)) {
+          setCustomPersonalFields(parsed.customPersonal);
+        }
+      } catch (error) {
+        console.error("Error parsing saved local form data:", error);
+      }
+    }
+  }, [forceLocalMode, formData, setFormData]);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+        if (forceLocalMode || !user) return;
+        try {
+            // Try to get the resumeID from localStorage first (set when clicking from dashboard)
+                const savedResumeID = localStorage.getItem('currentResumeID');
+                
+                // Get the session data to check if we need to update it
+                const sessionData = (await getDoc(doc(db, "sessions", user.uid))).data();
+
+                if (!sessionData){
+                    throw new Error("Error retrieving session data");
+                }
+
+                // If there's a saved resumeID that doesn't match the session, we need to load the correct resume
+                if (savedResumeID && sessionData.resumeID !== savedResumeID) {
+                    console.log("Loading resume from saved ID:", savedResumeID);
+                    
+                    // Get the specific resume data
+                    const resumeData = (await getDoc(doc(db, "user_resumes", user.uid, "resumes", savedResumeID))).data();
+                    
+                    if (resumeData) {
+                        // Update the session with the correct resumeID and data
+                        await setDoc(doc(db, "sessions", user.uid), {
+                            formData: resumeData.formData,
+                            resumeID: savedResumeID,
+                            templateID: resumeData.templateID
+                        }, { merge: false });
+                        
+                        // Reload the session data
+                        const updatedSessionData = (await getDoc(doc(db, "sessions", user.uid))).data();
+                        if (updatedSessionData && updatedSessionData.formData) {
+                            // Set form data from the correct resume
+                            Object.entries(updatedSessionData.formData).forEach(([key, value]) => {
+                                setFormData(key as string, value as FormDataValue);
+                            });
+                            
+                            // Initialize customPersonalFields if they exist
+                            if (updatedSessionData.formData.customPersonal && Array.isArray(updatedSessionData.formData.customPersonal)) {
+                                setCustomPersonalFields(updatedSessionData.formData.customPersonal);
+                            }
+                            
+                            setTemplateID(updatedSessionData.templateID);
+                            return; // Exit early as we've already set the data
+                        }
+                    }
+                }
+                
+                // If we didn't need to update the session or couldn't find the resume,
+                // just load the current session data
+                if (sessionData.formData) {
+                    // Set the entire formData object at once through context
+                    Object.entries(sessionData.formData).forEach(([key, value]) => {
+                        // Cast the value to the correct type to fix type error
+                        setFormData(key as string, value as FormDataValue);
+                    });
+                    
+                    // Initialize customPersonalFields if they exist in the loaded data
+                    if (sessionData.formData.customPersonal && Array.isArray(sessionData.formData.customPersonal)) {
+                        setCustomPersonalFields(sessionData.formData.customPersonal);
+                    }
+                }
+                
+                setTemplateID(sessionData.templateID);
+            } catch(error) {
+                console.error("Error fetching session data:", error);
+            }
+        
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (!forceLocalMode) return;
+    const resumeID = localStorage.getItem('currentResumeID') || 'default';
+    const key = `sevenworks_form_data_${resumeID}`;
+    localStorage.setItem(key, JSON.stringify(formData));
+  }, [formData, forceLocalMode]);
+
+  // Generate initial PDF on first load
+  useEffect(() => {
+    if (!templateID) return;
+
+    if (isFirstRender.current) {
+      setIsGenerating(true); // Set generating state immediately
+      // Small timeout to ensure UI renders before heavy PDF generation
+      setTimeout(() => {
+        generatePdf().then(() => {
+          setInitialLoadComplete(true);
+        });
+        isFirstRender.current = false;
+      }, 100);
+    }
+  }, [templateID, generatePdf]); // Added generatePdf as dependency
+
+  // Ensure at least 2 leadership and 2 honors entries to start (but not in render!)
+  useEffect(() => {
+    if (activeTab === "leadership" && (!Array.isArray(formData.leadership) || formData.leadership.length === 0)) {
+      setFormData('leadership', [{ title: '', description: '' }, { title: '', description: '' }]);
+    }
+    if (activeTab === "honors" && (!Array.isArray(formData.honorsList) || formData.honorsList.length === 0)) {
+      setFormData('honorsList', [{ honor: '' }, { honor: '' }]);
+    }
+  }, [activeTab]);
+
   // Check if form data has actually changed
   const hasFormDataChanged = useMemo(() => {
     if (isFirstRender.current) return true;
@@ -366,6 +443,11 @@ const InputFields = () => {
       }
     };
   }, [formData, hasFormDataChanged]);
+
+  useEffect(() => {
+    if (!primaryPdfUrl && !secondaryPdfUrl) return;
+    previousFormDataRef.current = { ...formData };
+  }, [primaryPdfUrl, secondaryPdfUrl]);
 
   // Clean up URLs on component unmount
   useEffect(() => {
@@ -648,7 +730,7 @@ const InputFields = () => {
                     }`}
                     style={{ transform: `scale(${zoom / 100})`, transformOrigin: 'top left' }}
                   >
-                    {primaryPdfUrl && <ViewerNoSSR fileUrl={primaryPdfUrl} />}
+                    {primaryPdfUrl && <ViewerNoSSR key={primaryPdfUrl} fileUrl={primaryPdfUrl} />}
                   </div>
 
                   {/* Secondary PDF Layer */}
@@ -658,7 +740,7 @@ const InputFields = () => {
                     }`}
                     style={{ transform: `scale(${zoom / 100})`, transformOrigin: 'top left' }}
                   >
-                    {secondaryPdfUrl && <ViewerNoSSR fileUrl={secondaryPdfUrl} />}
+                    {secondaryPdfUrl && <ViewerNoSSR key={secondaryPdfUrl} fileUrl={secondaryPdfUrl} />}
                   </div>
                 </div>
               </div>
@@ -701,31 +783,12 @@ const InputFields = () => {
         </div>
       )}
 
-      {/* Combined storage mode indicator with integrated toggle */}
-      <div className={`fixed bottom-4 right-4 flex items-center px-3 py-1 rounded-lg z-40 
-                      ${forceLocalMode || isQuotaExceeded ? 'bg-yellow-400 text-gray-900' : 'bg-blue-600 text-white'}`}>
-        {/* Toggle switch integrated on the left */}
-        <button 
-          onClick={toggleSaveMode}
-          className="relative inline-flex items-center h-4 rounded-full w-8 mr-2 transition-colors focus:outline-none"
-          role="switch"
-          aria-checked={!(forceLocalMode || isQuotaExceeded)}
-        >
-          <span 
-            className={`${
-              forceLocalMode || isQuotaExceeded ? 'bg-yellow-600' : 'bg-blue-800'
-            } absolute h-4 w-8 mx-auto rounded-full transition-colors`} 
-          />
-          <span 
-            className={`${
-              forceLocalMode || isQuotaExceeded ? 'translate-x-0.5' : 'translate-x-4'
-            } inline-block h-3 w-3 transform rounded-full bg-white transition-transform`} 
-          />
-        </button>
-        <span className="text-xs font-semibold">
-          {forceLocalMode || isQuotaExceeded ? "Local (Offline)" : "Cloud"}
-        </span>
-      </div>
+      <Suspense fallback={null}>
+        <DynamicStorageModeToggle 
+          cloudModeEnabled={!forceLocalMode && !isQuotaExceeded} 
+          toggleSaveMode={toggleSaveMode} 
+        />
+      </Suspense>
     </div>
   );
 };
