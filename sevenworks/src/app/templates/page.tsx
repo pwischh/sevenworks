@@ -28,36 +28,54 @@ interface Resume {
 const ResumeCard = ({ resume }: { resume: Resume }) => {
     const router = useRouter();
     const [user] = useAuthState(auth);
+    const [hasExistingResume, setHasExistingResume] = useState(false);
+    const [existingResumeId, setExistingResumeId] = useState<string | null>(null);
     
+    // Check if user already has this resume template
+    useEffect(() => {
+        const checkExistingResume = async () => {
+            if (!user) return;
+            
+            try {
+                const userResumesRef = collection(db, "user_resumes", user.uid, "resumes");
+                const querySnapshot = await getDocs(userResumesRef);
+                
+                querySnapshot.forEach(doc => {
+                    const data = doc.data();
+                    if (data.templateID === resume.id || data.name === resume.title) {
+                        setHasExistingResume(true);
+                        setExistingResumeId(doc.id);
+                    }
+                });
+            } catch (error) {
+                console.error("Error checking existing resume:", error);
+            }
+        };
+        
+        checkExistingResume();
+    }, [user, resume.id, resume.title]);
+
     const categories = (category: string) => {
         switch(category){
-            case "Business": return (
-                <LuBriefcaseBusiness className="w-[28px] h-[28px]"/>
-            );
-            case "STEM": return (
-                <LuAtom className="w-[28px] h-[28px]"/>
-            );
-            case "Health & Human Services": return (
-                <LuHospital className="w-[28px] h-[28px]"/>
-            );
-            case "Law": return (
-                <LuGavel className="w-[28px] h-[28px]"/>
-            );
-            case "Creative": return (
-                <LuPaintbrush className="w-[28px] h-[28px]"/>
-            );
-            case "Environmental & Sustainability": return (
-                <LuEarth className="w-[28px] h-[28px]"/>
-            );
-            case "Policy, Government & International Affairs": return (
-                <LuLandmark className="w-[28px] h-[28px]"/>
-            )
+            case "Business": 
+                return (<LuBriefcaseBusiness />);
+            case "STEM": 
+                return (<LuAtom />);
+            case "Health & Human Services": 
+                return (<LuHospital />);
+            case "Law": 
+                return (<LuGavel />);
+            case "Environmental & Sustainability": 
+                return (<LuEarth />);
+            case "Policy, Government & International Affairs": 
+                return (<LuLandmark />);
+            case "Creative": 
+                return (<LuPaintbrush />);
+            default: 
+                return (<LuFiles />);
         }
+    };
 
-        return;
-    }
-    
-    // Function to handle clicking on a resume template - allows both creating and editing
     async function handleTemplateClick() {
         if (!user) {
             console.error("User not authenticated");
@@ -74,19 +92,24 @@ const ResumeCard = ({ resume }: { resume: Resume }) => {
             const querySnapshot = await getDocs(userResumesRef);
             
             // Check all user resumes to find one with matching template
-            let existingResume = null;
-            querySnapshot.forEach(doc => {
-                const data = doc.data();
-                // Use a flexible matching approach - the template IDs might not match exactly
-                const templateMatches = 
-                    data.templateID === resume.id || 
+            let existingResume: { id: string; templateID: string; formData: any } | null = null;
+
+            for (const docSnapshot of querySnapshot.docs) { // Use for...of loop
+                const data = docSnapshot.data();
+                const templateMatches =
+                    data.templateID === resume.id ||
                     data.name === resume.title;
-                
+
                 if (templateMatches) {
-                    existingResume = { id: doc.id, ...data };
+                    existingResume = {
+                        id: docSnapshot.id,
+                        templateID: data.templateID,
+                        formData: data.formData || {}
+                    };
                     console.log("Found existing resume:", existingResume);
+                    break; // Exit loop once found
                 }
-            });
+            }
             
             // If user already has this resume, edit it instead of creating a new one
             if (existingResume) {
