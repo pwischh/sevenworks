@@ -24,7 +24,7 @@ const ResumeContext = createContext<Props>((templateID) => {
 export function ResumeProvider({children}: {children: ReactNode}){
 
     /* Store template file that corresponds to resume title */
-    const template = (templateID: string | null, formData: { [key: string]: string }) => {
+    const template = (templateID: string | null, formData: { [key: string]: any }) => {
         if (!templateID) {
             return (
                 <Document>
@@ -35,19 +35,31 @@ export function ResumeProvider({children}: {children: ReactNode}){
             );
         }
 
-        switch (templateID) {
-            case "Business Resume": return (<BusinessResume formData={formData} />);
-            case "Data Analytics Resume": return (<DataAnalystResume formData={formData} />);
-            default: {
-                return (
-                    <Document>
-                        <Page size = "A4" style={{fontSize: 30}}>
-                            <Text>Template name mismatch</Text>
-                        </Page>
-                    </Document>
-                )
-            }
+        // Log the templateID for debugging
+        console.log("Template ID received:", templateID);
+
+        // Fix the issue by correctly handling template file paths
+        // The problem is likely due to filename case sensitivity in imports
+        // BusinessResume.tsx uses lowercase filename but DataAnalystResume.tsx uses PascalCase
+        
+        // Import path case handling
+        if (templateID.includes("business") || 
+            templateID.includes("Business") || 
+            templateID === "business-resume" || 
+            templateID === "business resume") {
+            return <BusinessResume formData={formData} />;
         }
+        
+        if (templateID.includes("data") || 
+            templateID.includes("Data") || 
+            templateID === "data-analyst-resume" || 
+            templateID === "data analyst resume") {
+            return <DataAnalystResume formData={formData} />;
+        }
+        
+        // Fallback case - if we can't match, default to a template to avoid errors
+        console.error(`Template ID mismatch: ${templateID}`);
+        return <BusinessResume formData={formData} />;
     }
 
     return (

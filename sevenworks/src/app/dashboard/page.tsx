@@ -8,6 +8,16 @@ import { Markazi_Text } from "next/font/google";
 import { collection, doc, getDocs, getDoc, setDoc } from "firebase/firestore";
 import { auth, db } from "../lib/firebase";
 import { signOut } from "firebase/auth";
+import { 
+  LuFiles, 
+  LuBriefcaseBusiness,
+  LuAtom,
+  LuHospital,
+  LuGavel,
+  LuPaintbrush,
+  LuEarth,
+  LuLandmark 
+} from "react-icons/lu";
 
 const markazi = Markazi_Text({
   subsets: ["latin"],
@@ -40,7 +50,7 @@ const Sidebar = () => {
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m-6-8h6m2-2H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V6a2 2 0 00-2-2z" />
               </svg>
-              <span>Resumes</span>
+              <span>Templates</span>
             </Link>
           </li>
           <li>
@@ -51,14 +61,14 @@ const Sidebar = () => {
               <span>Editor</span>
             </Link>
           </li>
-          <li>
+          {/* <li>
             <Link href="/settings" className="flex items-center space-x-2 hover:text-lightRed transition-colors">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 3a1.5 1.5 0 00-1.5 1.5V5.25h7.5V4.5a1.5 1.5 0 00-1.5-1.5h-4.5zM6 8.25h12v12H6v-12z" />
               </svg>
               <span>Settings</span>
             </Link>
-          </li>
+          </li> */}
           <li>
             <Link href="/profile" className="flex items-center space-x-2 hover:text-lightRed transition-colors">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -86,6 +96,42 @@ interface InProgressResume {
   templateID: string;
   name: string;
   image: string;
+  category?: string;
+}
+
+// Function to determine which icon to display based on template category
+const getCategoryIcon = (templateID: string, category?: string) => {
+  // If we have a category, use it directly
+  if (category) {
+    switch(category){
+      case "Business": return <LuBriefcaseBusiness className="w-[24px] h-[24px]"/>;
+      case "STEM": return <LuAtom className="w-[24px] h-[24px]"/>;
+      case "Health & Human Services": return <LuHospital className="w-[24px] h-[24px]"/>;
+      case "Law": return <LuGavel className="w-[24px] h-[24px]"/>;
+      case "Creative": return <LuPaintbrush className="w-[24px] h-[24px]"/>;
+      case "Environmental & Sustainability": return <LuEarth className="w-[24px] h-[24px]"/>;
+      case "Policy, Government & International Affairs": return <LuLandmark className="w-[24px] h-[24px]"/>;
+      default: return <LuFiles className="w-[24px] h-[24px]"/>;
+    }
+  }
+  
+  // If no category, try to infer from templateID
+  if (templateID.includes("business")) return <LuBriefcaseBusiness className="w-[24px] h-[24px]"/>;
+  if (templateID.includes("data") || templateID.includes("tech") || templateID.includes("analytics")) 
+    return <LuAtom className="w-[24px] h-[24px]"/>;
+  if (templateID.includes("health") || templateID.includes("medical")) 
+    return <LuHospital className="w-[24px] h-[24px]"/>;
+  if (templateID.includes("law") || templateID.includes("legal")) 
+    return <LuGavel className="w-[24px] h-[24px]"/>;
+  if (templateID.includes("creative") || templateID.includes("art")) 
+    return <LuPaintbrush className="w-[24px] h-[24px]"/>;
+  if (templateID.includes("environmental") || templateID.includes("sustainability")) 
+    return <LuEarth className="w-[24px] h-[24px]"/>;
+  if (templateID.includes("policy") || templateID.includes("government")) 
+    return <LuLandmark className="w-[24px] h-[24px]"/>;
+  
+  // Default icon
+  return <LuFiles className="w-[24px] h-[24px]"/>;
 }
 
 // ResumeCard Component using Next.js <Image>
@@ -98,15 +144,16 @@ const ResumeCard = ({ resume }: { resume: InProgressResume }) => {
     if (currentUser) { 
       try {
         //Get fields from the resume being clicked
-        const clickedResume = await getDoc(doc(db, "user_resumes", currentUser.uid, "resumes", resume.id));
-        const clickedResumeData = clickedResume.data();
+        const clickedResumeRef = doc(db, "user_resumes", currentUser.uid, "resumes", resume.id);
+        const clickedResumeSnap = await getDoc(clickedResumeRef);
 
-        if (!clickedResumeData){
+        if (!clickedResumeSnap.exists()){
           throw new Error("Unable to retrieve resume data");
         }
+        const clickedResumeData = clickedResumeSnap.data();
 
         //Get formData and templateID from the db
-        const clickedResumeFormData = clickedResumeData.formData;
+        const clickedResumeFormData = clickedResumeData.formData || {}; // Default to empty object if undefined
         const clickedResumeTemplateID = clickedResumeData.templateID;
 
         // Store resumeID in localStorage to persist through refreshes
@@ -120,13 +167,19 @@ const ResumeCard = ({ resume }: { resume: InProgressResume }) => {
             resumeID: resume.id, 
             templateID: clickedResumeTemplateID
           }, 
-          {merge: false});
+          {merge: false}); // Overwrite existing session data
           
+        // Redirect to editor only after successful update
+        router.push("/editor");
+
       } catch(error) {
-        console.error("Error updating session data: ", error);
-      } finally {
-        router.push("/editor")
-      }
+        console.error("Error handling resume click:", error);
+        // Optionally: Show an error message to the user
+      } 
+      // Removed finally block to prevent navigation on error
+    } else {
+        console.error("User not authenticated.");
+        // Optionally: Redirect to login or show a message
     }
   }
 
@@ -134,6 +187,10 @@ const ResumeCard = ({ resume }: { resume: InProgressResume }) => {
     <div className="flex flex-col relative items-center w-full max-w-xs">
       {/* Document Thumbnail */}
       <div className="relative w-full aspect-[8.5/11] bg-white rounded-md shadow hover:shadow-lg overflow-hidden">
+        {/* Category Icon */}
+        <div className="absolute top-2 right-2 z-10 bg-navy/80 p-1.5 rounded-full text-offWhite">
+          {getCategoryIcon(resume.templateID, resume.category)}
+        </div>
         <Image
           src={resume.image}
           alt={resume.templateID}
@@ -153,7 +210,7 @@ const ResumeCard = ({ resume }: { resume: InProgressResume }) => {
 
       {/* Title & Description */}
       <div className="mt-2 text-center">
-        <h3 className="text-sm font-semibold">{resume.name}</h3>
+        <h3 className="text-sm text-gray-800 font-semibold">{resume.name}</h3>
         <p className="text-xs text-gray-600">{resume.templateID}</p>
       </div>
     </div>
@@ -200,7 +257,8 @@ const Dashboard = () => {
               id: doc.id,
               templateID: data.templateID,
               name: data.name,
-              image: data.image,
+              image: data.image || "/sample-business-resume.png",
+              category: data.category,
             };
           });
           setTemplateResumes(templatesData);

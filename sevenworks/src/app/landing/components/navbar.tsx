@@ -54,12 +54,12 @@ export default function Navbar() {
                                 <Link href="/templates" className="text-offWhite hover:text-lightRed font-medium tracking-wide transition-all duration-300 ease-in-out">
                                     Templates
                                 </Link>
-                                <Link href="#" className="text-offWhite hover:text-lightRed font-medium tracking-wide transition-all duration-300 ease-in-out">
+                                {/* <Link href="#" className="text-offWhite hover:text-lightRed font-medium tracking-wide transition-all duration-300 ease-in-out">
                                     Examples
-                                </Link>
-                                <Link href="#" className="text-offWhite hover:text-lightRed font-medium tracking-wide transition-all duration-300 ease-in-out">
+                                </Link> */}
+                                {/* <Link href="#" className="text-offWhite hover:text-lightRed font-medium tracking-wide transition-all duration-300 ease-in-out">
                                     About
-                                </Link>
+                                </Link> */}
                             </nav>
 
                             {/* Auth Buttons */}

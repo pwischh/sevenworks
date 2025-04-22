@@ -86,9 +86,9 @@ const IconBar = () => {
           <span className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2 py-1 rounded bg-black text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20">Additional Skills and Interests</span>
         </Link>
       </div>
-      {/* Add Section Button and Overlay */}
-      <div ref={newSectionOverlayRef} className="relative p-0.5 flex items-center justify-center group">
-         {overlay}
+      
+      {/* Add Section Button and Overlay - COMMENTED OUT */}
+      {/* 
          <button className="p-0.5 aspect-square flex items-center justify-center bg-black rounded-lg hover:bg-gray-700 relative" onClick={() => displayCreateNewSectionOverlay()}>
            <Image src="/plus-square.svg" alt="plus square" width={32} height={32} className="w-8 h-8" style={{filter: "invert(100%)"}}/>
            <span className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2 py-1 rounded bg-black text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20">Add Section</span>
@@ -125,7 +125,7 @@ const IconBar = () => {
             }
           </div>
           }
-        </div>
+        </div> */}
         
         <div className="mt-auto p-0.5 flex items-center justify-center group">
           <Link href="/dashboard">

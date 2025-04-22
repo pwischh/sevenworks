@@ -1,10 +1,6 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react";
-// import { useAuth } from "../authContext";
-// import ProfilePhoto from "../../components/profilephoto";
-// import { Markazi_Text } from "next/font/google";
-// import Link from "next/link";
 import Image from "next/image";
 import { 
     LuFiles, 
@@ -16,14 +12,11 @@ import {
     LuEarth,
     LuLandmark,
     LuChevronUp } from "react-icons/lu";
-import { collection, getDocs } from "firebase/firestore";
-import { db } from "../lib/firebase";
+import { collection, getDocs, doc, getDoc, addDoc, setDoc, Timestamp, query, where } from "firebase/firestore";
+import { db, auth } from "../lib/firebase";
 import Navbar from "../landing/components/navbar";
-
-// const markazi = Markazi_Text({
-//     subsets: ["latin"],
-//     variable: "--font-markazi",
-//   });
+import { useRouter } from "next/navigation";
+import { useAuthState } from "react-firebase-hooks/auth";
 
 interface Resume {
     id: string;
@@ -33,6 +26,9 @@ interface Resume {
 }
 
 const ResumeCard = ({ resume }: { resume: Resume }) => {
+    const router = useRouter();
+    const [user] = useAuthState(auth);
+    
     const categories = (category: string) => {
         switch(category){
             case "Business": return (
@@ -60,38 +56,138 @@ const ResumeCard = ({ resume }: { resume: Resume }) => {
 
         return;
     }
+    
+    // Function to handle clicking on a resume template - allows both creating and editing
+    async function handleTemplateClick() {
+        if (!user) {
+            console.error("User not authenticated");
+            router.push("/register/login");
+            return;
+        }
+
+        try {
+            console.log("Template clicked:", resume.id, resume.title);
+            
+            // Check if the user already has a resume with this template
+            // We need to be more flexible about how we check for existing templates
+            const userResumesRef = collection(db, "user_resumes", user.uid, "resumes");
+            const querySnapshot = await getDocs(userResumesRef);
+            
+            // Check all user resumes to find one with matching template
+            let existingResume = null;
+            querySnapshot.forEach(doc => {
+                const data = doc.data();
+                // Use a flexible matching approach - the template IDs might not match exactly
+                const templateMatches = 
+                    data.templateID === resume.id || 
+                    data.name === resume.title;
+                
+                if (templateMatches) {
+                    existingResume = { id: doc.id, ...data };
+                    console.log("Found existing resume:", existingResume);
+                }
+            });
+            
+            // If user already has this resume, edit it instead of creating a new one
+            if (existingResume) {
+                console.log("Editing existing resume:", existingResume.id);
+                
+                // Update session with this resume's data
+                await setDoc(doc(db, "sessions", user.uid), {
+                    resumeID: existingResume.id,
+                    templateID: existingResume.templateID,
+                    formData: existingResume.formData || {},
+                }, { merge: false });
+                
+                // Store resumeID in localStorage for persistence
+                localStorage.setItem('currentResumeID', existingResume.id);
+                
+                // Navigate to editor
+                router.push("/editor");
+                return;
+            }
+            
+            // If no existing resume found, create a new one
+            console.log("Creating new resume from template:", resume.id);
+            
+            // 1. Get the selected template data from resume_templates
+            const templateRef = doc(db, "resume_templates", resume.id);
+            const templateSnap = await getDoc(templateRef);
+
+            if (!templateSnap.exists()) {
+                throw new Error("Template not found!");
+            }
+            const templateData = templateSnap.data();
+
+            // 2. Create a new resume document in user_resumes collection
+            const newResumeRef = await addDoc(collection(db, "user_resumes", user.uid, "resumes"), {
+                templateID: resume.id, // Reference to the original template
+                name: resume.title, // Use the title from the UI component for consistency
+                formData: templateData.formData || {}, // Copy initial form data
+                image: templateData.image || "/sample-business-resume.png", // Use template image or default
+                category: templateData.category || "Business",
+                createdAt: Timestamp.now(),
+                lastModified: Timestamp.now(),
+            });
+
+            const newResumeID = newResumeRef.id;
+
+            // 3. Update the user's session data
+            await setDoc(doc(db, "sessions", user.uid), {
+                resumeID: newResumeID,
+                templateID: resume.id,
+                formData: templateData.formData || {},
+            }, { merge: false }); // Overwrite existing session
+
+            // Store resumeID in localStorage to persist through refreshes
+            localStorage.setItem('currentResumeID', newResumeID);
+
+            // 4. Redirect to the editor page
+            router.push("/editor");
+
+        } catch (error) {
+            console.error("Error handling resume template:", error);
+        }
+    }
 
     return(
-        <div className="relative z-0 flex flex-col items-center w-full p-4 bg-gray-100 rounded-lg border-[1px] border-gray-200">
-        {/* Triangle */}
-        <div className="flex absolute top-0 right-0 z-9 rounded-tr-lg w-0 h-0 border-solid border-t-0 border-r-[80px] border-l-0 border-b-[80px] border-l-transparent border-r-navy border-t-transparent border-b-transparent">
-            <div className="absolute left-[42px] top-[9px] z-11 text-offWhite">
-                {categories(resume.description)}
+        <div 
+            className="relative z-0 flex flex-col items-center w-full p-4 bg-gray-100 rounded-lg border-[1px] border-gray-200 cursor-pointer group hover:shadow-lg transition-shadow duration-200"
+            onClick={handleTemplateClick}
+        >
+            {/* Triangle */}
+            <div className="flex absolute top-0 right-0 z-9 rounded-tr-lg w-0 h-0 border-solid border-t-0 border-r-[80px] border-l-0 border-b-[80px] border-l-transparent border-r-navy border-t-transparent border-b-transparent">
+                <div className="absolute left-[42px] top-[9px] z-11 text-offWhite">
+                    {categories(resume.description)}
+                </div>
+            </div>
+            {/* Document Thumbnail */}
+            <div className="relative z-[-1] w-full aspect-[8.5/11] bg-white rounded-md shadow overflow-hidden">
+            {resume.image && (
+                <Image
+                    src={resume.image}
+                    alt={resume.title}
+                    fill
+                    className="object-cover"
+                />
+            )}
+            </div>
+            
+            {/* Hover overlay */}
+            <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center rounded-lg">
+                <span className="text-white text-lg font-semibold bg-navy/70 px-4 py-2 rounded">Use Template</span>
+            </div>
+      
+            {/* Title & Description */}
+            <div className="mt-2 text-center">
+                <h3 className=" text-navy text-md font-semibold">{resume.title}</h3>
+                <p className="text-sm font-medium text-gray-600">{resume.description}</p>
             </div>
         </div>
-        {/* Document Thumbnail */}
-        <div className="relative z-[-1] w-full aspect-[8.5/11] bg-white rounded-md shadow overflow-hidden">
-        {resume.image && (
-            <Image
-                src={resume.image}
-                alt={resume.title}
-                fill
-                className="object-cover"
-            />
-        )}
-        </div>
-  
-        {/* Title & Description */}
-        <div className="mt-2 text-center">
-            <h3 className=" text-navy text-md font-semibold">{resume.title}</h3>
-            <p className="text-sm font-medium text-gray-600">{resume.description}</p>
-        </div>
-    </div>
     );
 };
 
 export default function Templates() {
-    // const { user, loading } = useAuth();
     const [activeCategory, setActiveCategory] = useState("all");
     const [resumeList, setResumeList] = useState<Resume[]>([]);
     const [buttonVisible, setButtonVisible] = useState(false);
