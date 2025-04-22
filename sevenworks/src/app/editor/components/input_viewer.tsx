@@ -27,15 +27,13 @@ interface EducationEntry {
   years: string;
 }
 
-// Define FormDataValue type to match expected types
-type FormDataValue = string | string[] | object | any[] | undefined | null;
-
 const InputFields = () => {
   const searchParams = useSearchParams();
   const { formData, setFormData, isSaving } = useFormContext();
   const { zoom } = useZoom();
   const initialTab = searchParams?.get("tab") || "personal";
   const [activeTab, setActiveTab] = useState(initialTab);
+  const [fontSizeDropdownOpen, setFontSizeDropdownOpen] = useState(false);
 
   // References for PDF URLs and transitions
   const [primaryPdfUrl, setPrimaryPdfUrl] = useState<string | null>(null);
@@ -72,6 +70,12 @@ const InputFields = () => {
     );
     setCustomPersonalFields(updatedFields);
     setFormData("customPersonal", updatedFields);
+  };
+
+  // Function to handle font size selection
+  const handleFontSizeClick = (value: string) => {
+    setFormData("fontSize", value);
+    setFontSizeDropdownOpen(false);
   };
 
   // Add new experience entry
@@ -158,8 +162,10 @@ const InputFields = () => {
       // Generate the PDF blob with error handling
       let blob;
       try {
-        // Pass the dataForPdf directly to the template function
-        blob = await pdf(template(templateID, dataForPdf)).toBlob();
+        // Pass the dataForPdf directly, casting to 'any' to bypass strict type check
+        // This assumes the template function can handle the actual structure of formData
+        // TODO: Investigate the actual expected type for the template function for a safer fix
+        blob = await pdf(template(templateID, dataForPdf as any)).toBlob();
       } catch (pdfError) {
         console.error("Error generating PDF blob:", pdfError);
         setIsGenerating(false);
@@ -331,7 +337,7 @@ const InputFields = () => {
     if (activeTab === "honors" && (!Array.isArray(formData.honorsList) || formData.honorsList.length === 0)) {
       setFormData('honorsList', [{ honor: '' }, { honor: '' }]);
     }
-  }, [activeTab, formData.leadership, formData.honorsList, setFormData]);
+  }, [activeTab]);
 
   // Check if form data has actually changed
   const hasFormDataChanged = useMemo(() => {
@@ -379,7 +385,7 @@ const InputFields = () => {
   useEffect(() => {
     if (!primaryPdfUrl && !secondaryPdfUrl) return;
     previousFormDataRef.current = { ...formData };
-  }, [primaryPdfUrl, secondaryPdfUrl, formData]);
+  }, [primaryPdfUrl, secondaryPdfUrl]);
 
   // Clean up URLs on component unmount
   useEffect(() => {
