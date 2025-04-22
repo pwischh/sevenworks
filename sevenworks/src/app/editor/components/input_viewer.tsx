@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState, useRef, useMemo, useCallback, Suspense } from "react";
+import React, { useEffect, useState, useRef, useMemo, useCallback } from "react";
 // import type { JSX } from "react";
 import dynamic from "next/dynamic";
 import { useSearchParams } from "next/navigation";
@@ -15,47 +15,6 @@ import { doc, getDoc, setDoc } from "firebase/firestore";
 import { auth, db } from "@/app/lib/firebase";
 import { useResume } from "@/app/resumeContext";
 
-// Create a separate component for the toggle to use with dynamic import
-const StorageModeToggle = ({ cloudModeEnabled, toggleSaveMode }) => (
-  <div className={`fixed bottom-4 right-6 flex items-center px-3 py-1 rounded-lg z-40 
-                  ${cloudModeEnabled ? 'bg-blue-600 text-white' : 'bg-gray-400 text-gray-900'}`}>
-    {/* Toggle switch integrated on the left */}
-    <button 
-      onClick={toggleSaveMode}
-      className="relative inline-flex items-center h-4 rounded-full w-8 mr-2 transition-colors focus:outline-none"
-      role="switch"
-      aria-checked={cloudModeEnabled}
-    >
-      <span 
-        className={`${
-          cloudModeEnabled ? 'bg-blue-800' : 'bg-gray-600'
-        } absolute h-4 w-8 mx-auto rounded-full transition-colors`} 
-      />
-      <span 
-        className={`${
-          cloudModeEnabled ? 'translate-x-4' : 'translate-x-0.5'
-        } inline-block h-3 w-3 transform rounded-full bg-white transition-transform`} 
-      />
-    </button>
-    {/* Cloud icon instead of text */}
-    {cloudModeEnabled ? (
-      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-        <path d="M5.5 16a3.5 3.5 0 01-.369-6.98 4 4 0 117.753-1.977A4.5 4.5 0 1113.5 16h-8z" />
-      </svg>
-    ) : (
-      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="none" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5.5 16a3.5 3.5 0 01-.369-6.98 4 4 0 117.753-1.977A4.5 4.5 0 1113.5 16h-8z" />
-      </svg>
-    )}
-  </div>
-);
-
-// Use dynamic import with ssr disabled
-const DynamicStorageModeToggle = dynamic(
-  () => Promise.resolve(StorageModeToggle),
-  { ssr: false }
-);
-
 // Define interfaces for form data
 interface ExperienceEntry {
   title: string;
@@ -70,7 +29,7 @@ interface EducationEntry {
 
 const InputFields = () => {
   const searchParams = useSearchParams();
-  const { formData, setFormData, isSaving, isQuotaExceeded, forceLocalMode, toggleSaveMode } = useFormContext();
+  const { formData, setFormData, isSaving } = useFormContext();
   const { zoom } = useZoom();
   const initialTab = searchParams?.get("tab") || "personal";
   const [activeTab, setActiveTab] = useState(initialTab);
@@ -273,31 +232,8 @@ const InputFields = () => {
   }, [activeTab, searchParams]);
 
   useEffect(() => {
-    if (!forceLocalMode) return;
-    const resumeID = localStorage.getItem('currentResumeID') || 'default';
-    const key = `sevenworks_form_data_${resumeID}`;
-    const savedData = localStorage.getItem(key);
-    if (savedData) {
-      try {
-        const parsed = JSON.parse(savedData);
-        Object.entries(parsed).forEach(([key, value]) => {
-          // Check if the value in formData is different before setting
-          if (JSON.stringify(formData[key]) !== JSON.stringify(value)) {
-            setFormData(key, value);
-          }
-        });
-        if (parsed.customPersonal && Array.isArray(parsed.customPersonal)) {
-          setCustomPersonalFields(parsed.customPersonal);
-        }
-      } catch (error) {
-        console.error("Error parsing saved local form data:", error);
-      }
-    }
-  }, [forceLocalMode, formData, setFormData]);
-
-  useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-        if (forceLocalMode || !user) return;
+        if (!user) return;
         try {
             // Try to get the resumeID from localStorage first (set when clicking from dashboard)
                 const savedResumeID = localStorage.getItem('currentResumeID');
@@ -367,13 +303,6 @@ const InputFields = () => {
 
     return () => unsubscribe();
   }, []);
-
-  useEffect(() => {
-    if (!forceLocalMode) return;
-    const resumeID = localStorage.getItem('currentResumeID') || 'default';
-    const key = `sevenworks_form_data_${resumeID}`;
-    localStorage.setItem(key, JSON.stringify(formData));
-  }, [formData, forceLocalMode]);
 
   // Generate initial PDF on first load
   useEffect(() => {
@@ -693,23 +622,10 @@ const InputFields = () => {
 
   return (
     <div className="bg-[#F8F8F8] flex w-full h-full overflow-hidden">
-      {/* Remove the top banner and keep only the improved bottom right notification */}
+      {/* Top banner and storage mode toggle removed */}
       
       <div className="w-[38%] flex flex-col bg-[#F8F8F8] h-full overflow-auto">
         {renderFields()}
-        
-        {/* Save button at the bottom of the form */}
-        {/* <div className="sticky bottom-0 left-0 w-full bg-white border-t border-gray-200 p-3 shadow-md">
-          <button 
-            onClick={saveFormData}
-            disabled={isSaving}
-            className={`w-full py-2 px-4 rounded-lg text-white font-semibold transition-colors ${
-              isSaving ? 'bg-gray-500 cursor-not-allowed' : 'bg-navy hover:bg-blue-800'
-            }`}
-          >
-            {isSaving ? 'Saving...' : 'Save Changes'}
-          </button>
-        </div> */}
       </div>
       <div className="flex-1 overflow-auto bg-[#F8F8F8] h-full">
         <div className="w-full h-full flex flex-col">
@@ -760,35 +676,13 @@ const InputFields = () => {
           </Worker>
         </div>
       </div>
-      {/* Save indicator with mode text */}
+      {/* Save indicator */}
       {isSaving && (
         <div className="fixed top-4 right-4 flex items-center bg-navy text-white border border-gray-300 shadow-md px-2 py-2 rounded-lg z-50">
           <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></span>
-          <span className="text-white text-sm font-semibold">
-            {isQuotaExceeded ? "Local Save..." : "Save..."}
-          </span>
+          <span className="text-white text-sm font-semibold">Saving...</span>
         </div>
       )}
-      
-      {/* Quota exceeded notification */}
-      {isQuotaExceeded && !isSaving && (
-        <div className="fixed bottom-4 right-4 flex items-center bg-red-600 text-white border border-red-700 shadow-lg px-4 py-3 rounded-lg z-50">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2" viewBox="0 0 20 20" fill="currentColor">
-            <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-          </svg>
-          <div>
-            <span className="text-white text-base font-bold block">LOCAL STORAGE MODE</span>
-            <span className="text-white text-sm">Changes saved to this browser only</span>
-          </div>
-        </div>
-      )}
-
-      <Suspense fallback={null}>
-        <DynamicStorageModeToggle 
-          cloudModeEnabled={!forceLocalMode && !isQuotaExceeded} 
-          toggleSaveMode={toggleSaveMode} 
-        />
-      </Suspense>
     </div>
   );
 };

@@ -62,7 +62,11 @@ export default function Navbar() {
     return (
         <div className="bg-[#F8F8F8] px-4">
             <div className="max-w-7xl mx-auto pt-4 pb-4">
-                <nav ref={navRef} className="text-black relative pt-2 pb-2 w-full text-nowrap font-semibold bg-white shadow-md rounded-lg px-4 border border-gray-300 flex items-center justify-between">
+                <nav 
+                    ref={navRef} 
+                    className="text-black relative pt-2 pb-2 w-full text-nowrap font-semibold bg-white shadow-md rounded-lg px-4 border border-gray-300 flex items-center justify-between"
+                    style={{ zIndex: 50 }}
+                >
                     <div className="flex items-center gap-6">
                         <Link href="/" className={`${markazi.className} text-3xl`}>SevenWorks</Link>
                     </div>
@@ -83,7 +87,7 @@ export default function Navbar() {
                                 <Image src="/chevron-down.svg" alt="chevron down" width={24} height={24}/>
                             </div>
                             {fontDropdownOpen && (
-                                <div className="absolute top-full left-0 mt-2 bg-white border border-gray-300 rounded shadow-lg z-10">
+                                <div className="absolute top-full left-0 mt-2 bg-white border border-gray-300 rounded shadow-lg z-[100]">
                                     <ul className="py-2">
                                         <li className="px-4 py-1 hover:bg-gray-200 transition-colors duration-200 cursor-pointer font-[Arial]" onClick={() => handleFontClick("Arial")}>Arial</li>
                                         <li className="px-4 py-1 hover:bg-gray-200 transition-colors duration-200 cursor-pointer font-[Calibri]" onClick={() => handleFontClick("Calibri")}>Calibri</li>
@@ -102,7 +106,7 @@ export default function Navbar() {
                                 <Image src="/chevron-down.svg" alt="chevron down" width={24} height={24}/>
                             </div>
                             {fontSizeDropdownOpen && (
-                                <div className="absolute top-full left-0 mt-2 bg-white border border-gray-300 rounded shadow-lg z-10">
+                                <div className="absolute top-full left-0 mt-2 bg-white border border-gray-300 rounded shadow-lg z-[100]">
                                     <ul className="py-2">
                                         <li className="px-4 py-1 hover:bg-gray-200 transition-colors duration-200 cursor-pointer">Small</li>
                                         <li className="px-4 py-1 hover:bg-gray-200 transition-colors duration-200 cursor-pointer">Medium</li>
