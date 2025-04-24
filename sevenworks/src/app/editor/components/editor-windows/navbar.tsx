@@ -89,8 +89,8 @@ export default function Navbar() {
                             {fontDropdownOpen && (
                                 <div className="absolute top-full left-0 mt-2 bg-white border border-gray-300 rounded shadow-lg z-[100]">
                                     <ul className="py-2">
-                                        <li className="px-4 py-1 hover:bg-gray-200 transition-colors duration-200 cursor-pointer font-[Arial]" onClick={() => handleFontClick("Arial")}>Arial</li>
-                                        <li className="px-4 py-1 hover:bg-gray-200 transition-colors duration-200 cursor-pointer font-[Calibri]" onClick={() => handleFontClick("Calibri")}>Calibri</li>
+                                        <li className="px-4 py-1 hover:bg-gray-200 transition-colors duration-200 cursor-pointer font-[Arial]" onClick={() => handleFontClick("Arial")}>Arial</li> 
+                                        <li className="px-4 py-1 hover:bg-gray-200 transition-colors duration-200 cursor-pointer font-[Helvetica]" onClick={() => handleFontClick("Helvetica")}>Helvetica</li> 
                                         <li className="px-4 py-1 hover:bg-gray-200 transition-colors duration-200 cursor-pointer font-[TimesNewRoman]" onClick={() => handleFontClick("Times-Roman")}>Times New Roman</li>
                                         <li className="px-4 py-1 hover:bg-gray-200 transition-colors duration-200 cursor-pointer font-[CourierNew]" onClick={() => handleFontClick("Courier")}>Courier New</li>
                                     </ul>
