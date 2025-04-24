@@ -174,9 +174,9 @@ const ProfilePage = () => {
         {/* Legal Links */}
         <p className="text-[12px] text-gray-500 text-center mt-6">
           By using this app, you agree to our{" "}
-          <a href="/terms" className="text-sky-600 hover:underline">Terms of Service</a>{" "}
+          <a href="/legal/terms" className="text-sky-600 hover:underline">Terms of Service</a>{" "}
           and{" "}
-          <a href="/privacy" className="text-sky-600 hover:underline">Privacy Policy</a>.
+          <a href="/legal/privacy" className="text-sky-600 hover:underline">Privacy Policy</a>.
         </p>
       </div>
     </div>
