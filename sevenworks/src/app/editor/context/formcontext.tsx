@@ -5,7 +5,7 @@ import { doc, getDoc, setDoc } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 
 // Define a more specific type for array values to replace any[]
-type FormDataValue = string | number | boolean | null | undefined | Record<string, unknown>[] | Record<string, unknown>;
+export type FormDataValue = string | number | boolean | object | null | undefined;
 type FormData = { [key: string]: FormDataValue };
 
 interface FormContextType {
