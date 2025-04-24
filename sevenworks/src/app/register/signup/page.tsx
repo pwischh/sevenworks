@@ -174,9 +174,9 @@ export default function Signup() {
 
                 <p className="text-[12px] text-gray-500 text-center mt-4 px-6">
                     By signing up, you agree to our{" "}
-                    <a href="/terms" className="text-sky-600 hover:underline">Terms of Service</a>{" "}
+                    <a href="/legal/terms" className="text-sky-600 hover:underline">Terms of Service</a>{" "}
                     and{" "}
-                    <a href="/privacy" className="text-sky-600 hover:underline">Privacy Policy</a>.
+                    <a href="/legal/privacy" className="text-sky-600 hover:underline">Privacy Policy</a>.
                 </p>
 
 

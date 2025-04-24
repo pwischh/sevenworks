@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useAuth } from "../app/authContext";
+import { useAuth } from "../app/context/authContext";
 
 export default function ProfilePhoto() {
   const { user } = useAuth();

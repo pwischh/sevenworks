@@ -3,8 +3,8 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import classNames from 'classnames';
-import { ResumeProvider } from "./resumeContext";
-import { FormProvider } from "./editor/formcontext";
+import { ResumeProvider } from "./editor/context/resumeContext";
+import { FormProvider } from "./editor/context/formcontext";
 import ClientProviders from "../components/ClientProviders";
 
 const inter = Inter({

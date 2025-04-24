@@ -3,11 +3,11 @@ import { Markazi_Text } from "next/font/google";
 import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import { signOut } from "firebase/auth";
-import { auth } from "../../lib/firebase";
+import { auth } from "../../../lib/firebase";
 import Link from "next/link";
-import { useFormContext } from "./../formcontext";
-import ProfilePhoto from "../../../components/profilephoto";
-import { useZoom } from "../zoomcontext";
+import { useFormContext } from "../../context/formcontext";
+import ProfilePhoto from "../../../../components/profilephoto";
+import { useZoom } from "../../context/zoomcontext";
 import dynamic from "next/dynamic";
 
 const markazi = Markazi_Text({
@@ -15,7 +15,7 @@ const markazi = Markazi_Text({
     variable: "--font-markazi",
 });
 
-const DownloadButton = dynamic(() => import("./DownloadButton"), { ssr: false });
+const DownloadButton = dynamic(() => import("./../DownloadButton"), { ssr: false });
 
 async function handleSignOut(){
     try {

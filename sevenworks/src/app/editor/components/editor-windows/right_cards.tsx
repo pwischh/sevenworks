@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import features from "./features.json";
-import exampleEdits from "../example_edits.json";
-import { generateResumeText } from './gemini';
-import { useFormContext } from "../formcontext";
+import features from "./../features.json";
+import exampleEdits from "../../example_edits.json";
+import { generateResumeText } from './../gemini';
+import { useFormContext } from "../../context/formcontext";
 
 const RightView = () => {
   const { formData } = useFormContext();

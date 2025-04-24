@@ -1,6 +1,6 @@
 // PersonalInfoPanel.tsx
 import React from "react";
-import type { FormDataValue } from "../../formcontext";
+import type { FormDataValue } from "../../context/formcontext";
 
 interface PersonalInfoPanelProps {
   formData: Record<string, any>;

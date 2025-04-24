@@ -1,10 +1,10 @@
 "use client";
 import React from "react";
 import { pdf } from '@react-pdf/renderer';
-import { useResume } from "@/app/resumeContext";
+import { useResume } from "@/app/editor/context/resumeContext";
 import { db, auth } from "@/app/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
-import { useFormContext } from "../formcontext"; // Import useFormContext
+import { useFormContext } from "../context/formcontext"; // Import useFormContext
 
 // Define interfaces matching the expected TemplateFormData
 interface EducationEntry {

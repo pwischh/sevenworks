@@ -1,14 +1,14 @@
 "use client";
 
-import Navbar from "./components/navbar";
-import IconBar from "./components/left_iconbar";
+import Navbar from "./components/editor-windows/navbar";
+import IconBar from "./components/editor-windows/left_iconbar";
 import InputFields from "./components/input_viewer";
-import RightView from "./components/right_cards";
+import RightView from "./components/editor-windows/right_cards";
 import { useEffect, Suspense } from "react";
-import { useAuth } from "../authContext";
+import { useAuth } from "../context/authContext";
 import { useRouter } from "next/navigation";
-import { FormProvider } from "./formcontext";
-import { ZoomProvider } from "./zoomcontext";
+import { FormProvider } from "./context/formcontext";
+import { ZoomProvider } from "./context/zoomcontext";
 import "./../globals.css";
 
 export default function Editor() {

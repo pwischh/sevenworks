@@ -3,10 +3,10 @@ import React, { useEffect, useState, useRef, useMemo, useCallback } from "react"
 // import type { JSX } from "react";
 import dynamic from "next/dynamic";
 import { useSearchParams } from "next/navigation";
-import { useFormContext, FormDataValue } from "../formcontext";
+import { useFormContext, FormDataValue } from "../context/formcontext";
 import { Worker } from '@react-pdf-viewer/core';
 import { pdf } from '@react-pdf/renderer';
-import { useZoom } from "../zoomcontext";
+import { useZoom } from "../context/zoomcontext";
 import { onAuthStateChanged } from "firebase/auth";
 import PersonalInfoPanel from "./panels/PersonalInfoPanel";
 import ExperiencePanel from "./panels/ExperiencePanel";
@@ -19,7 +19,7 @@ const ViewerNoSSR = dynamic(() => import('@react-pdf-viewer/core').then(mod => m
 import '@react-pdf-viewer/core/lib/styles/index.css';
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { auth, db } from "@/app/lib/firebase";
-import { useResume } from "@/app/resumeContext";
+import { useResume } from "@/app/editor/context/resumeContext";
 
 // Define interfaces for form data
 interface ExperienceEntry {

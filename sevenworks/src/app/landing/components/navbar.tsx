@@ -3,7 +3,7 @@
 import { Markazi_Text } from "next/font/google";
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { useAuth } from "../../authContext";
+import { useAuth } from "../../context/authContext";
 import ProfilePhoto from "../../../components/profilephoto";
 
 const markazi = Markazi_Text({
