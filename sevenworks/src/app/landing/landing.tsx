@@ -31,7 +31,7 @@ export default function Landing() {
                     </div>
                 </div>
                 <div className="flex flex-row w-fit h-fit gap-[12px] pl-[2px]">
-                    <a href="/register/signup" className="font-medium text-[20px] text-offWhite hover:underline">
+                    <a href="/templates" className="font-medium text-[20px] text-offWhite hover:underline">
                         Get Started
                     </a>
                 </div>
