@@ -3,7 +3,7 @@ import React, { ReactNode, createContext, useContext } from "react";
 import { DocumentProps, Document, Page, Text } from "@react-pdf/renderer";
 
 /* All Templates */
-import BusinessResume from "../templates/BusinessResume";
+import BusinessResume from "../templates/businessResume";
 import DataAnalystResume from "../templates/DataAnalystResume";
 
 interface EducationEntry {
