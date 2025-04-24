@@ -12,11 +12,15 @@ interface ExperienceEntry {
   title: string;
   company: string;
   years: string;
+  bullets?: string[]; // Adding bullets array for experience entries
 }
 
 interface LeadershipEntry {
   title: string;
-  description: string;
+  description?: string;
+  role?: string;
+  years?: string;
+  bullets?: string[]; // Adding bullets array for leadership entries
 }
 
 interface FormData {
@@ -219,9 +223,9 @@ const MuseumResume = ({ formData }: TemplateProps) => {
                     <Text>{exp.years || ""}</Text>
                   </View>
                 </View>
-                <Text style={styles.bullet}>• Developed and implemented exhibition programs and educational initiatives</Text>
-                <Text style={styles.bullet}>• Collaborated with other museum departments to enhance visitor experience</Text>
-                <Text style={styles.bullet}>• Managed collections and maintained proper documentation procedures</Text>
+                {Array.isArray(exp.bullets) && exp.bullets.map((bullet, bulletIdx) => (
+                  <Text key={bulletIdx} style={styles.bullet}>• {bullet}</Text>
+                ))}
               </View>
             ))
           ) : (
@@ -287,12 +291,15 @@ const MuseumResume = ({ formData }: TemplateProps) => {
         <View>
           <Text style={styles.sectionHeader}>EXHIBITIONS & PROJECTS</Text>
           
-          {hasContent(formData.leadership, ['title', 'description']) ? (
+          {hasContent(formData.leadership, ['title']) ? (
             // Map through leadership data as exhibitions/projects
             formData.leadership?.map((lead, idx) => (
               <View key={idx} style={styles.itemContent}>
                 <Text style={styles.itemTitle}>{lead.title || ""}</Text>
-                <Text style={styles.bullet}>• {lead.description || ""}</Text>
+                {lead.description && <Text style={styles.bullet}>• {lead.description}</Text>}
+                {Array.isArray(lead.bullets) && lead.bullets.map((bullet, bulletIdx) => (
+                  <Text key={bulletIdx} style={styles.bullet}>• {bullet}</Text>
+                ))}
               </View>
             ))
           ) : (

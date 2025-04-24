@@ -12,11 +12,15 @@ interface ExperienceEntry {
   title: string;
   company: string;
   years: string;
+  bullets?: string[]; // Adding bullets array for experience entries
 }
 
 interface LeadershipEntry {
   title: string;
-  description: string;
+  description?: string;
+  role?: string;
+  years?: string;
+  bullets?: string[]; // Adding bullets array for leadership entries
 }
 
 interface FormData {
@@ -181,9 +185,17 @@ const ITConsultingResume = ({ formData }: TemplateProps) => {
                   <Text>{exp.years || ""}</Text>
                 </View>
                 <Text style={styles.role}>{exp.title || ""}</Text>
-                <Text style={styles.bullet}>• Led strategic IT consulting projects for enterprise clients across various industries</Text>
-                <Text style={styles.bullet}>• Developed technical solutions to solve complex business challenges and improve efficiency</Text>
-                <Text style={styles.bullet}>• Managed client relationships and communicated project status to key stakeholders</Text>
+                {Array.isArray(exp.bullets) && exp.bullets.length > 0 ? (
+                  exp.bullets.map((bullet, bulletIdx) => (
+                    <Text key={bulletIdx} style={styles.bullet}>• {bullet}</Text>
+                  ))
+                ) : (
+                  <>
+                    <Text style={styles.bullet}>• Led strategic IT consulting projects for enterprise clients across various industries</Text>
+                    <Text style={styles.bullet}>• Developed technical solutions to solve complex business challenges and improve efficiency</Text>
+                    <Text style={styles.bullet}>• Managed client relationships and communicated project status to key stakeholders</Text>
+                  </>
+                )}
               </View>
             ))
           ) : (
@@ -220,8 +232,18 @@ const ITConsultingResume = ({ formData }: TemplateProps) => {
           {hasContent(formData.leadership, ['title', 'description']) ? (
             formData.leadership?.map((project, idx) => (
               <View key={idx} style={styles.detailsContainer}>
-                <Text style={styles.company}>{project.title || ""}</Text>
-                <Text style={styles.bullet}>• {project.description || ""}</Text>
+                <View style={styles.flexRow}>
+                  <Text style={styles.company}>{project.title || ""}</Text>
+                  <Text>{project.years || ""}</Text>
+                </View>
+                {project.role && <Text style={styles.role}>{project.role}</Text>}
+                {Array.isArray(project.bullets) && project.bullets.length > 0 ? (
+                  project.bullets.map((bullet, bulletIdx) => (
+                    <Text key={bulletIdx} style={styles.bullet}>• {bullet}</Text>
+                  ))
+                ) : (
+                  <Text style={styles.bullet}>• {project.description || ""}</Text>
+                )}
               </View>
             ))
           ) : (

@@ -12,11 +12,15 @@ interface ExperienceEntry {
   title: string;
   company: string;
   years: string;
+  bullets?: string[]; // Adding bullets array for experience entries
 }
 
 interface LeadershipEntry {
   title: string;
-  description: string;
+  description?: string;
+  role?: string;
+  years?: string;
+  bullets?: string[]; // Adding bullets array for leadership entries
 }
 
 interface FormData {
@@ -207,9 +211,17 @@ const SWEResume = ({ formData }: TemplateProps) => {
                   <Text>{exp.years || ""}</Text>
                 </View>
                 <Text style={styles.role}>{exp.title || ""}</Text>
-                <Text style={styles.bullet}>• Developed and maintained web applications using modern frameworks and technologies</Text>
-                <Text style={styles.bullet}>• Collaborated with cross-functional teams to implement new features and optimize performance</Text>
-                <Text style={styles.bullet}>• Participated in code reviews and ensured high-quality, well-tested code</Text>
+                {Array.isArray(exp.bullets) && exp.bullets.length > 0 ? (
+                  exp.bullets.map((bullet, bulletIdx) => (
+                    <Text key={bulletIdx} style={styles.bullet}>• {bullet}</Text>
+                  ))
+                ) : (
+                  <>
+                    <Text style={styles.bullet}>• Developed and maintained web applications using modern frameworks and technologies</Text>
+                    <Text style={styles.bullet}>• Collaborated with cross-functional teams to implement new features and optimize performance</Text>
+                    <Text style={styles.bullet}>• Participated in code reviews and ensured high-quality, well-tested code</Text>
+                  </>
+                )}
               </View>
             ))
           ) : (
@@ -245,8 +257,18 @@ const SWEResume = ({ formData }: TemplateProps) => {
           {hasContent(formData.leadership, ['title', 'description']) ? (
             formData.leadership?.map((project, idx) => (
               <View key={idx} style={styles.detailsContainer}>
-                <Text style={styles.company}>{project.title || ""}</Text>
-                <Text style={styles.bullet}>• {project.description || ""}</Text>
+                <View style={styles.flexRow}>
+                  <Text style={styles.company}>{project.title || ""}</Text>
+                  <Text>{project.years || ""}</Text>
+                </View>
+                <Text style={styles.role}>{project.role || ""}</Text>
+                {Array.isArray(project.bullets) && project.bullets.length > 0 ? (
+                  project.bullets.map((bullet, bulletIdx) => (
+                    <Text key={bulletIdx} style={styles.bullet}>• {bullet}</Text>
+                  ))
+                ) : (
+                  <Text style={styles.bullet}>• {project.description || ""}</Text>
+                )}
               </View>
             ))
           ) : (

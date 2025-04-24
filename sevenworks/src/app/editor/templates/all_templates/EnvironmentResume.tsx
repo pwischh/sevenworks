@@ -12,11 +12,15 @@ interface ExperienceEntry {
   title: string;
   company: string;
   years: string;
+  bullets?: string[]; // Adding bullets array for experience entries
 }
 
 interface LeadershipEntry {
   title: string;
-  description: string;
+  description?: string;
+  role?: string;
+  years?: string;
+  bullets?: string[]; // Adding bullets array for leadership entries
 }
 
 interface FormData {
@@ -233,9 +237,17 @@ const EnvironmentResume = ({ formData }: TemplateProps) => {
                     <Text>{exp.years || ""}</Text>
                   </View>
                 </View>
-                <Text style={styles.bullet}>• Conducted environmental assessments and implemented conservation strategies</Text>
-                <Text style={styles.bullet}>• Collaborated with stakeholders on sustainable development initiatives</Text>
-                <Text style={styles.bullet}>• Analyzed environmental data and prepared technical reports</Text>
+                {Array.isArray(exp.bullets) && exp.bullets.length > 0 ? (
+                  exp.bullets.map((bullet, bulletIdx) => (
+                    <Text key={bulletIdx} style={styles.bullet}>• {bullet}</Text>
+                  ))
+                ) : (
+                  <>
+                    <Text style={styles.bullet}>• Conducted environmental assessments and implemented conservation strategies</Text>
+                    <Text style={styles.bullet}>• Collaborated with stakeholders on sustainable development initiatives</Text>
+                    <Text style={styles.bullet}>• Analyzed environmental data and prepared technical reports</Text>
+                  </>
+                )}
               </View>
             ))
           ) : (
@@ -306,7 +318,13 @@ const EnvironmentResume = ({ formData }: TemplateProps) => {
             formData.leadership?.map((lead, idx) => (
               <View key={idx} style={styles.itemContent}>
                 <Text style={styles.itemTitle}>{lead.title || ""}</Text>
-                <Text style={styles.bullet}>• {lead.description || ""}</Text>
+                {Array.isArray(lead.bullets) && lead.bullets.length > 0 ? (
+                  lead.bullets.map((bullet, bulletIdx) => (
+                    <Text key={bulletIdx} style={styles.bullet}>• {bullet}</Text>
+                  ))
+                ) : (
+                  <Text style={styles.bullet}>• {lead.description || ""}</Text>
+                )}
               </View>
             ))
           ) : (

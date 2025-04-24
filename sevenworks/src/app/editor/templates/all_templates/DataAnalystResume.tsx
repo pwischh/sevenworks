@@ -12,11 +12,15 @@ interface ExperienceEntry {
   title: string;
   company: string;
   years: string;
+  bullets?: string[]; // Adding bullets array for experience entries
 }
 
 interface LeadershipEntry {
   title: string;
-  description: string;
+  description?: string;
+  role?: string;
+  years?: string;
+  bullets?: string[]; // Adding bullets array for leadership entries
 }
 
 interface FormData {
@@ -218,8 +222,9 @@ const DataAnalystResume = ({ formData }: TemplateProps) => {
                     <Text>{exp.years || ""}</Text>
                   </View>
                 </View>
-                <Text style={styles.bullet}>• Analyzed data to derive business insights and create reports</Text>
-                <Text style={styles.bullet}>• Implemented data pipelines and visualization solutions</Text>
+                {Array.isArray(exp.bullets) && exp.bullets.map((bullet, bulletIdx) => (
+                  <Text key={bulletIdx} style={styles.bullet}>• {bullet}</Text>
+                ))}
               </View>
             ))
           ) : (
@@ -271,7 +276,9 @@ const DataAnalystResume = ({ formData }: TemplateProps) => {
             formData.leadership?.map((lead, idx) => (
               <View key={idx} style={styles.itemContent}>
                 <Text style={styles.itemTitle}>{lead.title || "Project"}</Text>
-                <Text style={styles.bullet}>• {lead.description || ""}</Text>
+                {Array.isArray(lead.bullets) && lead.bullets.map((bullet, bulletIdx) => (
+                  <Text key={bulletIdx} style={styles.bullet}>• {bullet}</Text>
+                ))}
               </View>
             ))
           ) : (

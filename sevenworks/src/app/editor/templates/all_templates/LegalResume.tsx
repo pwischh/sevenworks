@@ -12,11 +12,15 @@ interface ExperienceEntry {
   title: string;
   company: string;
   years: string;
+  bullets?: string[]; // Adding bullets array for experience entries
 }
 
 interface LeadershipEntry {
   title: string;
-  description: string;
+  description?: string;
+  role?: string;
+  years?: string;
+  bullets?: string[]; // Adding bullets array for leadership entries
 }
 
 interface FormData {
@@ -218,7 +222,17 @@ const LegalResume = ({ formData }: TemplateProps) => {
                     <Text>{exp.years || ""}</Text>
                   </View>
                 </View>
-                <Text style={styles.bullet}>• Professional experience details</Text>
+                {Array.isArray(exp.bullets) && exp.bullets.length > 0 ? (
+                  exp.bullets.map((bullet, bulletIdx) => (
+                    <Text key={bulletIdx} style={styles.bullet}>• {bullet}</Text>
+                  ))
+                ) : (
+                  <>
+                    <Text style={styles.bullet}>• Researched and drafted legal memoranda and court documents</Text>
+                    <Text style={styles.bullet}>• Assisted in case preparation and client communications</Text>
+                    <Text style={styles.bullet}>• Conducted legal research using Westlaw and LexisNexis</Text>
+                  </>
+                )}
               </View>
             ))
           ) : (
@@ -264,19 +278,30 @@ const LegalResume = ({ formData }: TemplateProps) => {
         <View>
           <Text style={styles.sectionHeader}>LEADERSHIP & ACTIVITIES</Text>
           
-          {hasContent(formData.leadership, ['title', 'description']) ? (
+          {hasContent(formData.leadership, ['title']) ? (
             // Map through actual leadership data
             formData.leadership?.map((lead, idx) => (
               <View key={idx} style={styles.itemContent}>
                 <View style={styles.flexRow}>
                   <View style={styles.institution}>
                     <Text style={styles.itemTitle}>{lead.title || ""}</Text>
+                    {lead.role && <Text style={styles.itemRole}>{lead.role}</Text>}
                   </View>
                   <View style={styles.dateLocation}>
-                    <Text>Present</Text>
+                    <Text>{lead.years || "Present"}</Text>
                   </View>
                 </View>
-                <Text style={styles.bullet}>• {lead.description || ""}</Text>
+                {Array.isArray(lead.bullets) && lead.bullets.length > 0 ? (
+                  lead.bullets.map((bullet, bulletIdx) => (
+                    <Text key={bulletIdx} style={styles.bullet}>• {bullet}</Text>
+                  ))
+                ) : (
+                  <>
+                    <Text style={styles.bullet}>• Researched and drafted legal memoranda and court documents</Text>
+                    <Text style={styles.bullet}>• Assisted in case preparation and client communications</Text>
+                    <Text style={styles.bullet}>• Conducted legal research using Westlaw and LexisNexis</Text>
+                  </>
+                )}
               </View>
             ))
           ) : (

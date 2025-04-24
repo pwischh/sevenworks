@@ -26,11 +26,17 @@ interface ExperienceEntry {
   title: string;
   company: string;
   years: string;
+  bullets?: string[]; // Add bullets array to store multiple bullet points
 }
 interface EducationEntry {
   degree: string;
   institution: string | undefined;
   years: string;
+}
+interface LeadershipEntry {
+  title: string;
+  description: string;
+  bullets?: string[]; // Add bullets array for leadership entries
 }
 
 const InputFields = () => {
@@ -90,12 +96,51 @@ const InputFields = () => {
     setFormData('experience', updated);
   };
 
-  // Add new education entry
-  const addEducation = () => {
-    const updated = Array.isArray(formData.education) 
-      ? [...formData.education, { degree: '', institution: '', years: '' }] 
-      : [{ degree: '', institution: '', years: '' }];
-    setFormData('education', updated);
+  // Add a bullet point to an experience entry
+  const addExperienceBullet = (idx: number) => {
+    const updated = Array.isArray(formData.experience) ? [...formData.experience] : [];
+    // If experience entry doesn't exist yet, create it
+    while (updated.length <= idx) {
+      updated.push({ title: '', company: '', years: '', bullets: [] });
+    }
+    // Initialize bullets array if it doesn't exist
+    if (!Array.isArray(updated[idx].bullets)) {
+      updated[idx].bullets = [];
+    }
+    // Add a new empty bullet point
+    updated[idx].bullets = [...updated[idx].bullets!, ''];
+    setFormData('experience', updated);
+  };
+
+  // Edit an existing bullet point in an experience entry
+  const editExperienceBullet = (expIdx: number, bulletIdx: number, value: string) => {
+    const updated = Array.isArray(formData.experience) ? [...formData.experience] : [];
+    // Make sure the experience entry and bullets array exist
+    if (updated[expIdx] && Array.isArray(updated[expIdx].bullets) && bulletIdx < updated[expIdx].bullets!.length) {
+      // Update the specific bullet
+      const updatedBullets = [...updated[expIdx].bullets!];
+      updatedBullets[bulletIdx] = value;
+      updated[expIdx] = {
+        ...updated[expIdx],
+        bullets: updatedBullets
+      };
+      setFormData('experience', updated);
+    }
+  };
+
+  // Remove a bullet point from an experience entry
+  const removeExperienceBullet = (expIdx: number, bulletIdx: number) => {
+    const updated = Array.isArray(formData.experience) ? [...formData.experience] : [];
+    // Make sure the experience entry and bullets array exist
+    if (updated[expIdx] && Array.isArray(updated[expIdx].bullets) && bulletIdx < updated[expIdx].bullets!.length) {
+      // Remove the specific bullet
+      const updatedBullets = updated[expIdx].bullets!.filter((_: string, idx: number) => idx !== bulletIdx);
+      updated[expIdx] = {
+        ...updated[expIdx],
+        bullets: updatedBullets
+      };
+      setFormData('experience', updated);
+    }
   };
 
   // Handle experience field change
@@ -108,6 +153,14 @@ const InputFields = () => {
     setFormData('experience', updated);
   };
   
+  // Add new education entry
+  const addEducation = () => {
+    const updated = Array.isArray(formData.education) 
+      ? [...formData.education, { degree: '', institution: '', years: '' }] 
+      : [{ degree: '', institution: '', years: '' }];
+    setFormData('education', updated);
+  };
+
   // Handle education field change
   const handleEducationChange = (idx: number, key: keyof EducationEntry, value: string) => {
     const updated = Array.isArray(formData.education) ? [...formData.education] : [];
@@ -129,15 +182,69 @@ const InputFields = () => {
     setFormData('leadership', updated);
   };
 
+  // Add a bullet point to a leadership entry
+  const addLeadershipBullet = (idx: number) => {
+    const updated = Array.isArray(formData.leadership) ? [...formData.leadership] : [];
+    // If leadership entry doesn't exist yet, create it
+    while (updated.length <= idx) {
+      updated.push({ title: '', description: '', bullets: [] });
+    }
+    // Initialize bullets array if it doesn't exist
+    if (!Array.isArray(updated[idx].bullets)) {
+      updated[idx].bullets = [];
+    }
+    // Add a new empty bullet point
+    updated[idx].bullets = [...updated[idx].bullets!, ''];
+    setFormData('leadership', updated);
+  };
+
+  // Edit an existing bullet point in a leadership entry
+  const editLeadershipBullet = (leadershipIdx: number, bulletIdx: number, value: string) => {
+    const updated = Array.isArray(formData.leadership) ? [...formData.leadership] : [];
+    // Make sure the leadership entry and bullets array exist
+    if (updated[leadershipIdx] && Array.isArray(updated[leadershipIdx].bullets) && bulletIdx < updated[leadershipIdx].bullets!.length) {
+      // Update the specific bullet
+      const updatedBullets = [...updated[leadershipIdx].bullets!];
+      updatedBullets[bulletIdx] = value;
+      updated[leadershipIdx] = {
+        ...updated[leadershipIdx],
+        bullets: updatedBullets
+      };
+      setFormData('leadership', updated);
+    }
+  };
+
+  // Remove a bullet point from a leadership entry
+  const removeLeadershipBullet = (leadershipIdx: number, bulletIdx: number) => {
+    const updated = Array.isArray(formData.leadership) ? [...formData.leadership] : [];
+    // Make sure the leadership entry and bullets array exist
+    if (updated[leadershipIdx] && Array.isArray(updated[leadershipIdx].bullets) && bulletIdx < updated[leadershipIdx].bullets!.length) {
+      // Remove the specific bullet
+      const updatedBullets = updated[leadershipIdx].bullets!.filter((_: string, idx: number) => idx !== bulletIdx);
+      updated[leadershipIdx] = {
+        ...updated[leadershipIdx],
+        bullets: updatedBullets
+      };
+      setFormData('leadership', updated);
+    }
+  };
+
   // Handle leadership field change
-  const handleLeadershipChange = (idx: number, key: 'title' | 'description', value: string) => {
+  const handleLeadershipChange = (idx: number, key: keyof LeadershipEntry, value: string) => {
     const updated = Array.isArray(formData.leadership) ? [...formData.leadership] : [];
     // If editing a placeholder row, expand the array
     while (updated.length <= idx) {
       updated.push({ title: '', description: '' });
     }
-    updated[idx][key] = value;
-    setFormData('leadership', updated);
+    
+    // Update the specific field
+    if (key === 'title' || key === 'description') {
+      updated[idx] = {
+        ...updated[idx],
+        [key]: value
+      };
+      setFormData('leadership', updated);
+    }
   };
 
   // Add new honor entry
@@ -446,11 +553,15 @@ const InputFields = () => {
                     title: typeof entry.title === "string" ? entry.title : "",
                     company: typeof entry.company === "string" ? entry.company : "",
                     years: typeof entry.years === "string" ? entry.years : "",
+                    bullets: Array.isArray(entry.bullets) ? entry.bullets : [],
                   }))
                 : []
             }
             onChange={handleExperienceChange}
             onAdd={addExperience}
+            onAddBullet={addExperienceBullet}
+            onEditBullet={editExperienceBullet}
+            onRemoveBullet={removeExperienceBullet}
           />
         );
       case "education":
@@ -479,9 +590,20 @@ const InputFields = () => {
       case "leadership":
         return (
           <LeadershipPanel
-            leadership={(Array.isArray(formData.leadership) ? formData.leadership : []) as {title: string, description: string}[]}
+            leadership={
+              Array.isArray(formData.leadership) 
+                ? formData.leadership.map((entry) => ({
+                    title: typeof entry.title === "string" ? entry.title : "",
+                    description: typeof entry.description === "string" ? entry.description : "",
+                    bullets: Array.isArray(entry.bullets) ? entry.bullets : [],
+                  }))
+                : []
+            }
             onChange={handleLeadershipChange}
             onAdd={addLeadership}
+            onAddBullet={addLeadershipBullet}
+            onEditBullet={editLeadershipBullet}
+            onRemoveBullet={removeLeadershipBullet}
           />
         );
       case "honors":

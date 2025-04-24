@@ -12,11 +12,15 @@ interface ExperienceEntry {
   title: string;
   company: string;
   years: string;
+  bullets?: string[]; // Adding bullets array for experience entries
 }
 
 interface LeadershipEntry {
   title: string;
-  description: string;
+  description?: string;
+  role?: string;
+  years?: string;
+  bullets?: string[]; // Adding bullets array for leadership entries
 }
 
 interface FormData {
@@ -186,8 +190,9 @@ const HealthResume = ({ formData }: TemplateProps) => {
                   <Text>{exp.years || ""}</Text>
                 </View>
                 <Text style={styles.role}>{exp.title || ""}</Text>
-                <Text style={styles.bullet}>• Assisted with patient care and health monitoring procedures</Text>
-                <Text style={styles.bullet}>• Collaborated with healthcare professionals on research and treatment protocols</Text>
+                {Array.isArray(exp.bullets) && exp.bullets.map((bullet, bulletIdx) => (
+                  <Text key={bulletIdx} style={styles.bullet}>• {bullet}</Text>
+                ))}
               </View>
             ))
           ) : (
@@ -227,11 +232,17 @@ const HealthResume = ({ formData }: TemplateProps) => {
         {/* Leadership Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>LEADERSHIP & EXTRACURRICULAR ACTIVITIES</Text>
-          {hasContent(formData.leadership, ['title', 'description']) ? (
+          {hasContent(formData.leadership, ['title']) ? (
             formData.leadership?.map((lead, idx) => (
               <View key={idx} style={styles.detailsContainer}>
-                <Text style={styles.institution}>{lead.title || ""}</Text>
-                <Text style={styles.bullet}>• {lead.description || ""}</Text>
+                <View style={styles.flexRow}>
+                  <Text style={styles.institution}>{lead.title || ""}</Text>
+                  <Text>{lead.years || ""}</Text>
+                </View>
+                <Text style={styles.role}>{lead.role || ""}</Text>
+                {Array.isArray(lead.bullets) && lead.bullets.map((bullet, bulletIdx) => (
+                  <Text key={bulletIdx} style={styles.bullet}>• {bullet}</Text>
+                ))}
               </View>
             ))
           ) : (
