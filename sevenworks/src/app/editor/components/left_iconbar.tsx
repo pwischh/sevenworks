@@ -52,38 +52,38 @@ const IconBar = () => {
       <div className="p-1 aspect-square rounded-lg flex items-center justify-center hover:bg-[#BFB7B6]/60 group relative">
         <Link href="/editor?tab=personal#personal-section">
           <Image src="/user.svg" alt="user" width={32} height={32} className="w-8 h-8" />
-          <span className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2 py-1 rounded bg-black text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20">Personal</span>
+          <span className="pointer-events-none absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2 py-1 rounded bg-black text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20">Personal</span>
         </Link>
       </div>
       <div className="p-1 aspect-square rounded-lg flex items-center justify-center hover:bg-[#BFB7B6]/60 group relative">
         <Link href="/editor?tab=education">
           <Image src="/book-open.svg" alt="open book" width={32} height={32} className="w-8 h-8" />
-          <span className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2 py-1 rounded bg-black text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20">Education</span>
+          <span className="pointer-events-none absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2 py-1 rounded bg-black text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20">Education</span>
         </Link>
       </div>
       <div className="p-1 aspect-square rounded-lg flex items-center justify-center hover:bg-[#BFB7B6]/60 group relative">
         <Link href="/editor?tab=experience">
           <Image src="/briefcase.svg" alt="briefcase" width={32} height={32} className="w-8 h-8" />
-          <span className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2 py-1 rounded bg-black text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20">Experience</span>
+          <span className="pointer-events-none absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2 py-1 rounded bg-black text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20">Experience</span>
         </Link>
       </div>
       <div className="p-1 aspect-square rounded-lg flex items-center justify-center hover:bg-[#BFB7B6]/60 group relative">
         <Link href="/editor?tab=leadership">
           <Image src="/leadership.svg" alt="award" width={32} height={32} className="w-8 h-8" />
-          <span className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2 py-1 rounded bg-black text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20">Leadership & Community Development</span>
+          <span className="pointer-events-none absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2 py-1 rounded bg-black text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20">Leadership & Community Development</span>
         </Link>
       </div>
       {/* Extra icons */}
       <div className="p-1 aspect-square rounded-lg flex items-center justify-center hover:bg-[#BFB7B6]/60 group relative">
         <Link href="/editor?tab=honors">
           <Image src="/honors.svg" alt="settings" width={32} height={32} className="w-8 h-8" />
-          <span className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2 py-1 rounded bg-black text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20">Honors</span>
+          <span className="pointer-events-none absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2 py-1 rounded bg-black text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20">Honors</span>
         </Link>
       </div>
       <div className="p-1 aspect-square rounded-lg flex items-center justify-center hover:bg-[#BFB7B6]/60 group relative">
         <Link href="/editor?tab=additional">
           <Image src="/additional.svg" alt="help" width={32} height={32} className="w-8 h-8" />
-          <span className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2 py-1 rounded bg-black text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20">Additional Skills and Interests</span>
+          <span className="pointer-events-none absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2 py-1 rounded bg-black text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20">Additional Skills and Interests</span>
         </Link>
       </div>
       
@@ -135,7 +135,7 @@ const IconBar = () => {
               width={32} height={32}
               className="w-8 h-8"
             />
-            <span className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2 py-1 rounded bg-black text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20">Back to Dashboard</span>
+            <span className="pointer-events-none absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2 py-1 rounded bg-black text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20">Back to Dashboard</span>
           </Link>
         </div>
       </div>

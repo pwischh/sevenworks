@@ -1,7 +1,9 @@
 "use client";
 import React from "react";
 import { pdf } from '@react-pdf/renderer';
-import BusinessTemplate from './business_template';
+import { useResume } from "@/app/resumeContext";
+import { db, auth } from "@/app/lib/firebase";
+import { doc, getDoc } from "firebase/firestore";
 
 // Define interfaces matching the expected TemplateFormData
 interface EducationEntry {
@@ -39,16 +41,42 @@ interface FormData {
 }
 
 export default function DownloadButton({ formData }: { formData: FormData }) {
+  const template = useResume();
+
   const handleDownload = async () => {
-    const blob = await pdf(<BusinessTemplate formData={formData} />).toBlob();
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'resume.pdf';
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
+    const user = auth.currentUser;
+
+    if (!user) return;
+
+    try {
+      const sessionRef = doc(db, "sessions", user.uid);
+      const userSessionData = (await getDoc(sessionRef)).data();
+      
+      if (!userSessionData) return;
+
+      const templateID = userSessionData.templateID;
+      const resumeID = userSessionData.resumeID;
+
+      const resumeRef = doc(db, "user_resumes", user.uid, "resumes", resumeID);
+      const userResumeData = (await getDoc(resumeRef)).data();
+
+      if(!userResumeData) return;
+
+      const resumeName = userResumeData.name;
+
+      const blob = await pdf(template(templateID, formData)).toBlob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = resumeName + ".pdf";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+
+    } catch (error) {
+      console.error("Error downloading resume: ", error);
+    }
   };
   return <button onClick={handleDownload}>Download</button>;
 }

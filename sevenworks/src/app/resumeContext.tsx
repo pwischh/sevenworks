@@ -6,9 +6,42 @@ import { DocumentProps, Document, Page, Text } from "@react-pdf/renderer";
 import BusinessResume from "./TEST-TEMPLATES/businessResume";
 import DataAnalystResume from "./TEST-TEMPLATES/DataAnalystResume";
 
+interface EducationEntry {
+    degree: string;
+    institution: string;
+    years: string; // Changed from 'year' to 'years' to match the expected type
+}
+  
+interface ExperienceEntry {
+title: string;
+company: string;
+years: string;
+}
+
+interface LeadershipEntry {
+title: string;
+description: string;
+}
+
+interface FormData {
+    font?: string;
+    firstName?: string;
+    middleName?: string;
+    lastName?: string;
+    address?: string;
+    phone?: string;
+    email?: string;
+    education?: EducationEntry[]; // Changed to use the properly defined EducationEntry
+    experience?: ExperienceEntry[];
+    leadership?: LeadershipEntry[];
+    honorsList?: { honor: string }[];
+    skillsInterests?: string;
+    [key: string]: unknown; // Using unknown instead of any for better type safety
+  }
+
 type Props = (
     templateID: string | null,
-    formData: { [key: string]: string }
+    formData: FormData,
 ) => React.ReactElement<DocumentProps>;
 
 const ResumeContext = createContext<Props>((templateID) => {
