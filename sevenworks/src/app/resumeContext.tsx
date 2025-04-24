@@ -3,8 +3,8 @@ import React, { ReactNode, createContext, useContext } from "react";
 import { DocumentProps, Document, Page, Text } from "@react-pdf/renderer";
 
 /* All Templates */
-import BusinessResume from "./TEST-TEMPLATES/businessResume";
-import DataAnalystResume from "./TEST-TEMPLATES/DataAnalystResume";
+import BusinessResume from "./editor/templates/businessResume";
+import DataAnalystResume from "./editor/templates/DataAnalystResume";
 
 interface EducationEntry {
     degree: string;

@@ -8,6 +8,12 @@ import { Worker } from '@react-pdf-viewer/core';
 import { pdf } from '@react-pdf/renderer';
 import { useZoom } from "../zoomcontext";
 import { onAuthStateChanged } from "firebase/auth";
+import PersonalInfoPanel from "./panels/PersonalInfoPanel";
+import ExperiencePanel from "./panels/ExperiencePanel";
+import EducationPanel from "./panels/EducationPanel";
+import AdditionalPanel from "./panels/AdditionalPanel";
+import LeadershipPanel from "./panels/LeadershipPanel";
+import HonorsPanel from "./panels/HonorsPanel";
 
 const ViewerNoSSR = dynamic(() => import('@react-pdf-viewer/core').then(mod => mod.Viewer), { ssr: false });
 import '@react-pdf-viewer/core/lib/styles/index.css';
@@ -411,221 +417,74 @@ const InputFields = () => {
   };
 
   const renderFields = () => {
-    if (activeTab === "personal") {
-      return (
-        <div className="bg-white rounded-lg shadow-lg hover:shadow-lg transition transform p-6 border border-gray-300 flex flex-col flex-1 max-h-screen overflow-auto pb-20">
-          <h1 className="text-black text-center">Personal Information</h1>
-          {["firstName", "middleName", "lastName", "email", "phone", "address"].map((field) => (
-            <div key={field} className="flex flex-col mt-2">
-              <span className="text-xs font-bold text-[#848C8E]">
-                {field.charAt(0).toUpperCase() + field.replace(/([A-Z])/g, ' $1').slice(1)}{" "}
-                {field === "firstName" && <span className="text-red-500">*</span>}
-              </span>
-              <input
-                type="text"
-                name={field}
-                value={typeof formData[field] === "string" ? formData[field] : ""}
-                placeholder={field.charAt(0).toUpperCase() + field.replace(/([A-Z])/g, ' $1').slice(1)}
-                onChange={handleInputChange}
-                className="border bg-[#E6E6E6] border-[#999999] shadow-md p-2 rounded-lg w-full text-[#848C8E]"
-              />
-            </div>
-          ))}
-          {customPersonalFields.map((field) => (
-            <div key={field.id} className="flex flex-col mt-2">
-              <span className="text-xs font-bold text-[#848C8E]">Custom Field Label</span>
-              <input
-                type="text"
-                value={field.label}
-                onChange={(e) => handleCustomFieldChange(field.id, "label", e.target.value)}
-                placeholder="Custom Label"
-                className="border bg-[#E6E6E6] border-[#999999] shadow-md p-2 rounded-lg w-full text-[#848C8E]"
-              />
-              <span className="text-xs font-bold text-[#848C8E] mt-2">Custom Field Value</span>
-              <input
-                type="text"
-                value={field.value}
-                onChange={(e) => handleCustomFieldChange(field.id, "value", e.target.value)}
-                placeholder="Custom Value"
-                className="border bg-[#E6E6E6] border-[#999999] shadow-md p-2 rounded-lg w-full text-[#848C8E]"
-              />
-            </div>
-          ))}
-          <div className="flex flex-col pt-3">
-            <button
-              onClick={addCustomField}
-              className="border bg-[#435058] border-[#999999] shadow-md p-2 rounded-lg w-full hover:bg-[#1c2428] transition text-white"
-            >
-              + Add a New Element
-            </button>
-          </div>
-        </div>
-      );
-    } else if (activeTab === "experience") {
-      return (
-        <div className="bg-white rounded-lg shadow-lg hover:shadow-lg transition transform p-6 border border-gray-300 flex flex-col flex-1 min-h-full">
-          <h1 className="text-black text-center">Experience</h1>
-          {(Array.isArray(formData.experience) ? formData.experience : []).map((exp, idx) => (
-            <div key={idx} className="flex flex-col mt-2 border-b pb-2">
-              <span className="text-xs font-bold text-[#848C8E]">Job Title</span>
-              <input
-                type="text"
-                value={typeof exp.title === "string" ? exp.title : ""}
-                onChange={e => handleExperienceChange(idx, 'title', e.target.value)}
-                className="border bg-[#E6E6E6] border-[#999999] shadow-md p-2 rounded-lg w-full text-[#848C8E]"
-                placeholder="Job Title"
-              />
-              <span className="text-xs font-bold text-[#848C8E] mt-2">Company</span>
-              <input
-                type="text"
-                value={typeof exp.company === "string" ? exp.company : ""}
-                onChange={e => handleExperienceChange(idx, 'company', e.target.value)}
-                className="border bg-[#E6E6E6] border-[#999999] shadow-md p-2 rounded-lg w-full text-[#848C8E]"
-                placeholder="Company"
-              />
-              <span className="text-xs font-bold text-[#848C8E] mt-2">Years</span>
-              <input
-                type="text"
-                value={typeof exp.years === "string" ? exp.years : ""}
-                onChange={e => handleExperienceChange(idx, 'years', e.target.value)}
-                className="border bg-[#E6E6E6] border-[#999999] shadow-md p-2 rounded-lg w-full text-[#848C8E]"
-                placeholder="Years"
-              />
-            </div>
-          ))}
-          <button
-            onClick={addExperience}
-            className="border bg-[#435058] border-[#999999] shadow-md p-2 rounded-lg w-full hover:bg-[#1c2428] transition text-white mt-4"
-          >
-            + Add Experience
-          </button>
-        </div>
-      );
-    } else if (activeTab === "education") {
-      return (
-        <div className="bg-white rounded-lg shadow-lg hover:shadow-lg transition transform p-6 border border-gray-300 flex flex-col flex-1 min-h-full">
-          <h1 className="text-black text-center">Education</h1>
-          {(formData.education && Array.isArray(formData.education) ? formData.education : []).map((edu, idx) => (
-            <div key={idx} className="flex flex-col mt-2 border-b pb-2">
-              <span className="text-xs font-bold text-[#848C8E]">Degree</span>
-              <input
-                type="text"
-                value={typeof edu.degree === "string" ? edu.degree : ''}
-                onChange={e => handleEducationChange(idx, 'degree', e.target.value)}
-                className="border bg-[#E6E6E6] border-[#999999] shadow-md p-2 rounded-lg w-full text-[#848C8E]"
-                placeholder="Degree"
-              />
-              <span className="text-xs font-bold text-[#848C8E] mt-2">Institution</span>
-              <input
-                type="text"
-                value={typeof edu.institution === "string" ? edu.institution : ''}
-                onChange={e => handleEducationChange(idx, 'institution', e.target.value)}
-                className="border bg-[#E6E6E6] border-[#999999] shadow-md p-2 rounded-lg w-full text-[#848C8E]"
-                placeholder="Institution"
-              />
-              <span className="text-xs font-bold text-[#848C8E] mt-2">Years</span>
-              <input
-                type="text"
-                value={typeof edu.years === 'string' ? edu.years : ''}
-                onChange={e => handleEducationChange(idx, 'years', e.target.value)}
-                className="border bg-[#E6E6E6] border-[#999999] shadow-md p-2 rounded-lg w-full text-[#848C8E]"
-                placeholder="Years"
-              />
-            </div>
-          ))}
-          <button
-            onClick={addEducation}
-            className="border bg-[#435058] border-[#999999] shadow-md p-2 rounded-lg w-full hover:bg-[#1c2428] transition text-white mt-4"
-          >
-            + Add Education
-          </button>
-        </div>
-      );
-    } else if (activeTab === "additional") {
-      return (
-        <div className="bg-white rounded-lg shadow-lg hover:shadow-lg transition transform p-6 border border-gray-300 flex flex-col flex-1 min-h-full">
-          <h1 className="text-black text-center">Additional Skills & Interests</h1>
-          <div className="mt-4">
-          <span className="text-xs font-bold text-[#848C8E]">Additional Skills & Interests</span>
-            <textarea
-              name="skillsInterests"
-              value={typeof formData.skillsInterests === 'string' ? formData.skillsInterests : ''}
-              onChange={handleInputChange}
-              className="border bg-[#E6E6E6] border-[#999999] shadow-md p-2 rounded-lg w-full text-[#848C8E] h-20"
-              placeholder="List your skills, languages, interests, etc..."
-            />
-          </div>
-        </div>
-      );
-    } else if (activeTab === "leadership") {
-      const leadershipEntries = Array.isArray(formData.leadership) ? formData.leadership : [];
-      const showEmpty = leadershipEntries.length === 0 || leadershipEntries.every(l => !l.title && !l.description);
-      const displayLeadership = showEmpty ? [{ title: '', description: '' }, { title: '', description: '' }] : leadershipEntries;
-      const leadershipFields = [
-        { key: 'title', label: 'Title' },
-        { key: 'description', label: 'Description' }
-      ];
-      return (
-        <div className="bg-white rounded-lg shadow-lg hover:shadow-lg transition transform p-6 border border-gray-300 flex flex-col flex-1 min-h-full">
-          <h1 className="text-black text-center">Leadership & Community Engagement</h1>
-          {displayLeadership.map((lead, idx) => (
-            <div key={idx} className="flex flex-col mt-2 border-b pb-2">
-              {leadershipFields.map(field => (
-                <React.Fragment key={field.key}>
-                  <span className={`text-xs font-bold text-[#848C8E]${field.key === 'description' ? ' mt-2' : ''}`}>{field.label}</span>
-                  <input
-                    type="text"
-                    value={((lead as any)[field.key] as string) || ''}
-                    onChange={e => handleLeadershipChange(idx, field.key as 'title' | 'description', e.target.value)}
-                    className="border bg-[#E6E6E6] border-[#999999] shadow-md p-2 rounded-lg w-full text-[#848C8E]"
-                    placeholder={field.label}
-                  />
-                </React.Fragment>
-              ))}
-            </div>
-          ))}
-          <button
-            onClick={addLeadership}
-            className="border bg-[#435058] border-[#999999] shadow-md p-2 rounded-lg w-full hover:bg-[#1c2428] transition text-white mt-4"
-          >
-            + Add Leadership
-          </button>
-        </div>
-      );
-    } else if (activeTab === "honors") {
-      const honorsEntries = Array.isArray(formData.honorsList) ? formData.honorsList : [];
-      const showEmpty = honorsEntries.length === 0 || honorsEntries.every(h => !h.honor);
-      const displayHonors = showEmpty ? [{ honor: '' }, { honor: '' }] : honorsEntries;
-      const honorsFields = [
-        { key: 'honor', label: 'Honor' }
-      ];
-      return (
-        <div className="bg-white rounded-lg shadow-lg hover:shadow-lg transition transform p-6 border border-gray-300 flex flex-col flex-1 min-h-full">
-          <h1 className="text-black text-center">Honors</h1>
-          {displayHonors.map((honorObj, idx) => (
-            <div key={idx} className="flex flex-col mt-2 border-b pb-2">
-              {honorsFields.map(field => (
-                <React.Fragment key={field.key}>
-                  <span className="text-xs font-bold text-[#848C8E]">{field.label}</span>
-                  <input
-                    type="text"
-                    value={((honorObj as any).honor as string) || ''}
-                    onChange={e => handleHonorsChange(idx, e.target.value)}
-                    className="border bg-[#E6E6E6] border-[#999999] shadow-md p-2 rounded-lg w-full text-[#848C8E]"
-                    placeholder="Honor, Award, or Recognition"
-                  />
-                </React.Fragment>
-              ))}
-            </div>
-          ))}
-          <button
-            onClick={addHonor}
-            className="border bg-[#435058] border-[#999999] shadow-md p-2 rounded-lg w-full hover:bg-[#1c2428] transition text-white mt-4"
-          >
-            + Add Honor
-          </button>
-        </div>
-      );
+    switch (activeTab) {
+      case "personal":
+        return (
+          <PersonalInfoPanel
+            formData={formData}
+            setFormData={setFormData}
+            customFields={customPersonalFields}
+            onFieldChange={handleCustomFieldChange}
+            onAddField={addCustomField}
+          />
+        );
+      case "experience":
+        return (
+          <ExperiencePanel
+            experience={
+              Array.isArray(formData.experience)
+                ? formData.experience.map((entry) => ({
+                    title: typeof entry.title === "string" ? entry.title : "",
+                    company: typeof entry.company === "string" ? entry.company : "",
+                    years: typeof entry.years === "string" ? entry.years : "",
+                  }))
+                : []
+            }
+            onChange={handleExperienceChange}
+            onAdd={addExperience}
+          />
+        );
+      case "education":
+        return (
+          <EducationPanel
+            education={
+              Array.isArray(formData.education)
+                ? formData.education.map((entry) => ({
+                    degree: typeof entry.degree === "string" ? entry.degree : "",
+                    institution: typeof entry.institution === "string" ? entry.institution : "",
+                    years: typeof entry.years === "string" ? entry.years : "",
+                  }))
+                : []
+            }
+            onChange={handleEducationChange}
+            onAdd={addEducation}
+          />
+        );
+      case "additional":
+        return (
+          <AdditionalPanel
+            value={typeof formData.skillsInterests === 'string' ? formData.skillsInterests : ''}
+            onChange={handleInputChange}
+          />
+        );
+      case "leadership":
+        return (
+          <LeadershipPanel
+            leadership={(Array.isArray(formData.leadership) ? formData.leadership : []) as {title: string, description: string}[]}
+            onChange={handleLeadershipChange}
+            onAdd={addLeadership}
+          />
+        );
+      case "honors":
+        return (
+          <HonorsPanel
+            honorsList={(Array.isArray(formData.honorsList) ? formData.honorsList : []) as {honor: string}[]}
+            onChange={handleHonorsChange}
+            onAdd={addHonor}
+          />
+        );
+      default:
+        return null;
     }
   };
 
