@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { Markazi_Text } from "next/font/google";
-import { collection, doc, getDocs, getDoc, setDoc } from "firebase/firestore";
+import { collection, doc, getDocs, getDoc, setDoc, deleteDoc } from "firebase/firestore";
 import { auth, db } from "../lib/firebase";
 import { signOut } from "firebase/auth";
 import { 
@@ -16,7 +16,8 @@ import {
   LuGavel,
   LuPaintbrush,
   LuEarth,
-  LuLandmark 
+  LuLandmark,
+  LuTrash2
 } from "react-icons/lu";
 
 const markazi = Markazi_Text({
@@ -61,14 +62,6 @@ const Sidebar = () => {
               <span>Editor</span>
             </Link>
           </li>
-          {/* <li>
-            <Link href="/settings" className="flex items-center space-x-2 hover:text-lightRed transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 3a1.5 1.5 0 00-1.5 1.5V5.25h7.5V4.5a1.5 1.5 0 00-1.5-1.5h-4.5zM6 8.25h12v12H6v-12z" />
-              </svg>
-              <span>Settings</span>
-            </Link>
-          </li> */}
           <li>
             <Link href="/profile" className="flex items-center space-x-2 hover:text-lightRed transition-colors">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -101,7 +94,6 @@ interface InProgressResume {
 
 // Function to determine which icon to display based on template category
 const getCategoryIcon = (templateID: string, category?: string) => {
-  // If we have a category, use it directly
   if (category) {
     switch(category){
       case "Business": return <LuBriefcaseBusiness className="w-[24px] h-[24px]"/>;
@@ -115,7 +107,6 @@ const getCategoryIcon = (templateID: string, category?: string) => {
     }
   }
   
-  // If no category, try to infer from templateID
   if (templateID.includes("business")) return <LuBriefcaseBusiness className="w-[24px] h-[24px]"/>;
   if (templateID.includes("data") || templateID.includes("tech") || templateID.includes("analytics")) 
     return <LuAtom className="w-[24px] h-[24px]"/>;
@@ -130,12 +121,11 @@ const getCategoryIcon = (templateID: string, category?: string) => {
   if (templateID.includes("policy") || templateID.includes("government")) 
     return <LuLandmark className="w-[24px] h-[24px]"/>;
   
-  // Default icon
   return <LuFiles className="w-[24px] h-[24px]"/>;
 }
 
 // ResumeCard Component using Next.js <Image>
-const ResumeCard = ({ resume }: { resume: InProgressResume }) => {
+const ResumeCard = ({ resume, onDelete }: { resume: InProgressResume, onDelete: (id: string) => void }) => {
   const router = useRouter();
   
   async function handleResumeClick() {
@@ -143,7 +133,6 @@ const ResumeCard = ({ resume }: { resume: InProgressResume }) => {
   
     if (currentUser) { 
       try {
-        //Get fields from the resume being clicked
         const clickedResumeRef = doc(db, "user_resumes", currentUser.uid, "resumes", resume.id);
         const clickedResumeSnap = await getDoc(clickedResumeRef);
 
@@ -152,14 +141,11 @@ const ResumeCard = ({ resume }: { resume: InProgressResume }) => {
         }
         const clickedResumeData = clickedResumeSnap.data();
 
-        //Get formData and templateID from the db
-        const clickedResumeFormData = clickedResumeData.formData || {}; // Default to empty object if undefined
+        const clickedResumeFormData = clickedResumeData.formData || {};
         const clickedResumeTemplateID = clickedResumeData.templateID;
 
-        // Store resumeID in localStorage to persist through refreshes
         localStorage.setItem('currentResumeID', resume.id);
 
-        //Update session with correct data
         await setDoc(
           doc(db, "sessions", currentUser.uid), 
           {
@@ -167,30 +153,61 @@ const ResumeCard = ({ resume }: { resume: InProgressResume }) => {
             resumeID: resume.id, 
             templateID: clickedResumeTemplateID
           }, 
-          {merge: false}); // Overwrite existing session data
+          {merge: false});
           
-        // Redirect to editor only after successful update
         router.push("/editor");
 
       } catch(error) {
         console.error("Error handling resume click:", error);
-        // Optionally: Show an error message to the user
       } 
-      // Removed finally block to prevent navigation on error
     } else {
         console.error("User not authenticated.");
-        // Optionally: Redirect to login or show a message
+    }
+  }
+
+  async function handleDeleteClick() {
+    if (!window.confirm(`Are you sure you want to delete the resume "${resume.name}"? This action cannot be undone.`)) {
+      return;
+    }
+
+    const currentUser = auth.currentUser;
+    if (currentUser) {
+      try {
+        const resumeRef = doc(db, "user_resumes", currentUser.uid, "resumes", resume.id);
+        await deleteDoc(resumeRef);
+        console.log("Resume deleted successfully:", resume.id);
+        onDelete(resume.id);
+
+        const sessionRef = doc(db, "sessions", currentUser.uid);
+        const sessionSnap = await getDoc(sessionRef);
+        if (sessionSnap.exists() && sessionSnap.data().resumeID === resume.id) {
+          await deleteDoc(sessionRef);
+          console.log("Session data cleared for deleted resume.");
+          localStorage.removeItem('currentResumeID');
+          localStorage.removeItem('currentTemplateID');
+        }
+
+      } catch (error) {
+        console.error("Error deleting resume:", error);
+      }
+    } else {
+      console.error("User not authenticated for delete operation.");
     }
   }
 
   return(
     <div className="flex flex-col relative items-center w-full max-w-xs">
-      {/* Document Thumbnail */}
-      <div className="relative w-full aspect-[8.5/11] bg-white rounded-md shadow hover:shadow-lg overflow-hidden">
-        {/* Category Icon */}
+      <div className="relative w-full aspect-[8.5/11] bg-white rounded-md shadow hover:shadow-lg overflow-hidden group">
         <div className="absolute top-2 right-2 z-10 bg-navy/80 p-1.5 rounded-full text-offWhite">
           {getCategoryIcon(resume.templateID, resume.category)}
         </div>
+        <button 
+          onClick={handleDeleteClick} 
+          className="absolute top-2 left-2 z-10 bg-red-600/80 p-1.5 rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-700"
+          aria-label="Delete resume"
+        >
+          <LuTrash2 className="w-4 h-4" />
+        </button>
         <Image
           src={resume.image}
           alt={resume.templateID}
@@ -199,7 +216,7 @@ const ResumeCard = ({ resume }: { resume: InProgressResume }) => {
         />
         <div 
           className="flex flex-col justify-center items-center absolute top-0 rounded-md w-full h-full bg-black/40 
-              font-medium text-offWhite text-[18px] transition duration-150 opacity-0 hover:opacity-100"
+              font-medium text-offWhite text-[18px] transition duration-150 opacity-0 group-hover:opacity-100"
         >
           <button className="px-3 py-0.5 bg-transparent border-2 border border-offWhite rounded-lg hover:border-lightRed hover:bg-lightRed" 
             onClick={handleResumeClick}>
@@ -208,7 +225,6 @@ const ResumeCard = ({ resume }: { resume: InProgressResume }) => {
         </div> 
       </div>
 
-      {/* Title & Description */}
       <div className="mt-2 text-center">
         <h3 className="text-sm text-gray-800 font-semibold">{resume.name}</h3>
         <p className="text-xs text-gray-600">{resume.templateID}</p>
@@ -231,17 +247,18 @@ const Dashboard = () => {
   const [user, loading] = useAuthState(auth);
   const router = useRouter();
 
-  // Two separate state variables for each section
   const [templateResumes, setTemplateResumes] = useState<InProgressResume[]>([]);
 
-  // Redirect if not authenticated
   useEffect(() => {
     if (!loading && !user) {
       router.push("/register/login");
     }
   }, [user, loading, router]);
 
-  // Fetch resumes for "Resume Templates" from Firestore collection "resume_templates"
+  const handleDeleteResume = (id: string) => {
+    setTemplateResumes(prevResumes => prevResumes.filter(resume => resume.id !== id));
+  };
+
   useEffect(() => {
     const fetchTemplateResumes = async () => {
       try {
@@ -291,25 +308,6 @@ const Dashboard = () => {
           <p className="text-gray-500 mt-2">Manage and create your professional resumes</p>
         </header>
 
-        {/* Resume Templates Section */}
-        {/*<section className="mb-12">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-gray-800">Resume Templates</h2>
-            <Link href="/templates" className="text-blue-600 hover:text-blue-800 text-sm font-medium">
-              View all
-            </Link>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 pb-4">
-            {templateResumes.slice(0, 3).map((resume) => (
-              <div key={resume.id}>
-                <ResumeCard resume={resume} />
-              </div>
-            ))}
-            <CreateNewButton type="Template" />
-          </div>
-        </section>*/}
-
-        {/* Editing Resumes Section */}
         <section>
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold text-gray-800">My Resumes</h2>
@@ -321,7 +319,7 @@ const Dashboard = () => {
             <CreateNewButton type="Resume" />
             {templateResumes.map((resume) => (
               <div key={resume.id}>
-                <ResumeCard resume={resume} />
+                <ResumeCard resume={resume} onDelete={handleDeleteResume} /> 
               </div>
             ))}
           </div>
