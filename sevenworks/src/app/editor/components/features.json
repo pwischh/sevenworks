@@ -1,15 +1,5 @@
 [
   {
-    "title": "Resume Analysis",
-    "description": "Get insights on your resume's strengths and areas for improvement with AI-powered analysis.",
-    "buttonText": "Analyze Resume"
-  },
-  {
-    "title": "Content Suggestions",
-    "description": "Receive AI-driven recommendations to enhance your resume content and make it more impactful.",
-    "buttonText": "Suggest Content"
-  },
-  {
     "title": "Chat with Resume",
     "description": "Ask questions about your resume or get suggestions. Powered by Gemini.",
     "buttonText": "Open Chat"

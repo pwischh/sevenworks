@@ -12,12 +12,12 @@ const RightView = () => {
   const [chatMessages, setChatMessages] = useState<{ sender: string; text: string }[]>([
     { 
       sender: "gemini", 
-      text: "Hi! I can help with your resume. What would you like assistance with today?" 
+      text: "Hi! I'm Sevenworks AI! Powered by Gemini. I can help with your resume. What would you like assistance with today?" 
     }
   ]);
   const [chatInput, setChatInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [chatOnlyView, setChatOnlyView] = useState(false);
+  const [chatOnlyView, setChatOnlyView] = useState(true);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll to bottom of chat when new messages are added
@@ -115,7 +115,8 @@ ${resumeData.honors.length > 0
       ${resumeSummary}
       
       Keep your response conversational, brief, and helpful. If they ask for specific resume advice, 
-      refer to the exact fields from their resume and provide constructive suggestions.`;
+      refer to the exact fields from their resume and provide constructive suggestions. If asked to 
+      refer to yourself, you are "Sevenworks AI".`;
 
       // Call the API with the prompt
       const aiResponse = await generateResumeText(prompt);
@@ -191,7 +192,7 @@ ${resumeData.honors.length > 0
               onClick={() => setChatOnlyView(false)}
               className="self-start mb-2 px-3 py-1 bg-[#435058] text-white rounded hover:bg-gray-400 transition"
             >
-              ← Back
+              ← Close
             </button>
             <h2 className="text-xl font-semibold text-gray-800">Chat with Resume</h2>
             <div className="mt-4 w-full bg-gray-100 text-black p-4 rounded flex flex-col max-h-full overflow-y-auto flex-1">
