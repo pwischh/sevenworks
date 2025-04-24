@@ -25,6 +25,7 @@ description: string;
 
 interface FormData {
     font?: string;
+    fontSize?: number; // Add fontSize property
     firstName?: string;
     middleName?: string;
     lastName?: string;

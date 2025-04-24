@@ -108,9 +108,9 @@ export default function Navbar() {
                             {fontSizeDropdownOpen && (
                                 <div className="absolute top-full left-0 mt-2 bg-white border border-gray-300 rounded shadow-lg z-[100]">
                                     <ul className="py-2">
-                                        <li className="px-4 py-1 hover:bg-gray-200 transition-colors duration-200 cursor-pointer">Small</li>
-                                        <li className="px-4 py-1 hover:bg-gray-200 transition-colors duration-200 cursor-pointer">Medium</li>
-                                        <li className="px-4 py-1 hover:bg-gray-200 transition-colors duration-200 cursor-pointer">Large</li>
+                                        <li className="px-4 py-1 hover:bg-gray-200 transition-colors duration-200 cursor-pointer" onClick={() => setFormData("fontSize", 10)}>Small</li>
+                                        <li className="px-4 py-1 hover:bg-gray-200 transition-colors duration-200 cursor-pointer" onClick={() => setFormData("fontSize", 12)}>Medium</li>
+                                        <li className="px-4 py-1 hover:bg-gray-200 transition-colors duration-200 cursor-pointer" onClick={() => setFormData("fontSize", 14)}>Large</li>
                                     </ul>
                                 </div>
                             )}
@@ -134,8 +134,8 @@ export default function Navbar() {
                             className="hover:scale-110 transition-transform duration-200 hover:opacity-65" 
                             onClick={() => window.location.reload()} 
                         />
-                        {formData && isClient && (
-                            <DownloadButton formData={formData} />
+                        {isClient && (
+                            <DownloadButton />
                         )}
                         <button onClick={handleSignOut} className="hover:underline hover:opacity-65 transition-opacity duration-200">
                             <Image src="/log-out.svg" alt="logout" width={24} height={24} className="hover:scale-110 transition-transform duration-200" /> 

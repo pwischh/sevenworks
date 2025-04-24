@@ -3,6 +3,7 @@
 // FormData type for resume templates
 export interface TemplateFormData {
   font?: string;
+  fontSize?: number; // Add fontSize property
   firstName?: string;
   middleName?: string;
   lastName?: string;
