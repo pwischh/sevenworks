@@ -226,7 +226,7 @@ export default function Templates() {
                 id: doc.id,
                 title: data.name,
                 description: data.category,
-                image: "/sample-business-resume.png",
+                image: data.image,
               };
             });
             setResumeList(templatesData);
