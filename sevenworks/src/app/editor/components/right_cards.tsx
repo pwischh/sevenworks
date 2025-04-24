@@ -153,18 +153,21 @@ ${resumeData.honors.length > 0
             >
               <h2 className="text-xl font-semibold text-gray-800">{feature.title}</h2>
               <p className="text-sm text-gray-600 mt-2 text-center">{feature.description}</p>
-              <button
-                onClick={() => {
-                  if (feature.title === "Chat with Resume") {
-                    setChatOnlyView(true);
-                  } else {
-                    setExpandedIndex(expandedIndex === index ? null : index);
-                  }
-                }}
-                className="mt-4 px-4 py-2 bg-[#435058] text-white rounded-lg hover:bg-[#1c2428] transition"
-              >
-                {feature.buttonText}
-              </button>
+              {/* Hide button for Resume Analysis */}
+              {feature.title !== "Resume Analysis" && (
+                <button
+                  onClick={() => {
+                    if (feature.title === "Chat with Resume") {
+                      setChatOnlyView(true);
+                    } else {
+                      setExpandedIndex(expandedIndex === index ? null : index);
+                    }
+                  }}
+                  className="mt-4 px-4 py-2 bg-[#435058] text-white rounded-lg hover:bg-[#1c2428] transition"
+                >
+                  {feature.buttonText}
+                </button>
+              )}
               {expandedIndex === index && feature.title === "Content Suggestions" && (
                 <div className="mt-4 w-full text-xs text-left bg-gray-100 text-black p-4 rounded space-y-4 overflow-y-auto max-h-60">
                   {exampleEdits.experience.map((exp, idx) => (
