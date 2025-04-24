@@ -2,9 +2,8 @@
 import React, { ReactNode, createContext, useContext } from "react";
 import { DocumentProps, Document, Page, Text } from "@react-pdf/renderer";
 
-/* All Templates */
-import BusinessResume from "../templates/businessResume";
-import DataAnalystResume from "../templates/DataAnalystResume";
+/* Import from centralized templates index */
+import templates from "../templates/index";
 
 interface EducationEntry {
     degree: string;
@@ -13,14 +12,14 @@ interface EducationEntry {
 }
   
 interface ExperienceEntry {
-title: string;
-company: string;
-years: string;
+    title: string;
+    company: string;
+    years: string;
 }
 
 interface LeadershipEntry {
-title: string;
-description: string;
+    title: string;
+    description: string;
 }
 
 interface FormData {
@@ -37,8 +36,9 @@ interface FormData {
     leadership?: LeadershipEntry[];
     honorsList?: { honor: string }[];
     skillsInterests?: string;
+    customPersonal?: { id: number; label: string; value: string }[]; // Support for custom fields
     [key: string]: unknown; // Using unknown instead of any for better type safety
-  }
+}
 
 type Props = (
     templateID: string | null,
@@ -72,28 +72,71 @@ export function ResumeProvider({children}: {children: ReactNode}){
         // Log the templateID for debugging
         console.log("Template ID received:", templateID);
 
-        // Fix the issue by correctly handling template file paths
-        // The problem is likely due to filename case sensitivity in imports
-        // BusinessResume.tsx uses lowercase filename but DataAnalystResume.tsx uses PascalCase
+        // Match the template ID to the appropriate template component
+        const templateIdLower = templateID.toLowerCase();
         
-        // Import path case handling
-        if (templateID.includes("business") || 
-            templateID.includes("Business") || 
-            templateID === "business-resume" || 
-            templateID === "business resume") {
-            return <BusinessResume formData={formData} />;
+        // Business resume variants
+        if (templateIdLower.includes("business") || templateIdLower === "business-resume") {
+            return <templates.business formData={formData} />;
         }
         
-        if (templateID.includes("data") || 
-            templateID.includes("Data") || 
-            templateID === "data-analyst-resume" || 
-            templateID === "data analyst resume") {
-            return <DataAnalystResume formData={formData} />;
+        // Data Analyst resume variants
+        if (templateIdLower.includes("data-analyst") || templateIdLower.includes("dataanalyst")) {
+            return <templates.dataAnalyst formData={formData} />;
+        }
+        
+        // All other templates mapped from our central index
+        if (templateIdLower.includes("journalism")) {
+            return <templates.journalism formData={formData} />;
+        }
+        
+        if (templateIdLower.includes("legal") || templateIdLower.includes("law")) {
+            return <templates.legal formData={formData} />;
+        }
+        
+        if (templateIdLower.includes("human-services") || templateIdLower.includes("humanservices")) {
+            return <templates.humanServices formData={formData} />;
+        }
+        
+        if (templateIdLower.includes("international") || templateIdLower.includes("affairs")) {
+            return <templates.internationalAffairs formData={formData} />;
+        }
+        
+        if (templateIdLower.includes("health") || templateIdLower.includes("healthcare")) {
+            return <templates.health formData={formData} />;
+        }
+        
+        if (templateIdLower.includes("swe") || templateIdLower.includes("software-engineer")) {
+            return <templates.swe formData={formData} />;
+        }
+        
+        if (templateIdLower.includes("it") || templateIdLower.includes("consulting")) {
+            return <templates.itConsulting formData={formData} />;
+        }
+        
+        if (templateIdLower.includes("tech") || templateIdLower.includes("technology")) {
+            return <templates.technology formData={formData} />;
+        }
+        
+        if (templateIdLower.includes("environment") || templateIdLower.includes("sustainability")) {
+            return <templates.environment formData={formData} />;
+        }
+        
+        if (templateIdLower.includes("museum") || templateIdLower.includes("cultural")) {
+            return <templates.museum formData={formData} />;
+        }
+        
+        if (templateIdLower.includes("policy") || templateIdLower.includes("public") || templateIdLower.includes("government")) {
+            return <templates.publicPolicy formData={formData} />;
+        }
+        
+        if (templateIdLower.includes("business-component") || templateIdLower.includes("businesscomponent")) {
+            return <templates.businessComponent formData={formData} />;
         }
         
         // Fallback case - if we can't match, default to a template to avoid errors
         console.error(`Template ID mismatch: ${templateID}`);
-        return <BusinessResume formData={formData} />;
+        return <templates.business formData={formData} />;
     }
 
     return (

@@ -162,18 +162,27 @@ const InputFields = () => {
 
     setIsGenerating(true);
     try {
-      // Pass formData directly, templates expect arrays/objects
-      const dataForPdf = { ...formData };
+      console.log("Generating PDF with formData:", formData);
+      console.log("Using templateID:", templateID);
+      
+      // Ensure arrays are properly initialized
+      const dataForPdf = { 
+        ...formData,
+        education: Array.isArray(formData.education) ? formData.education : [],
+        experience: Array.isArray(formData.experience) ? formData.experience : [],
+        leadership: Array.isArray(formData.leadership) ? formData.leadership : [],
+        honorsList: Array.isArray(formData.honorsList) ? formData.honorsList : [],
+        customPersonal: Array.isArray(formData.customPersonal) ? formData.customPersonal : [],
+      };
       
       // Generate the PDF blob with error handling
       let blob;
       try {
-        // Pass the dataForPdf directly, casting to 'any' to bypass strict type check
-        // This assumes the template function can handle the actual structure of formData
-        // TODO: Investigate the actual expected type for the template function for a safer fix
-        blob = await pdf(template(templateID, dataForPdf as any)).toBlob();
+        // Pass the prepared data to the template
+        blob = await pdf(template(templateID, dataForPdf)).toBlob();
       } catch (pdfError) {
         console.error("Error generating PDF blob:", pdfError);
+        console.error("Template or data issue:", templateID, dataForPdf);
         setIsGenerating(false);
         return;
       }
