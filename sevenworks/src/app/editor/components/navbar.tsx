@@ -5,9 +5,9 @@ import Image from "next/image";
 import { signOut } from "firebase/auth";
 import { auth } from "../../lib/firebase";
 import Link from "next/link";
-import { useFormContext } from "./../formcontext";
+import { useFormContext } from "../context/formcontext";
 import ProfilePhoto from "../../../components/profilephoto";
-import { useZoom } from "../zoomcontext";
+import { useZoom } from "../context/zoomcontext";
 import dynamic from "next/dynamic";
 
 const markazi = Markazi_Text({
@@ -134,8 +134,8 @@ export default function Navbar() {
                             className="hover:scale-110 transition-transform duration-200 hover:opacity-65" 
                             onClick={() => window.location.reload()} 
                         />
-                        {formData && isClient && (
-                            <DownloadButton formData={formData} />
+                        {isClient && (
+                            <DownloadButton />
                         )}
                         <button onClick={handleSignOut} className="hover:underline hover:opacity-65 transition-opacity duration-200">
                             <Image src="/log-out.svg" alt="logout" width={24} height={24} className="hover:scale-110 transition-transform duration-200" /> 

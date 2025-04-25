@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 const templates = [
   { src: "/Thumbnails/Business-Resume.png", name: "Business" },
   { src: "/Thumbnails/Data-Analytics-Resume.png", name: "Data Analytics" },
-  { src: "/Thumbnails/Data-Science-Resume.png", name: "Data Science" },
+  { src: "/Thumbnails/Technology-Resume.png", name: "Technology" },
 ];
 
 export default function TemplatePreview() {
