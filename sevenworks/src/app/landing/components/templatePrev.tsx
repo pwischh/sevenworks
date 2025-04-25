@@ -2,10 +2,10 @@
 import Image from "next/image";
 import { motion } from "framer-motion";
 
-const images = [
-  "/sample-business-resume.png",
-  "/sample-business-resume.png",
-  "/sample-business-resume.png",
+const templates = [
+  { src: "/Thumbnails/Business-Resume.png", name: "Business" },
+  { src: "/Thumbnails/Data-Analytics-Resume.png", name: "Data Analytics" },
+  { src: "/Thumbnails/Data-Science-Resume.png", name: "Data Science" },
 ];
 
 export default function TemplatePreview() {
@@ -26,11 +26,11 @@ export default function TemplatePreview() {
   };
 
   return (
-    <section id="resumes" className="py-20 px-4 bg-gray-50">
+    <section id="resumes" className="pt-20 pb-10 px-4 bg-gray-50">
       <div className="max-w-7xl mx-auto">
         {/* Heading */}
         <motion.div 
-          className="text-center mb-16"
+          className="text-center mb-16 mt-8"
           initial={{ opacity: 0, y: -20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -51,7 +51,7 @@ export default function TemplatePreview() {
           whileInView="visible"
           viewport={{ once: true, amount: 0.2 }}
         >
-          {images.map((src, index) => (
+          {templates.map((template, index) => (
             <motion.div
               key={index}
               className="group relative aspect-[3/4] rounded-xl overflow-hidden shadow-xl"
@@ -62,18 +62,18 @@ export default function TemplatePreview() {
               }}
             >
               <Image
-                src={src}
-                alt={`Template ${index + 1}`}
+                src={template.src}
+                alt={`Template ${template.name}`}
                 fill
                 sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                 className="object-cover transition-transform duration-700"
                 priority={index < 3}
               />
               
-              Overlay on hover
+              {/* Overlay on hover */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end">
                 <div className="p-6 text-white">
-                  <h3 className="text-xl font-bold">Template {index + 1}</h3>
+                  <h3 className="text-xl font-bold">{template.name}</h3>
                   <p className="text-sm opacity-80">Professional resume design</p>
                 </div>
               </div>
