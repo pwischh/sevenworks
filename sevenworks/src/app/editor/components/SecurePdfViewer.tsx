@@ -30,8 +30,12 @@ const SecurePdfViewer: React.FC<SecurePdfViewerProps> = ({ fileUrl, scale = 1 })
     setHasAcceptedRisk(true);
   };
   
-  const handleViewerError = () => {
-    setIsErrorState(true);
+  // Handle both successful and failed document loads
+  const handleDocumentLoad = (doc: any) => {
+    // If doc is null or undefined, there was an error loading the document
+    if (!doc) {
+      setIsErrorState(true);
+    }
   };
   
   if (!isTrustedSource) {
@@ -78,7 +82,7 @@ const SecurePdfViewer: React.FC<SecurePdfViewerProps> = ({ fileUrl, scale = 1 })
     <div className="secure-pdf-container">
       <Viewer
         fileUrl={fileUrl}
-        onDocumentLoadError={handleViewerError}
+        onDocumentLoad={handleDocumentLoad}
         // @ts-ignore - Adding custom security settings
         viewerConfig={viewerConfig}
       />
