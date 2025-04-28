@@ -15,7 +15,8 @@ import AdditionalPanel from "./panels/AdditionalPanel";
 import LeadershipPanel from "./panels/LeadershipPanel";
 import HonorsPanel from "./panels/HonorsPanel";
 
-const ViewerNoSSR = dynamic(() => import('@react-pdf-viewer/core').then(mod => mod.Viewer), { ssr: false });
+// Replace direct viewer import with our secure wrapper
+const SecurePdfViewerNoSSR = dynamic(() => import('./SecurePdfViewer'), { ssr: false });
 import '@react-pdf-viewer/core/lib/styles/index.css';
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { auth, db } from "@/app/lib/firebase";
@@ -638,24 +639,24 @@ const InputFields = () => {
                   width: zoom > 100 ? `${zoom}%` : '100%',
                   height: '100%'
                 }}>
-                  {/* Primary PDF Layer */}
+                  {/* Primary PDF Layer with Secure Viewer */}
                   <div
                     className={`absolute bg-[#F8F8F8] top-0 left-0 w-full h-full transition-opacity duration-300 ${
                       isPrimaryActive ? 'opacity-100 z-10' : 'opacity-0 z-0'
                     }`}
                     style={{ transform: `scale(${zoom / 100})`, transformOrigin: 'top left' }}
                   >
-                    {primaryPdfUrl && <ViewerNoSSR key={primaryPdfUrl} fileUrl={primaryPdfUrl} />}
+                    {primaryPdfUrl && <SecurePdfViewerNoSSR key={primaryPdfUrl} fileUrl={primaryPdfUrl} />}
                   </div>
 
-                  {/* Secondary PDF Layer */}
+                  {/* Secondary PDF Layer with Secure Viewer */}
                   <div
                     className={`absolute bg-[#F8F8F8] top-0 left-0 w-full h-full transition-opacity duration-300 ${
                       !isPrimaryActive ? 'opacity-100 z-10' : 'opacity-0 z-0'
                     }`}
                     style={{ transform: `scale(${zoom / 100})`, transformOrigin: 'top left' }}
                   >
-                    {secondaryPdfUrl && <ViewerNoSSR key={secondaryPdfUrl} fileUrl={secondaryPdfUrl} />}
+                    {secondaryPdfUrl && <SecurePdfViewerNoSSR key={secondaryPdfUrl} fileUrl={secondaryPdfUrl} />}
                   </div>
                 </div>
               </div>

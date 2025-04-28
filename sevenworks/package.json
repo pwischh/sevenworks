@@ -6,7 +6,9 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "audit": "npx npm-audit-resolver",
+    "audit:check": "npx npm-audit-resolver --production --audit-level=high"
   },
   "dependencies": {
     "@react-pdf-viewer/core": "^3.12.0",
@@ -37,6 +39,7 @@
     "canvas": "^3.1.0",
     "eslint": "^9",
     "eslint-config-next": "^15.2.4",
+    "npm-audit-resolver": "^3.0.0-RC.0",
     "postcss": "^8.5.3",
     "postcss-loader": "^8.1.1",
     "postcss-selector-parser": "^7.1.0",
