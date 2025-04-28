@@ -1,42 +1,30 @@
-const GEMINI_API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY!;
-
-// Define separate URLs for image and text generation
-const GEMINI_IMAGE_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp-image-generation:generateContent?key=' + GEMINI_API_KEY;
-const GEMINI_TEXT_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + GEMINI_API_KEY;
-
-/**
- * Generate an event image using the Gemini API.
- * @param {string} prompt - The description of the image to generate.
- * @returns {Promise<string>} - The URL of the generated image.
- */
+// No API keys exposed here - all secure server-side communication
+// Define interfaces for request and response types
 interface GeminiRequestBody {
   contents: { parts: { text: string }[] }[];
-  generationConfig: { responseModalities: string[] };
+  generationConfig?: { responseModalities: string[] };
 }
 
 interface GeminiResponseData {
-  candidates?: { content: { parts: { inlineData: { data: string } }[] } }[];
+  candidates?: { content: { parts: { inlineData?: { data: string }, text?: string }[] } }[];
 }
 
+/**
+ * Generate an event image using the Gemini API through our secure server endpoint.
+ * @param {string} prompt - The description of the image to generate.
+ * @returns {Promise<string>} - The URL of the generated image.
+ */
 export async function generateEventImage(prompt: string): Promise<string> {
   try {
-    const response = await fetch(GEMINI_IMAGE_API_URL, {
+    const response = await fetch('/api/gemini', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        contents: [
-          {
-            parts: [
-              { text: prompt },
-            ],
-          },
-        ],
-        generationConfig: {
-          responseModalities: ['Image'],
-        },
-      } as GeminiRequestBody),
+        type: 'image',
+        prompt,
+      }),
     });
 
     const data: GeminiResponseData = await response.json();
@@ -55,29 +43,26 @@ export async function generateEventImage(prompt: string): Promise<string> {
 }
 
 /**
- * Generate resume text using the Gemini API.
+ * Generate resume text using the Gemini API through our secure server endpoint.
  * @param {string} prompt - The description of the text to generate.
  * @returns {Promise<string>} - The generated text.
  */
 export async function generateResumeText(prompt: string): Promise<string> {
   try {
-    const response = await fetch(GEMINI_TEXT_API_URL, {
+    const response = await fetch('/api/gemini', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        contents: [
-          {
-            parts: [
-              { text: `You are a professional resume advisor. Provide concise advice on improving this resume content: ${prompt}` },
-            ],
-          },
-        ],
+        type: 'resume',
+        prompt,
       }),
     });
+
     const data = await response.json();
     const geminiText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+    
     if (geminiText) {
       return geminiText;
     } else {
