@@ -1,0 +1,11 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/sevenworks"
+    schedule:
+      interval: "weekly"
+    ignore:
+      - dependency-name: "pdfjs-dist"
+        vulnerability-ids: 
+          - "GHSA-wgrm-67xf-hhpq"
+        reason: "Mitigated through code-level changes in SecurePdfViewer component"
