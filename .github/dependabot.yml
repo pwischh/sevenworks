@@ -5,7 +5,6 @@ updates:
     schedule:
       interval: "weekly"
     ignore:
-      # Ignoring pdfjs-dist because we've implemented code-level mitigations through SecurePdfViewer component
+      # Ignoring major version updates for pdfjs-dist because @react-pdf-viewer/core requires a specific version range
       - dependency-name: "pdfjs-dist"
-        versions:
-          - "< 5.0.0"
+        update-types: ["version-update:semver-major"]
