@@ -5,7 +5,7 @@ updates:
     schedule:
       interval: "weekly"
     ignore:
+      # Ignoring pdfjs-dist because we've implemented code-level mitigations through SecurePdfViewer component
       - dependency-name: "pdfjs-dist"
-        vulnerability-ids: 
-          - "GHSA-wgrm-67xf-hhpq"
-        reason: "Mitigated through code-level changes in SecurePdfViewer component"
+        versions:
+          - "< 5.0.0"
