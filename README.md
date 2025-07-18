@@ -65,4 +65,4 @@ MIT
 
 ---
 
-Made by Parker Wischhover Alex Lautin, Andy Blumberg, Lester Martin, Chris Kim, Tomas Lee, and Andrea Valentino
+Made by Parker Wischhover, Alex Lautin, Andy Blumberg, Lester Martin, Chris Kim, Tomas Lee, and Andrea Valentino
